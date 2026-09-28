@@ -1,0 +1,52 @@
+# Standalone VPS with Caddy; do not combine with the Traefik example.
+# Run from project root with --project-directory . --env-file .env.
+name: stemtape
+services:
+  app:
+    image: ${STEMTAPE_IMAGE:-stemtape:0.3.0}
+    build:
+      context: .
+      args:
+        NGINX_IMAGE: ${NGINX_IMAGE:?Set a scanned nginx alpine image digest in .env}
+    user: '10001:10001'
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs: ['/tmp:rw,noexec,nosuid,nodev,size=16m,mode=1777']
+    init: true
+    stop_grace_period: 30s
+    pids_limit: 100
+    mem_limit: 128m
+    cpus: '0.50'
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options: {max-size: '5m', max-file: '2'}
+    networks: [stemtape]
+  proxy:
+    image: ${CADDY_IMAGE:?Set a scanned Caddy alpine image digest in .env}
+    ports: ['80:8080', '443:8443']
+    user: '10001:10001'
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      STEMTAPE_DOMAIN: ${STEMTAPE_DOMAIN:?Set your real domain}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./runtime/caddy-data:/data
+      - ./runtime/caddy-config:/config
+    tmpfs: ['/tmp:rw,noexec,nosuid,nodev,size=16m,mode=1777']
+    networks: [stemtape,edge]
+    init: true
+    pids_limit: 100
+    mem_limit: 192m
+    cpus: '0.50'
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options: {max-size: '5m', max-file: '2'}
+networks:
+  stemtape:
+    internal: true
+  edge: {}

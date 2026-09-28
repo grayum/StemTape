@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+!deploy/.env.vps.example
+compose.yaml
+docker-compose.yaml
+deploy/*.local.yaml
+runtime/
+data/
+*.db
+*.sqlite*
+*.pem
+*.key
+node_modules/
+artifacts/
+__pycache__/
+.DS_Store

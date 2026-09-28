@@ -1,0 +1,21 @@
+{
+    admin off
+    http_port 8080
+    https_port 8443
+    auto_https disable_redirects
+    servers {
+        timeouts {
+            read_header 10s
+            read_body 10s
+            write 30s
+            idle 30s
+        }
+    }
+}
+http://{$STEMTAPE_DOMAIN} {
+    redir https://{$STEMTAPE_DOMAIN}{uri} permanent
+}
+https://{$STEMTAPE_DOMAIN} {
+    header Strict-Transport-Security "max-age=31536000"
+    reverse_proxy app:8080
+}

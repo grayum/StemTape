@@ -1,0 +1,56 @@
+# Copy to docker-compose.yaml. Default: local testing at http://127.0.0.1:8080.
+# Existing Traefik: (1) remove ports, (2) uncomment ALL Traefik sections below,
+# (3) set STEMTAPE_DOMAIN/TRAEFIK_* in .env. Do not start a second proxy.
+name: stemtape
+services:
+  app:
+    image: ${STEMTAPE_IMAGE:-stemtape:0.3.0}
+    build:
+      context: .
+      args:
+        NGINX_IMAGE: ${NGINX_IMAGE:?Set NGINX_IMAGE in .env}
+    user: '10001:10001'
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs: ['/tmp:rw,noexec,nosuid,nodev,size=16m,mode=1777']
+    init: true
+    stop_grace_period: 30s
+    pids_limit: 100
+    mem_limit: 128m
+    cpus: '0.50'
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options: {max-size: '5m', max-file: '2'}
+
+    # LOCAL TESTING ONLY — remove these two lines when using Traefik:
+    ports:
+      - '127.0.0.1:8080:8080'
+
+    networks:
+      - stemtape
+      # - traefik # TRAEFIK: uncomment this line too
+
+    # TRAEFIK: uncomment the entire labels block:
+    # labels:
+    #   traefik.enable: 'true'
+    #   traefik.docker.network: ${TRAEFIK_NETWORK:?Set your existing network name}
+    #   traefik.http.routers.stemtape.rule: Host(`${STEMTAPE_DOMAIN:?Set your domain}`)
+    #   traefik.http.routers.stemtape.entrypoints: websecure
+    #   traefik.http.routers.stemtape.tls: 'true'
+    #   traefik.http.routers.stemtape.tls.certresolver: ${TRAEFIK_CERTRESOLVER:?Set your configured resolver name}
+    #   traefik.http.routers.stemtape.service: stemtape
+    #   traefik.http.routers.stemtape.middlewares: stemtape-headers,stemtape-rate
+    #   traefik.http.services.stemtape.loadbalancer.server.port: '8080'
+    #   traefik.http.middlewares.stemtape-headers.headers.stsSeconds: '31536000'
+    #   traefik.http.middlewares.stemtape-rate.ratelimit.average: '30'
+    #   traefik.http.middlewares.stemtape-rate.ratelimit.burst: '100'
+
+networks:
+  stemtape:
+    internal: true
+  # TRAEFIK: uncomment this complete network definition:
+  # traefik:
+  #   external: true
+  #   name: ${TRAEFIK_NETWORK:?Set your existing network name}

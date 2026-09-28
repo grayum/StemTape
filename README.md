@@ -1,0 +1,115 @@
+# StemTape
+
+**A little tape. A clear plan.**
+
+Local-first cycling cue sheets for a stem or top tube. A portable static web app with light/dark/system themes and a lime folded-tape identity. All editing, imports, storage and printing happen in the browser.
+
+## Start on your laptop
+
+Python 3 and a modern browser are sufficient. No npm install or build is needed to use the app.
+
+```sh
+python3 scripts/serve.py
+```
+
+Open **http://127.0.0.1:8080**. Use this local server rather than opening `index.html` as a file: ES modules require HTTP. The development server binds to loopback only and is not intended for public hosting.
+
+## Included in 0.3.0
+
+- Saved events, duplication/deletion and project-owner presets.
+- Nutrition by distance **or elapsed h:mm**, with separate cue lists; route and custom presets.
+- Metric defaults and explicit mile/inch overrides; canonical distance storage.
+- Local Lucide outline icon picker plus pasted emojis/text.
+- Mouse/touch drag handles and keyboard/arrow-button reordering; custom typed columns, visibility, width, alignment and emphasis.
+- Live white print preview, physical dimensions, padding, font, spacing, rotation and headers.
+- Overflow warnings; printing blocked when content does not fit.
+- A4/Letter printing and browser Save as PDF; copies, cut marks and calibration scale.
+- CSV file import/export and tab-separated spreadsheet paste. JSON full backup/restore with confirmation.
+- Remembered bike dimensions, local personal presets, storage failure/recovery handling.
+- Transparent SVG logos, symbol files, banners and SVG/ICO favicon assets.
+- Hardened Docker recipe and local / standalone VPS / existing Traefik examples.
+
+Custom Unicode emojis use the user's system font. The outlined symbols combine **Lucide** with four original StemTape symbols, not Font Awesome. Lucide 1.8.0 and DejaVu font notices are bundled in `dist/assets/`. No CDN assets or analytics.
+
+## Data and privacy
+
+Plans live in your current browser's localStorage, not the server. Different domains, profiles and browsers have separate data. Clearing site data removes plans. Export JSON backups regularly; CSV preserves cue data, not full layout/types. Remembered bike dimensions are included in JSON. Imports are limited to 2 MB, 200 rows per mode and 8 columns. No GPX parsing, accounts, automatic nutrition advice or route detection.
+
+CSV example:
+
+```csv
+distance_km,icon,Eat / drink
+20,banana,Banana
+40,bottle,Drink
+```
+
+Time example:
+
+```csv
+time,icon,Eat / drink
+0:30,bar,Bar
+1:00,gel,Gel
+```
+
+Use point decimal separators in CSV numbers. A comma in text must be quoted. Supported icon keys: banana, bottle, bar, gel, smile, mountain, feed, flag, coffee, warning, cobbles, ricecake, can, neutral, litter (or empty). Unknown icons are rejected. Export includes the active mode, cumulative distance values and hidden columns. Use JSON for lossless backups.
+
+## Print workflow
+
+Measure the **usable surface**, not the nominal stem length. Set width/length, adjust text and print at **100% / Actual size**; disable browser headers/footers. Save as PDF from that dialog if wanted. Measure the printed **50 mm calibration line** before fitting the strip. Each copy gets its own page. Actual printer scaling and readability still require a physical test. The app never silently shrinks fonts; default is 11 pt, minimum 8 pt.
+
+## Docker development
+
+Copy the examples once into your private configuration files:
+
+```sh
+cp docker-compose.example.yaml docker-compose.yaml
+cp .env.example .env
+docker compose -f docker-compose.yaml config --quiet
+docker compose -f docker-compose.yaml up --build -d
+```
+
+The default is local testing at **http://127.0.0.1:8080**. The `.env` uses an official, versioned Alpine Nginx tag for convenience. Resolve and scan an immutable digest before a production build. The application image, domain, network and resolver references are all parameterised.
+
+For an existing **Traefik** proxy, remove the local `ports` section and uncomment all three marked sections in your private `docker-compose.yaml`: the service's `traefik` network entry, the labels block, and the external network definition. Configure `STEMTAPE_DOMAIN`, `TRAEFIK_NETWORK` and `TRAEFIK_CERTRESOLVER` in `.env` to match your installation. The proxy should already handle HTTP-to-HTTPS redirection. No Caddy configuration is needed.
+
+An independent Caddy/VPS example is in `deploy/docker-compose.vps.example.yaml`, with `deploy/.env.vps.example`. See [deployment instructions](docs/DEPLOYMENT.md) for the exact command and certificate-directory setup.
+
+For upgrades, preserve your existing private `.env` and `docker-compose.yaml`. See [UPGRADE.md](UPGRADE.md). No private files are included in this archive.
+
+## Checks
+
+Node 22+ for the dependency-free data tests:
+
+```sh
+npm test
+npm run check
+```
+
+Browser tests (development-only dependency):
+
+```sh
+npm install --no-save --package-lock=false playwright@1.62.1
+npx playwright install chromium
+# Keep the local server running in another terminal:
+npm run test:browser
+```
+
+This creates screenshots and an actual PDF in ignored `artifacts/`. Review all screenshots and verify PDF dimensions; passing assertions alone is not visual QA.
+
+```sh
+sh scripts/container-smoke.sh stemtape:0.3.0
+```
+
+**Validation:** 21 core tests, syntax checks and local/Traefik YAML checks passed. Print layout functions are unchanged from 0.1.0, whose physical sizing you confirmed at 100%. Browser automation and Docker startup remain unverified here. Run the included browser/container suites on your laptop; see [validation record](docs/VALIDATION.md).
+
+## Repository workflow
+
+Unzip into a fresh development directory, review, then initialise Git and create your chosen private GitHub repository. Keep `.env`, actual deployment overrides and `runtime/` outside version control. CI is included and does not publish or deploy. Public release needs a chosen project license, verified private security contact, domain/trademark checks and release gates. First-party code/brand licensing remains for the owner to choose; bundled third-party assets retain their own notices.
+
+## Credits
+
+[StemTape](https://github.com/grayum/StemTape) is developed and maintained by [Graham van der Wielen](https://grahamofthewheels.com/).
+
+Created with assistance from ChatGPT & Codex (OpenAI).
+
+Editing the primary distance or time sorts cues when you leave the field or press Enter. Manual reordering then persists until the next valid position edit (or Sort). Equal positions retain their relative order. Text and symbol edits do not sort. The Softdrink symbol retains CSV/JSON key `can`.
