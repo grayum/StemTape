@@ -105,7 +105,9 @@ assert.deepEqual(await page.locator('#editor-rows tr').evaluateAll(rows=>rows.ma
 ]);
 await page.locator('#column-settings').click();await page.getByRole('button',{name:'Add column',exact:true}).click();await page.getByRole('button',{name:'Done',exact:true}).click();assert.equal(await page.locator('#editor-head th').count(),6);
 await page.locator('#event-select').selectOption({index:0});await page.evaluate(()=>window.print=()=>window.dispatchEvent(new Event('beforeprint')));await page.locator('#print').click();await page.waitForFunction(()=>document.querySelector('#print-pages svg'));
-const dim=await page.locator('#print-pages svg svg').evaluate(n=>({w:n.getAttribute('width'),h:n.getAttribute('height')}));assert.deepEqual(dim,{w:'32',h:'90'});
+const printedSheet=page.locator('#print-pages svg[aria-label="Printable cue sheet"]');
+assert.equal(await printedSheet.count(),1,'Single-copy print contains exactly one printable sheet');
+const dim=await printedSheet.evaluate(n=>({w:n.getAttribute('width'),h:n.getAttribute('height')}));assert.deepEqual(dim,{w:'32',h:'90'});
 await page.pdf({path:'artifacts/test-print.pdf',preferCSSPageSize:true,printBackground:true});
 await page.setViewportSize({width:390,height:844});await page.screenshot({path:'artifacts/mobile-edit.png',fullPage:true});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);await page.locator('[data-tab=preview]').click();assert.equal(await page.locator('.preview-card').isVisible(),true);await page.screenshot({path:'artifacts/mobile-preview.png',fullPage:true});
 assert.deepEqual(external,[]);assert.deepEqual(errors,[]);
