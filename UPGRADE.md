@@ -21,3 +21,9 @@ The storage key `stemtape.v1` and schema version 1 are unchanged. 0.1 and 0.2 ba
 The new `docker-compose.example.yaml` is a single local-test configuration with optional **commented** Traefik sections. It replaces the old `compose.example.yaml` plus local/Traefik overlays. You do not need to adopt it if your private Compose already works.
 
 The standalone Caddy/VPS file is now `deploy/docker-compose.vps.example.yaml`; it is independent, not an overlay. Caddy settings are in `deploy/.env.vps.example`. The default `.env.example` contains no Caddy setting.
+
+## Review fixes: byte policy and CSV compatibility
+
+Schema version and `stemtape.v1` stay unchanged; no migration rewrites existing data. Valid backups within 2,000,000 UTF-8 bytes still restore. Oversized or unreadable browser storage opens recovery mode, preserving the exact original and offering its export before explicit replacement. Recovery originals may require offline repair or splitting before import; never discard them. New complete backups use the same compact encoding and byte budget as saved state. Browser quota failures still leave accepted in-memory data exportable.
+
+New CSV custom-distance headers use explicit metadata to preserve labels and units, including 32-character labels and literal bracketed units. Older versions do not understand these headers; use JSON for full fidelity. Old unmarked headers such as `Water [km]` continue to import as literal text rather than guessing whether the suffix was generated.

@@ -33,7 +33,7 @@ Custom Unicode emojis use the user's system font. The outlined symbols combine *
 
 ## Data and privacy
 
-Plans live in your current browser's localStorage, not the server. Different domains, profiles and browsers have separate data. Clearing site data removes plans. Export JSON backups regularly; CSV preserves cue data, not full layout/types. Remembered bike dimensions are included in JSON. Imports are limited to 2 MB, 200 rows per mode and 8 columns. No GPX parsing, accounts, automatic nutrition advice or route detection.
+Plans live in your current browser's localStorage, not the server. Different domains, profiles and browsers have separate data. Clearing site data removes plans. Export JSON backups regularly; CSV preserves cue data, not full layout/types. Remembered bike dimensions are included in JSON. Saved state, complete JSON backups and imported files share a 2,000,000-byte UTF-8 limit. State includes all events, both cue modes, presets and preferences; changes exceeding the limit are rejected without truncation. Existing oversized or unreadable storage remains protected with an original-data recovery export. Imports also allow at most 200 rows per mode and 8 columns. No GPX parsing, accounts, automatic nutrition advice or route detection.
 
 CSV example:
 
@@ -51,7 +51,7 @@ time,icon,Eat / drink
 1:00,gel,Gel
 ```
 
-Use point decimal separators in CSV numbers. A comma in text must be quoted. Supported icon keys: banana, bottle, bar, gel, smile, mountain, feed, flag, coffee, warning, cobbles, ricecake, can, neutral, litter (or empty). Unknown icons are rejected. Export includes the active mode, cumulative distance values and hidden columns. Use JSON for lossless backups.
+Use point decimal separators in CSV numbers. A comma in text must be quoted. Supported icon keys: banana, bottle, bar, gel, smile, mountain, feed, flag, coffee, warning, cobbles, ricecake, can, neutral, litter (or empty). Unknown icons are rejected. Export includes the active mode, cumulative distance values and hidden columns. Custom distance columns export explicit `stemtape:column:` JSON metadata in their CSV headers, preserving labels and distance units. Literal labels ending in `[km]` or `[mi]` remain text unless explicitly marked; legacy CSV suffixes are not inferred. Use JSON for lossless backups.
 
 ## Print workflow
 

@@ -57,7 +57,7 @@ export function validateState(s){
   return {bike,version:VERSION,theme:choice(s.theme,['light','dark','system'],'theme'),active:events.some(e=>e.id===s.active)?s.active:events[0].id,events,presets};
 }
 export function parseCSV(text){
-  if(new TextEncoder().encode(text).length>LIMITS.bytes)throw Error('File exceeds 2 MB.');
+  if(utf8Bytes(text)>LIMITS.bytes)throw Error('File exceeds 2 MB.');
   text=text.replace(/^\uFEFF/,'');const rows=[];let row=[],cell='',quoted=false,closed=false;
   for(let i=0;i<text.length;i++){const ch=text[i];
     if(quoted){if(ch==='"'){if(text[i+1]==='"'){cell+='"';i++;}else {quoted=false;closed=true;}}else cell+=ch;}
@@ -70,15 +70,15 @@ export function parseCSV(text){
 }
 // Spreadsheet-safe CSV is not a lossless backup; JSON preserves exact strings.
 export function safeCSVCell(v){let s=String(v??'');if(/^[\s]*[=+\-@\t\r\n]/.test(s))s="'"+s;return '"'+s.replaceAll('"','""')+'"';}
-export function exportCSV(e){const head=[e.mode==='time'?'time':`distance_${e.unit}`,'icon',...e.columns.slice(1).map(c=>c.type==='distance'?`${c.label} [${e.unit}]`:c.label)];return '\uFEFF'+[head,...e.rows[e.mode].map(r=>[e.mode==='time'?formatTime(r.cells[e.columns[0].id]):displayDistance(r.cells[e.columns[0].id],e.unit),r.symbol,...e.columns.slice(1).map(c=>c.type==='distance'?displayDistance(r.cells[c.id],e.unit):r.cells[c.id])])].map(r=>r.map(safeCSVCell).join(',')).join('\r\n');}
+export function exportCSV(e){const head=[e.mode==='time'?'time':`distance_${e.unit}`,'icon',...e.columns.slice(1).map(c=>csvHeader(c,e.unit))];return '\uFEFF'+[head,...e.rows[e.mode].map(r=>[e.mode==='time'?formatTime(r.cells[e.columns[0].id]):displayDistance(r.cells[e.columns[0].id],e.unit),r.symbol,...e.columns.slice(1).map(c=>c.type==='distance'?displayDistance(r.cells[c.id],e.unit):r.cells[c.id])])].map(r=>r.map(safeCSVCell).join(',')).join('\r\n');}
 export function importCSV(text){
   const data=parseCSV(text);if(data.length<2)throw Error('CSV needs a header and at least one row.');
   const h=data.shift().map(v=>v.trim());const first=h[0]?.toLowerCase();const mode=['time','h:mm'].includes(first)?'time':'distance';
   if(!['time','h:mm','distance_km','km','distance_mi','mi'].includes(first))throw Error('First CSV column must be distance_km, distance_mi or time (h:mm).');
   const iconIndex=h[1]?.toLowerCase()==='icon'?1:-1;const start=iconIndex===1?2:1;
   if(h.length-start<1||h.length-start>7)throw Error('CSV needs 1–7 cue columns.');
-  const e=createEvent('nutrition');e.name='Imported plan';e.mode=mode;e.unit=first.endsWith('mi')?'mi':'km';e.columns=[e.columns[0],...h.slice(start).map(label=>column(label,'text',50))];e.rows={distance:[],time:[]};
-  for(const values of data){if(values.length!==h.length)throw Error('CSV rows must match the header length.');const raw=values[0].trim();if(!raw)throw Error('Every row needs a distance or time.');const n=mode==='time'?parseTime(raw):toMetres(raw,e.unit);if(!Number.isFinite(n)||n<0)throw Error('Distances must be positive numbers.');const r={id:uid(),symbol:iconIndex===1?values[1]:'',cells:{[e.columns[0].id]:n}};e.columns.slice(1).forEach((c,i)=>r.cells[c.id]=values[start+i]);e.rows[mode].push(r);}
+  const e=createEvent('nutrition');e.name='Imported plan';e.mode=mode;e.unit=first.endsWith('mi')?'mi':'km';e.columns=[e.columns[0],...h.slice(start).map(label=>{const meta=parseCSVHeader(label);return column(meta.label,meta.type,50);})];e.rows={distance:[],time:[]};
+  for(const values of data){if(values.length!==h.length)throw Error('CSV rows must match the header length.');const raw=values[0].trim();if(!raw)throw Error('Every row needs a distance or time.');const n=mode==='time'?parseTime(raw):toMetres(raw,e.unit);if(!Number.isFinite(n)||n<0)throw Error('Distances must be positive numbers.');const r={id:uid(),symbol:iconIndex===1?values[1]:'',cells:{[e.columns[0].id]:n}};e.columns.slice(1).forEach((c,i)=>{const meta=parseCSVHeader(h[start+i]);const value=values[start+i];if(c.type==='distance'&&!value.trim())throw Error('Every distance cell needs a number.');r.cells[c.id]=c.type==='distance'?toMetres(value,meta.unit):value;});e.rows[mode].push(r);}
   return validateEvent(e);
 }
 
@@ -92,4 +92,47 @@ export function moveCue(rows, id, targetIndex) {
 // Stable sorting keeps equal-position cues in their current manual order.
 export function sortCuesByPosition(rows,columnId){
  rows.sort((a,b)=>a.cells[columnId]-b.cells[columnId]);
+}
+
+// One wire representation and UTF-8 budget for persisted state and complete backups.
+export const utf8Bytes = text => new TextEncoder().encode(text).length;
+export function assertByteLimit(text) {
+  if (utf8Bytes(text)>LIMITS.bytes) throw Error('Complete state exceeds 2,000,000 UTF-8 bytes. Export existing data and remove events or presets before adding more.');
+  return text;
+}
+export function serializeState(state) {
+  return assertByteLimit(JSON.stringify(validateState(state)));
+}
+export function parseState(text) {
+  assertByteLimit(text);
+  const state=validateState(JSON.parse(text));
+  serializeState(state);
+  return state;
+}
+export function totalDistanceMaximum(unit) { return 10_000_000/(unit==='mi'?1609.344:1000); }
+export function validatedTotal(value,unit) {
+  if(String(value).trim()==='')throw Error('Enter a total distance.');
+  return finite(toMetres(value,unit),0,10_000_000,'total distance');
+}
+// Roll back rejected edits in place so existing row/column handlers retain their references.
+export function restoreObject(target,source) {
+  for(const key of Object.keys(target))if(!Object.hasOwn(source,key))delete target[key];
+  for(const [key,value] of Object.entries(source)) {
+    if(value && typeof value==='object' && target[key] && typeof target[key]==='object' && Array.isArray(value)===Array.isArray(target[key]))restoreObject(target[key],value);
+    else target[key]=clone(value);
+  }
+  if(Array.isArray(target))target.length=source.length;
+}
+
+// Explicit metadata avoids confusing literal labels such as "Water [km]" with units.
+const CSV_COLUMN_PREFIX='stemtape:column:';
+function csvHeader(c,unit) {
+  return c.type==='distance'||c.label.startsWith(CSV_COLUMN_PREFIX)
+    ?CSV_COLUMN_PREFIX+JSON.stringify([c.type==='distance'?'distance':'text',c.label,c.type==='distance'?unit:null]):c.label;
+}
+function parseCSVHeader(header) {
+  if(!header.startsWith(CSV_COLUMN_PREFIX))return {label:header,type:'text'};
+  const meta=JSON.parse(header.slice(CSV_COLUMN_PREFIX.length));
+  if(!Array.isArray(meta)||meta.length!==3||!['text','distance'].includes(meta[0])||typeof meta[1]!=='string'||(meta[0]==='distance'?!['km','mi'].includes(meta[2]):meta[2]!==null))throw Error('Invalid CSV column metadata.');
+  return {type:meta[0],label:meta[1],unit:meta[2]};
 }

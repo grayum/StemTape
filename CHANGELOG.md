@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0 — review fixes (2026-09-29, uncommitted)
+
+- Share a validated 2,000,000-byte UTF-8 policy across accepted state, storage, JSON exports and imports; reject oversized mutations without truncation and preserve original oversized/unreadable storage for recovery export.
+- Validate total distance in canonical metres and derive unit-specific limits before saving.
+- Guard invalid drafts across ordering and full rerenders; provide explicit cancellation. Keep row-arrow focus by stable identity and announce movement, including boundary arrivals.
+- Preserve custom distance column labels and units through explicit CSV metadata; keep literal bracketed-unit text labels unambiguous.
+- Name the dialog accessibly, retain mobile storage status, distinguish recovery originals from temporary fallback plans, and match container smoke configuration with `--init`.
+- Add core boundary/round-trip tests and browser regressions. Print generation and physical geometry are unchanged. See VALIDATION.md for executed checks and blocked browser verification.
+
 ## 0.3.0 — development candidate
 
 - Keep one header tagline: A little tape. A clear plan.; refresh logo/banner assets.

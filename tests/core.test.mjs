@@ -52,3 +52,59 @@ test('elapsed positions sort numerically without changing distance list',async()
  const distance=JSON.stringify(e.rows.distance);sortCuesByPosition(e.rows.time,key);
  assert.deepEqual(e.rows.time.map(r=>r.cells[key]),[45,60,120]);assert.equal(JSON.stringify(e.rows.distance),distance);
 });
+
+import {LIMITS,uid,column,serializeState,parseState,utf8Bytes,assertByteLimit,totalDistanceMaximum,validatedTotal,restoreObject} from '../dist/core.js';
+function budgetState(){
+ const s=initialState();s.active=s.events[0].id;
+ const e=s.events[0];e.columns.push(...Array.from({length:6},()=>column('Extra')));
+ for(const mode of ['distance','time'])e.rows[mode]=Array.from({length:200},(_,i)=>({id:uid(),symbol:'',cells:Object.fromEntries(e.columns.map((c,j)=>[c.id,j===0?i:'']))}));
+ s.events.push({...clone(e),id:uid()});s.presets.push({name:'Multibyte 🍌',event:clone(e)});
+ return s;
+}
+function fillBudget(s,target){
+ let left=target-utf8Bytes(serializeState(s));
+ for(const e of [...s.events,...s.presets.map(p=>p.event)])for(const mode of ['distance','time'])for(const row of e.rows[mode])for(const c of e.columns.slice(1)){
+  const n=Math.min(left,320);row.cells[c.id]='é'.repeat(Math.floor(n/2))+'x'.repeat(n%2);left-=n;
+ }
+ assert.equal(left,0,'fixture has sufficient text capacity');return s;
+}
+test('one UTF-8 budget includes both modes, events, presets and multibyte text at exact boundary',()=>{
+ const s=fillBudget(budgetState(),LIMITS.bytes),backup=serializeState(s);
+ assert.equal(utf8Bytes(backup),LIMITS.bytes);assert.ok(backup.length<LIMITS.bytes);
+ assert.deepEqual(parseState(backup),validateState(s));assert.equal(serializeState(parseState(backup)),backup);
+ // Test one byte over using an otherwise valid scalar, without exceeding cell limits.
+ const over=JSON.parse(backup);over.presets[0].name+='x';assert.throws(()=>serializeState(over),/UTF-8/);
+ assert.throws(()=>parseState(backup+' '),/UTF-8/);
+ assert.equal(assertByteLimit('é'.repeat(LIMITS.bytes/2)).length,LIMITS.bytes/2);
+});
+test('oversized existing state is not mutated by validation; compact exports are restorable',()=>{
+ const s=fillBudget(budgetState(),LIMITS.bytes-1);const before=JSON.stringify(s);s.presets[0].name+='🍌';
+ const original=JSON.stringify(s);assert.throws(()=>serializeState(s),/UTF-8/);assert.equal(JSON.stringify(s),original);
+ assert.throws(()=>parseState(original),/UTF-8/);assert.equal(utf8Bytes(serializeState(JSON.parse(before))),LIMITS.bytes-1);
+});
+test('rejected mutation rollback retains row and cell references and removes added data',()=>{
+ const s=initialState(),accepted=validateState(s),event=s.events[0],row=event.rows.distance[0],cells=row.cells;
+ event.name='Rejected';cells[event.columns[1].id]='Rejected';s.events.push(createEvent());s.presets.push({name:'Rejected',event:createEvent()});
+ restoreObject(s,accepted);assert.deepEqual(s,accepted);assert.equal(s.events[0],event);assert.equal(event.rows.distance[0],row);assert.equal(row.cells,cells);
+});
+test('canonical total limits reject invalid miles without mutating the event',()=>{
+ const e=createEvent(),original=clone(e);
+ for(const v of ['', ' ', '-1','NaN','Infinity','10000'])assert.throws(()=>validatedTotal(v,'mi'));
+ assert.deepEqual(e,original);assert.equal(validatedTotal('10000','km'),10_000_000);
+ assert.ok(Math.abs(validatedTotal(totalDistanceMaximum('mi'),'mi')-10_000_000)<1e-8);
+ assert.throws(()=>validatedTotal(totalDistanceMaximum('mi')+.01,'mi'));
+});
+test('CSV distance metadata preserves maximum and bracketed labels and canonical distances',()=>{
+ for(const unit of ['km','mi'])for(const label of ['A'.repeat(32),'Water [km]','Water [mi] [km]']){
+  const e=createEvent();e.unit=unit;e.columns[1].label=label;e.columns[1].type='distance';e.rows.distance.forEach(r=>r.cells[e.columns[1].id]=unit==='mi'?1609.344:1000);
+  const result=importCSV(exportCSV(e));assert.equal(result.columns[1].label,label);assert.equal(result.columns[1].type,'distance');
+  assert.equal(result.rows.distance[0].cells[result.columns[1].id],e.rows.distance[0].cells[e.columns[1].id]);
+ }
+});
+test('CSV literal bracket and reserved-prefix text labels are not inferred as distances',()=>{
+ for(const label of ['Water [km]','Water [mi]','stemtape:column:literal']){
+  const e=createEvent();e.columns[1].label=label;const result=importCSV(exportCSV(e));assert.equal(result.columns[1].label,label);assert.equal(result.columns[1].type,'text');
+ }
+ const e=createEvent();e.columns[1].type='distance';e.rows.distance.forEach(r=>r.cells[e.columns[1].id]=1000);
+ assert.throws(()=>importCSV(exportCSV(e).replace('"1"','"NaN"')));
+});
