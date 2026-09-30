@@ -79,7 +79,30 @@ await page.getByLabel('Eat / drink, row 1',{exact:true}).fill('<img src=x onerro
 await page.getByLabel('Eat / drink, row 1',{exact:true}).fill('X'.repeat(160));assert.equal(await page.locator('#print').isDisabled(),true);await page.getByLabel('Eat / drink, row 1',{exact:true}).fill('Banana');
 await page.locator('#export').click();const [download]=await Promise.all([page.waitForEvent('download'),page.getByRole('button',{name:'JSON · complete backup',exact:true}).click()]);assert.equal(download.suggestedFilename(),'stemtape-backup.json');
 await page.locator('#import').click();await page.locator('#file-input').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from('{"version":999}')});await page.getByRole('heading',{name:'Import could not be completed'}).waitFor();assert.equal(await page.locator('#editor-rows tr').count(),6);await page.locator('#close-dialog').click();
-await page.locator('#import').click();await page.locator('#file-input').setInputFiles({name:'test.csv',mimeType:'text/csv',buffer:Buffer.from('km,icon,Cue\n10,banana,Eat\n20,bottle,Drink')});assert.equal(await page.locator('#editor-rows tr').count(),2);
+const beforeCSVEvent=await page.locator('#event-select').inputValue();
+assert.equal(await page.locator('input:invalid,textarea:invalid').count(),0,'CSV import starts without invalid drafts');
+await page.locator('#import').click();
+await page.locator('#file-input').setInputFiles({name:'test.csv',mimeType:'text/csv',buffer:Buffer.from('km,icon,Cue\n10,banana,Eat\n20,bottle,Drink')});
+// setInputFiles dispatches change; it does not await the handler's File.text().
+await page.waitForFunction(previousId=>{
+ const dialog=document.getElementById('dialog');
+ if(dialog.open&&document.getElementById('dialog-title').textContent==='Import could not be completed'){
+  throw new Error(document.getElementById('dialog-body').textContent);
+ }
+ return !dialog.open&&document.getElementById('event-select').value!==previousId
+  &&document.getElementById('toast').textContent==='CSV imported as a new event.';
+},beforeCSVEvent,{timeout:10000});
+assert.notEqual(await page.locator('#event-select').inputValue(),beforeCSVEvent);
+assert.equal(await page.locator('#event-select option:checked').textContent(),'Imported plan');
+assert.equal(await page.locator('#editor-rows tr').count(),2);
+assert.deepEqual(await page.locator('#editor-rows tr').evaluateAll(rows=>rows.map(row=>({
+ position:row.querySelectorAll('input')[0].value,
+ symbol:row.querySelector('.symbol-button').dataset.symbol,
+ cue:row.querySelectorAll('input')[1].value
+}))),[
+ {position:'10',symbol:'banana',cue:'Eat'},
+ {position:'20',symbol:'bottle',cue:'Drink'}
+]);
 await page.locator('#column-settings').click();await page.getByRole('button',{name:'Add column',exact:true}).click();await page.getByRole('button',{name:'Done',exact:true}).click();assert.equal(await page.locator('#editor-head th').count(),6);
 await page.locator('#event-select').selectOption({index:0});await page.evaluate(()=>window.print=()=>window.dispatchEvent(new Event('beforeprint')));await page.locator('#print').click();await page.waitForFunction(()=>document.querySelector('#print-pages svg'));
 const dim=await page.locator('#print-pages svg svg').evaluate(n=>({w:n.getAttribute('width'),h:n.getAttribute('height')}));assert.deepEqual(dim,{w:'32',h:'90'});
