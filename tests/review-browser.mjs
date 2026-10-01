@@ -145,8 +145,43 @@ export async function reviewRegressions(browser,base){
   const [recovery]=await Promise.all([page.waitForEvent('download'),page.getByRole('button',{name:'Export original recovery data',exact:true}).click()]);
   const recoveryStream=await recovery.createReadStream();const recoveryChunks=[];for await(const chunk of recoveryStream)recoveryChunks.push(chunk);assert.ok(Buffer.concat(recoveryChunks).toString()===oversized,'Recovery export must retain the original oversized state');
   await page.locator('#close-dialog').click();await page.locator('#event-name').fill('Temporary');assert.ok((await stored())===oversized,'Recovery must retain the original oversized state');
+  diagnostics.phase('recovery restore confirmation');
+  // Hold File.text pending deliberately: setInputFiles does not await async onchange.
+  await page.evaluate(()=>{
+   const original=File.prototype.text;
+   File.prototype.text=function(){
+    File.prototype.text=original;
+    return new Promise(resolve=>{window.releaseRecoveryFileRead=()=>{delete window.releaseRecoveryFileRead;resolve(original.call(this));};});
+   };
+  });
   await page.locator('#import').click();await page.locator('#file-input').setInputFiles({name:'valid.json',mimeType:'application/json',buffer:Buffer.from(serializeState(fresh()))});
-  assert.equal(await page.getByRole('button',{name:'Export original recovery data',exact:true}).count(),1);assert.equal(await page.getByRole('button',{name:'Back up temporary in-memory plan',exact:true}).count(),1);
+  await page.waitForFunction(()=>typeof window.releaseRecoveryFileRead==='function',null,{timeout:10000});
+  await page.getByRole('heading',{name:'Import from your device',exact:true}).waitFor({state:'visible',timeout:10000});
+  assert.ok((await stored())===oversized,'Pending file read must retain the oversized original');
+  await page.evaluate(()=>window.releaseRecoveryFileRead());
+  const recoveryDialog=page.locator('#dialog');
+  try{
+   // Wait for successful parsing and confirmation UI before counting recovery actions.
+   await recoveryDialog.getByRole('heading',{name:'Restore backup?',exact:true}).waitFor({state:'visible',timeout:10000});
+   assert.equal(await recoveryDialog.evaluate(n=>n.open),true);
+   assert.equal(await recoveryDialog.getByRole('button',{name:'Export original recovery data',exact:true}).count(),1);
+   assert.equal(await recoveryDialog.getByRole('button',{name:'Back up temporary in-memory plan',exact:true}).count(),1);
+  }catch(error){
+   // Static UI labels and sizes only; never include dialog body or saved plan contents.
+   console.error('[recovery confirmation]',JSON.stringify(await page.evaluate(()=>({
+    dialogOpen:document.getElementById('dialog').open,
+    heading:document.getElementById('dialog-title').textContent,
+    buttonNames:[...document.querySelectorAll('#dialog button')].map(b=>b.getAttribute('aria-label')||b.textContent),
+    savedBytes:new TextEncoder().encode(localStorage.getItem('stemtape.v1')||'').length,
+    invalidInputs:document.querySelectorAll('input:invalid,textarea:invalid').length,
+    saveStatus:document.getElementById('save-status').textContent
+   }))));
+   throw error;
+  }
+  assert.ok((await stored())===oversized,'Opening restore confirmation must not overwrite the original');
+  const [restoreRecovery]=await Promise.all([page.waitForEvent('download'),recoveryDialog.getByRole('button',{name:'Export original recovery data',exact:true}).click()]);
+  const restoreStream=await restoreRecovery.createReadStream(),restoreChunks=[];for await(const chunk of restoreStream)restoreChunks.push(chunk);
+  assert.ok(Buffer.concat(restoreChunks).toString('utf8')===oversized,'Restore confirmation must export the oversized original byte-for-byte');
   await page.locator('#close-dialog').click();assert.ok((await stored())===oversized,'Recovery must retain the original oversized state');
   // Storage failure status remains visible on mobile.
   await load(fresh());await page.evaluate(()=>Storage.prototype.setItem=function(){throw new DOMException('Full','QuotaExceededError');});await page.locator('#event-name').fill('Still exportable');
