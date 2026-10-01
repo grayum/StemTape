@@ -100,7 +100,7 @@ This creates screenshots and an actual PDF in ignored `artifacts/`. Review all s
 sh scripts/container-smoke.sh stemtape:0.3.0
 ```
 
-**Validation:** 21 core tests, syntax checks and local/Traefik YAML checks passed. Print layout functions are unchanged from 0.1.0, whose physical sizing you confirmed at 100%. Browser automation and Docker startup remain unverified here. Run the included browser/container suites on your laptop; see [validation record](docs/VALIDATION.md).
+**Validation:** [Main CI run 36886880381](https://github.com/grayum/StemTape/actions/runs/36886880381) passed on 2026-10-01: 30 data tests, app/core syntax checks, Chromium browser regressions with screenshot/PDF generation, basic tracked-file checks and the container smoke test. User-reported manual and actual-size-print checks are recorded separately. Production proxy checks, full secret/image scans, broader visual/device checks and large-active-plan performance profiling remain outstanding; this is not a security audit or production-deployment verification. See the [validation record](docs/VALIDATION.md) for coverage and limitations.
 
 ## Repository workflow
 

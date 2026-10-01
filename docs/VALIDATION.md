@@ -1,5 +1,26 @@
 # Validation record
 
+## 2026-10-01 — successful main CI validation
+
+Main GitHub Actions run [36886880381](https://github.com/grayum/StemTape/actions/runs/36886880381) **passed** on 2026-10-01. The repository owner supplied this run result; coverage below was checked against `.github/workflows/checks.yml` and its test scripts at the supplied main commit `51de86501a5dded7c3c691d906bc5ca902cda3a9`. This records execution in GitHub CI, not a new local browser run or independent inspection of the CI artifacts.
+
+Automated coverage of the successful workflow:
+
+- **Syntax and data:** `npm run check` checks `dist/app.js` and `dist/core.js` syntax; `npm test` runs all **30 Node tests**, including validation/import limits, prototype-key rejection, literal untrusted text, CSV formula escaping and metadata round trips, ordering, canonical distance validation, UTF-8 boundaries and rollback.
+- **Chromium browser workflows:** `npm run test:browser` runs `tests/browser.mjs` and `tests/review-browser.mjs` against the loopback development server. Assertions cover mouse/keyboard ordering and cancellation, automatic sorting and focus, persistence, themes, time/distance modes, invalid drafts, import/export, literal HTML input, overflow, mobile layout/storage feedback, exact-byte accepted/rejected edits, backup round trips, oversized-original preservation and byte-for-byte recovery exports, and the asynchronous recovery-confirmation actions. The suite checks page errors and, in the primary browser workflow, unexpected external requests. A synthetic touch event used by one assertion is not physical touch-device verification.
+- **Print and visual artifacts:** the browser suite generates desktop light/dark and mobile screenshots and `test-print.pdf`. It asserts exactly one printable sheet with SVG width/height attributes of 32 × 90 in the millimetre-based print layout. It does not measure the generated PDF or physical paper, or perform a human visual review of the screenshots.
+- **Repository hygiene:** `scripts/check-private-files.py` checks tracked filenames and a small set of credential patterns. This is not a full secret scan or security audit.
+- **Container smoke:** CI resolves `nginx:stable-alpine` to a digest, builds the application image and runs `scripts/container-smoke.sh`. The container is started with init, UID/GID 10001, read-only root, constrained tmpfs, dropped capabilities, no-new-privileges and resource limits. Assertions check the health endpoint, UID 10001, inability to write the application root, presence of the CSP header and POST rejection with HTTP 405. This does not validate production proxy routing or prove every hardening property independently.
+- **Artifacts:** the workflow uploads browser artifacts and the development-server log, including on failure. No publishing or deployment step is present.
+
+User-reported manual checks remain separate: the 2026-10-01 six-check byte-boundary/recovery record and the 2026-09-30 UI/round-trip/actual-size-print record below retain their original scope. The CI pass is not an additional physical-print verification.
+
+Outstanding checks: human review of screenshots and PDF geometry; broader light/dark/mobile/200% zoom and accessibility checks; real touch/pen, pointer-cancellation and long-list behavior beyond the recorded manual checks; production proxy TLS/HSTS, canonical-host routing, redirects and host/network exposure; full secret and image-vulnerability scans. No security audit or production deployment is recorded, and the remaining release gates still apply.
+
+**Performance concern retained:** the byte-limit fixture now keeps the active plan small. Passing CI confirms that the revised suite completes; it does not prove the precise cause of the earlier timeout or fix rendering of very large active plans. That application performance concern still requires real-browser profiling.
+
+The investigation and development records below are historical evidence. Their statements about unavailable local Chromium or pending CI describe the situation at that time; this successful main run supersedes the pending automated-browser/container status, not the outstanding production checks.
+
 ## 2026-10-01 — recovery-confirmation test synchronization
 
 The user reports that CI run 36884169684 completed the boundary-edit and backup round-trip phases, then failed at `tests/review-browser.mjs:149` with count 0 instead of 1. That line counted the exact accessible button names `Export original recovery data` and `Back up temporary in-memory plan` immediately after `setInputFiles`. Both labels match the application. The file handler awaits `File.text()` before opening `Restore backup?` and adding these actions; locator `count()` does not wait for that asynchronous transition. The shared readiness helper only reads DOM/storage state and does not close or alter the recovery dialog. Earlier assertions in this sequence check entry into recovery, original export byte-for-byte, and preservation while editing fallback data.
@@ -89,7 +110,7 @@ Browser execution:
 
 Not run: real-browser visual/light/dark/mobile/200% zoom checks, actual touch/pen/capture cancellation, PDF generation/dimension inspection, physical printing, container smoke/runtime checks, proxy/TLS/host routing, full secret scan or image scan. No production readiness is claimed; required release gates remain blocked.
 
-### Manual verification checklist — UNEXECUTED
+### Historical manual verification checklist — unexecuted when written (2026-09-29)
 
 1. Edit distance/time, then Tab/Enter or click an arrow directly. Check stable equal positions, row identity, focused boundary arrows and movement announcements. Manually reorder and reload; text/icon edits must not sort.
 2. Enter an invalid distance/time/total or layout value. Try Sort, all reorder methods, row add/delete, event/mode/unit/preset changes and dialogs. The draft must remain until correction, Escape or Cancel unaccepted edits. Check correction after refocusing an invalid field.
@@ -123,4 +144,4 @@ User-reported evidence: on 2026-09-28 the user confirmed v0.1.0 runs in the home
 
 ## Before production
 
-Run npm test, npm run check and npm run test:browser; inspect the generated light/dark/mobile screenshots and PDF. Verify touch dragging, pointer cancellation and long-list scrolling on actual devices. Run the container smoke test and selected proxy configuration/TLS/host routing checks. Run full secret/image scans. Keep a pre-upgrade JSON backup and pin tested image digests. None of these pending checks should be represented as passed.
+The automated data, syntax, Chromium and container smoke checks passed in the main CI run recorded above. Rerun them for subsequent release candidates. Complete the outstanding human visual/PDF, device, proxy/TLS/host-routing and full secret/image-scan checks listed above; CI does not replace them. Keep a pre-upgrade JSON backup and pin tested image digests. User-reported physical-print results apply to the tested setup; recheck at actual size when the print path or setup changes. No production readiness or deployment is established by this record.
