@@ -108,3 +108,45 @@ test('CSV literal bracket and reserved-prefix text labels are not inferred as di
  const e=createEvent();e.columns[1].type='distance';e.rows.distance.forEach(r=>r.cells[e.columns[1].id]=1000);
  assert.throws(()=>importCSV(exportCSV(e).replace('"1"','"NaN"')));
 });
+
+
+import {EXPECTED_BYTE_LIMIT,byteBudgetFixture,stateBytes} from './byte-budget-fixture.mjs';
+test('independent UTF-8 fixture leaves exactly four bytes for an accepted emoji name',()=>{
+ assert.equal(LIMITS.bytes,EXPECTED_BYTE_LIMIT);
+ const state=byteBudgetFixture(1_999_996),before=JSON.stringify(state);
+ const name=state.events[0].name;
+ assert.equal(Buffer.byteLength('🍌','utf8'),4);
+ state.events[0].name=name+'🍌';
+ assert.equal(stateBytes(state),2_000_000);
+ const accepted=serializeState(state);
+ assert.equal(Buffer.byteLength(accepted,'utf8'),2_000_000);
+ assert.equal(parseState(accepted).events[0].name,name+'🍌');
+ state.events[0].name+='🍌';
+ assert.equal(stateBytes(state),2_000_004);
+ assert.throws(()=>serializeState(state),/2,000,000 UTF-8 bytes/);
+ assert.equal(Buffer.byteLength(before,'utf8'),1_999_996);
+ assert.equal(parseState(accepted).events[0].name,name+'🍌');
+});
+test('rejected duplicate rolls back all state changes before the next boundary name edit',()=>{
+ const state=byteBudgetFixture(),accepted=serializeState(state),copy=clone(state.events[0]);
+ copy.id=uid();copy.name=(copy.name+' · copy').slice(0,80);state.events.push(copy);state.active=copy.id;
+ assert.ok(stateBytes(state)>EXPECTED_BYTE_LIMIT);
+ assert.throws(()=>serializeState(state),/UTF-8 bytes/);
+ restoreObject(state,JSON.parse(accepted));
+ assert.equal(state.events.length,2);assert.equal(state.active,state.events[0].id);
+ assert.equal(stateBytes(state),2_000_000);assert.ok(serializeState(state)===accepted,'Rollback must reproduce the prior accepted backup');
+ state.events[0].name+='🍌';assert.equal(stateBytes(state),2_000_004);
+ assert.throws(()=>serializeState(state),/UTF-8 bytes/);
+});
+
+test('byte-budget fixture keeps active rendering small while retaining bulk in both modes and presets',()=>{
+ const state=byteBudgetFixture(),active=state.events.find(e=>e.id===state.active);
+ assert.equal(active.rows[active.mode].length,6);assert.equal(active.columns.length,2);
+ assert.equal(state.events.length,2);assert.equal(state.presets.length,1);
+ for(const e of [state.events[1],state.presets[0].event]){
+  assert.equal(e.columns.length,8);
+  for(const mode of ['distance','time'])assert.equal(e.rows[mode].length,200);
+ }
+ assert.equal(stateBytes(state),2_000_000);
+ assert.equal(Buffer.byteLength(serializeState(state),'utf8'),2_000_000);
+});

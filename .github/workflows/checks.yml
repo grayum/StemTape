@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 (Node.js 24)
         with:
           persist-credentials: false
       - name: Syntax and data tests
@@ -20,7 +20,8 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Browser workflows and PDF
         run: |
-          python3 scripts/serve.py > /tmp/stemtape-preview.log 2>&1 &
+          mkdir -p artifacts
+          python3 scripts/serve.py --diagnostics > artifacts/stemtape-preview.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid"' EXIT
           for attempt in $(seq 1 15); do
@@ -28,13 +29,20 @@ jobs:
             sleep 1
           done
           npm run test:browser
+      - name: Preserve browser diagnostics even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: browser-diagnostics
+          path: artifacts/
+          if-no-files-found: warn
       - name: Ensure private files are not tracked
         run: python3 scripts/check-private-files.py
   container:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 (Node.js 24)
         with:
           persist-credentials: false
       - name: Resolve base image, build, test hardening
