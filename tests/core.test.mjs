@@ -138,3 +138,15 @@ test('rejected duplicate rolls back all state changes before the next boundary n
  state.events[0].name+='🍌';assert.equal(stateBytes(state),2_000_004);
  assert.throws(()=>serializeState(state),/UTF-8 bytes/);
 });
+
+test('byte-budget fixture keeps active rendering small while retaining bulk in both modes and presets',()=>{
+ const state=byteBudgetFixture(),active=state.events.find(e=>e.id===state.active);
+ assert.equal(active.rows[active.mode].length,6);assert.equal(active.columns.length,2);
+ assert.equal(state.events.length,2);assert.equal(state.presets.length,1);
+ for(const e of [state.events[1],state.presets[0].event]){
+  assert.equal(e.columns.length,8);
+  for(const mode of ['distance','time'])assert.equal(e.rows[mode].length,200);
+ }
+ assert.equal(stateBytes(state),2_000_000);
+ assert.equal(Buffer.byteLength(serializeState(state),'utf8'),2_000_000);
+});

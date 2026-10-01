@@ -20,7 +20,8 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Browser workflows and PDF
         run: |
-          python3 scripts/serve.py > /tmp/stemtape-preview.log 2>&1 &
+          mkdir -p artifacts
+          python3 scripts/serve.py --diagnostics > artifacts/stemtape-preview.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid"' EXIT
           for attempt in $(seq 1 15); do
@@ -28,6 +29,13 @@ jobs:
             sleep 1
           done
           npm run test:browser
+      - name: Preserve browser diagnostics even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: browser-diagnostics
+          path: artifacts/
+          if-no-files-found: warn
       - name: Ensure private files are not tracked
         run: python3 scripts/check-private-files.py
   container:

@@ -1,5 +1,24 @@
 # Validation record
 
+## 2026-10-01 — CI reload timeout investigation (local evidence)
+
+Run 36862213689 reported a 30-second `page.reload()` timeout waiting for `load` after cancelling an over-budget name draft. The saved state was still the accepted 2,000,000-byte state. Fixture inspection found 200 active rows, 1,600 inputs and 224,490 active cell characters. Startup synchronously renders the editor and SVG preview, then renders the preview again after fonts load; cancellation also rebuilds the editor/preview. This confirms an unnecessarily heavy rendering workload in the byte-budget test, but does not prove the precise cause of the CI timeout. CI log retrieval failed with HTTP 401, and Chromium is unavailable locally.
+
+The byte-budget fixture now keeps six active rows (12 inputs, 64 cell characters), moving bulk text into the inactive event and personal preset. Both bulk objects retain 200 rows in each mode and eight columns. Independent exact-byte, accepted/rejected emoji, duplicate rollback, reload and backup round-trip assertions remain. No application rendering, print geometry, byte limits or navigation timeouts changed. Test setup no longer navigates through the previous fixture before seeding the next one. Reload still waits for `load`, then verifies fonts, preview, active selection and row count.
+
+Added phase/elapsed-time and fixture-size/count diagnostics, with Node-side page-error, failed-request and pending-resource capture on failure. CI now uploads browser artifacts and the development-server log with `if: always()`. Server request timing/status logging is opt-in, omits queries/headers/bodies and retains loopback binding. The upload-artifact v4.6.2 SHA was verified against the official repository tag.
+
+Checks for this follow-up:
+
+- `npm test`: **30/30 passed**; `npm run check`, all browser/test JavaScript syntax checks and `git diff --check`: **passed**.
+- Python server syntax and 20 concurrent HTTP resource requests with CSP/timing/query-redaction checks: **passed**.
+- Temporary EventEmitter diagnostic-failure simulation: **passed** report creation, counts, page errors, pending/failed URLs and query redaction without querying the page. This is **not browser verification**.
+- `python3 scripts/check-private-files.py`: **passed** its tracked-file/basic-pattern checks; not a full secret scan.
+- Full browser suite attempted via the temporary Playwright installation: **unexecuted**, missing Chromium headless shell. No download or network restriction bypass attempted.
+- Automated workflow YAML parsing could not run: PyYAML is unavailable. Workflow changes were inspected as source only.
+
+Pending: CI must verify the revised suite and collect failure diagnostics if the timeout recurs. No pending-resource/server-connection cause has been demonstrated. Rendering very large active plans remains a separate performance concern requiring browser profiling; reducing this fixture is not an application performance fix. The earlier six user-reported manual passes apply to the prior build/fixture, not this follow-up. No new physical-print or production verification is claimed.
+
 ## 2026-10-01 — byte-boundary fix, user-reported manual passes
 
 Graham van der Wielen reports all six requested manual checks passed against the fixed Docker development build, using synthetic fixtures through loopback HTTP:

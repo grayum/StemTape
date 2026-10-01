@@ -6,14 +6,15 @@ export const EXPECTED_BYTE_LIMIT=2_000_000;
 export const stateBytes=state=>Buffer.byteLength(JSON.stringify(state),'utf8');
 export function byteBudgetFixture(targetBytes=EXPECTED_BYTE_LIMIT){
  const state=initialState();state.active=state.events[0].id;
- const event=state.events[0];event.columns.push(...Array.from({length:6},()=>column('Extra')));
+ // Keep the active editor/preview small; bulk exercises storage, not SVG stress.
+ const event=clone(state.events[0]);event.id=uid();event.columns.push(...Array.from({length:6},()=>column('Extra')));
  for(const mode of ['distance','time'])event.rows[mode]=Array.from({length:200},(_,i)=>({
   id:uid(),symbol:'',cells:Object.fromEntries(event.columns.map((c,j)=>[c.id,j===0?i:'']))
  }));
- state.events.push({...clone(event),id:uid()});state.presets.push({name:'Budget',event:clone(event)});
+ state.events.push(event);state.presets.push({name:'Budget',event:clone(event)});
  let remaining=targetBytes-stateBytes(state);
  assert.ok(remaining>=0,'Target must fit the fixture structure');
- for(const e of [...state.events,...state.presets.map(p=>p.event)])for(const mode of ['distance','time'])for(const row of e.rows[mode])for(const c of e.columns.slice(1)){
+ for(const e of [...state.events.slice(1),...state.presets.map(p=>p.event)])for(const mode of ['distance','time'])for(const row of e.rows[mode])for(const c of e.columns.slice(1)){
   const n=Math.min(remaining,320);
   row.cells[c.id]='é'.repeat(Math.floor(n/2))+'x'.repeat(n%2);remaining-=n;
  }
