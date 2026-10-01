@@ -22,7 +22,7 @@ Use a supported patched VPS OS and Docker. Restrict SSH by key and provider fire
 
 Only the proxy is public. Restrict allowed hostnames there. Do not enable untrusted forwarded-header processing. Caddy example uses a single canonical domain, explicit HTTPS redirect and one-year HSTS (no includeSubDomains/preload). Add only after valid TLS; don't include unrelated subdomains. The optional Traefik configuration assumes an already hardened proxy and configured certificate resolver.
 
-Before production, execute the browser, container, proxy, vulnerability and secret-scan gates. No automated vulnerability scan or production deployment has been performed in this initial workspace. There is no Docker daemon here. Browser test installation was blocked by the execution environment. The supplied tests are a release gate, not proof they have passed.
+[Main CI run 36886880381](https://github.com/grayum/StemTape/actions/runs/36886880381) passed on 2026-10-01, including Chromium browser regressions, the container smoke test and basic tracked-file/credential-pattern checks. These checks are not a security audit or full secret/image-vulnerability scan. Before production, complete the outstanding proxy TLS/HSTS, canonical-host routing, host/network exposure and full scanning gates, plus the remaining visual/device checks in the [validation record](docs/VALIDATION.md). No production deployment or production-readiness verification is recorded.
 
 ## Reporting
 Until a public repository/private reporting channel is established, contact the repository owner privately. Do not post exploitable vulnerabilities or secrets in public issues. Add a verified reporting contact and enable GitHub private vulnerability reporting before making the repository public.
