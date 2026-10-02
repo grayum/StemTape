@@ -28,3 +28,7 @@ Pointer events on the leading grip support mouse, touch and pen; the handle rese
 The first distance/time cell sorts the active list after a changed valid value loses focus or Enter is pressed. Ties are stable. Text/icon changes and loading existing data never sort. Manual movement is retained until another primary-position edit or explicit Sort. DOM rebuilding waits until the pointer action finishes; row actions resolve stable IDs so a blur-triggered sort cannot redirect a click to another cue.
 
 Invalid drafts block actions that could discard them, including pointer/keyboard ordering and changes to event/mode/units. Escape or Cancel unaccepted edits explicitly restores accepted values. Row arrows remain focusable at boundaries with aria-disabled state, and resolve moves/focus by stable row ID. CSV distance metadata uses a reserved header prefix with a JSON tuple; reserved-prefix text labels are escaped with a text tuple. Unmarked bracketed units remain literal labels to avoid guessing legacy column types.
+
+## Save status (0.4)
+
+`save-status.js` owns the storage-success boundary, optional validated `savedAt` metadata and relative-age formatting. See [save-status behavior and compatibility](SAVE-STATUS.md). A single state write includes metadata only when it fits the existing byte budget; metadata never displaces plan data. Display timers update status nodes only. Recovery remains protected until an explicitly requested replacement is successfully written, and stale tabs are warned rather than silently replacing known newer data.

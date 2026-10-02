@@ -14,9 +14,11 @@ python3 scripts/serve.py
 
 Open **http://127.0.0.1:8080**. Use this local server rather than opening `index.html` as a file: ES modules require HTTP. The development server binds to loopback only and is not intended for public hosting.
 
-## Included in 0.3.0
+## Included in 0.4.0 (review candidate)
 
 - Saved events, duplication/deletion and project-owner presets.
+- Honest successful-save age and exact UTC time, with persistent failure/recovery feedback.
+- Cloudflare/DNS/Caddy security runbook and proxy-only capability fix; manual production steps remain pending.
 - Nutrition by distance **or elapsed h:mm**, with separate cue lists; route and custom presets.
 - Metric defaults and explicit mile/inch overrides; canonical distance storage.
 - Local Lucide outline icon picker plus pasted emojis/text.
@@ -33,7 +35,7 @@ Custom Unicode emojis use the user's system font. The outlined symbols combine *
 
 ## Data and privacy
 
-Plans live in your current browser's localStorage, not the server. Different domains, profiles and browsers have separate data. Clearing site data removes plans. Export JSON backups regularly; CSV preserves cue data, not full layout/types. Remembered bike dimensions are included in JSON. Saved state, complete JSON backups and imported files share a 2,000,000-byte UTF-8 limit. State includes all events, both cue modes, presets and preferences; changes exceeding the limit are rejected without truncation. Existing oversized or unreadable storage remains protected with an original-data recovery export. Imports also allow at most 200 rows per mode and 8 columns. No GPX parsing, accounts, automatic nutrition advice or route detection.
+Plans live in your current browser's localStorage, not the server. Different domains, profiles and browsers have separate data. Clearing site data removes plans. Export JSON backups regularly; CSV preserves cue data, not full layout/types. Remembered bike dimensions are included in JSON. Optional last-save timing metadata shares the same atomic state record and byte budget; exact-limit plans preserve their data and explicitly retain time only for the current tab when metadata cannot fit. Old data with no timestamp keeps an unknown save time. See [save-status behavior](docs/SAVE-STATUS.md). Saved state, complete JSON backups and imported files share a 2,000,000-byte UTF-8 limit. State includes all events, both cue modes, presets and preferences; changes exceeding the limit are rejected without truncation. Existing oversized or unreadable storage remains protected with an original-data recovery export. Imports also allow at most 200 rows per mode and 8 columns. No GPX parsing, accounts, automatic nutrition advice or route detection.
 
 CSV example:
 
@@ -97,10 +99,12 @@ npm run test:browser
 This creates screenshots and an actual PDF in ignored `artifacts/`. Review all screenshots and verify PDF dimensions; passing assertions alone is not visual QA.
 
 ```sh
-sh scripts/container-smoke.sh stemtape:0.3.0
+sh scripts/container-smoke.sh stemtape:0.4.0
 ```
 
-**Validation:** [Main CI run 36886880381](https://github.com/grayum/StemTape/actions/runs/36886880381) passed on 2026-10-01: 30 data tests, app/core syntax checks, Chromium browser regressions with screenshot/PDF generation, basic tracked-file checks and the container smoke test. User-reported manual and actual-size-print checks are recorded separately. Production proxy checks, full secret/image scans, broader visual/device checks and large-active-plan performance profiling remain outstanding; this is not a security audit or production-deployment verification. See the [validation record](docs/VALIDATION.md) for coverage and limitations.
+**v0.4.0 validation:** this is a review candidate; see [current evidence and remaining gates](docs/VALIDATION.md). The two changes are described in [review order](docs/REVIEW-v0.4.0.md).
+
+**Prior v0.3.0 validation:** [Main CI run 36886880381](https://github.com/grayum/StemTape/actions/runs/36886880381) passed on 2026-10-01: 30 data tests, app/core syntax checks, Chromium browser regressions with screenshot/PDF generation, basic tracked-file checks and the container smoke test. User-reported manual and actual-size-print checks are recorded separately. Production proxy checks, full secret/image scans, broader visual/device checks and large-active-plan performance profiling remain outstanding; this is not a security audit or production-deployment verification. See the [validation record](docs/VALIDATION.md) for coverage and limitations.
 
 ## Repository workflow
 

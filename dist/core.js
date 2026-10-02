@@ -54,7 +54,13 @@ export function validateState(s){
   if(!Array.isArray(s.presets)||s.presets.length>20)throw Error('Too many personal presets.');
   const presets=s.presets.map(p=>({name:str(p.name,40,'preset name'),event:validateEvent(p.event)}));
   let bike=null;if(s.bike){const e=createEvent();e.layout={...e.layout,...s.bike};const l=validateEvent(e).layout;bike={width:l.width,length:l.length,padding:l.padding,rotation:l.rotation};}
-  return {bike,version:VERSION,theme:choice(s.theme,['light','dark','system'],'theme'),active:events.some(e=>e.id===s.active)?s.active:events[0].id,events,presets};
+  const out={bike,version:VERSION,theme:choice(s.theme,['light','dark','system'],'theme'),active:events.some(e=>e.id===s.active)?s.active:events[0].id,events,presets};
+  // Optional v1 metadata. Legacy backups remain unchanged; malformed metadata enters recovery.
+  if(Object.hasOwn(s,'savedAt')){
+    if(!Number.isSafeInteger(s.savedAt)||s.savedAt<=0||s.savedAt>8_640_000_000_000_000)throw Error('Invalid save timestamp.');
+    out.savedAt=s.savedAt;
+  }
+  return out;
 }
 export function parseCSV(text){
   if(utf8Bytes(text)>LIMITS.bytes)throw Error('File exceeds 2 MB.');

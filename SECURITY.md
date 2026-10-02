@@ -1,6 +1,6 @@
 # Security policy and deployment boundary
 
-StemTape 0.3.0 is an initial implementation, not a production-audited release.
+StemTape 0.4.0 is a review candidate, not a production-audited release.
 
 ## Threat model
 An anonymous internet-facing static site serves trusted HTML/CSS/ES modules, fonts and SVG icons. The server has no accounts, sessions, database, import/upload endpoint, webhook, OAuth token or user-data API. CSV and JSON are read locally. Browser printing produces PDF via the user's print dialog. This removes the corresponding session/CSRF/SSRF surfaces; it does not remove XSS or supply-chain risk.
@@ -26,3 +26,7 @@ Only the proxy is public. Restrict allowed hostnames there. Do not enable untrus
 
 ## Reporting
 Until a public repository/private reporting channel is established, contact the repository owner privately. Do not post exploitable vulnerabilities or secrets in public issues. Add a verified reporting contact and enable GitHub private vulnerability reporting before making the repository public.
+
+## v0.4.0 edge/origin review
+
+The owner-reported Internet.nl baseline on 2026-10-02 scored 95%; remaining TLS findings belong to the Cloudflare edge and must be tested separately from Caddy. See the [security/deployment runbook](docs/SECURITY-DEPLOYMENT.md) for current official guidance, ownership, manual steps and remaining decisions. The VPS example adds only `NET_BIND_SERVICE` to the proxy for execution of the official capability-marked Caddy binary, retaining all other restrictions. No verified private vulnerability-report contact is available yet, so no placeholder security.txt is published. No production or DNS settings were changed by this review.
