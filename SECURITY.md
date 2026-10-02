@@ -1,6 +1,6 @@
 # Security policy and deployment boundary
 
-StemTape 0.3.0 is an initial implementation, not a production-audited release.
+StemTape 0.4.0 is a review candidate, not a production-audited release.
 
 ## Threat model
 An anonymous internet-facing static site serves trusted HTML/CSS/ES modules, fonts and SVG icons. The server has no accounts, sessions, database, import/upload endpoint, webhook, OAuth token or user-data API. CSV and JSON are read locally. Browser printing produces PDF via the user's print dialog. This removes the corresponding session/CSRF/SSRF surfaces; it does not remove XSS or supply-chain risk.

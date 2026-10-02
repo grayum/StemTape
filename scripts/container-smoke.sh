@@ -1,6 +1,6 @@
 #!/bin/sh
 set -eu
-image=${1:-stemtape:0.3.0}
+image=${1:-stemtape:0.4.0}
 name="stemtape-smoke-$$"
 cleanup() { docker stop "$name" >/dev/null 2>&1 || true; }
 trap cleanup EXIT INT TERM

@@ -1,3 +1,12 @@
+# Upgrade to 0.4.0 (review candidate)
+
+Keep a complete JSON backup and the prior tested image. This review does not authorize deployment. Source remains at `/opt/docker/stemtape`; preserve private configuration and certificate data under `/opt/docker/stemtape-config`. Use `vim` for any later operator edits; do not copy public examples over private files.
+
+- Review the [security/deployment runbook](docs/SECURITY-DEPLOYMENT.md) independently first. Cloudflare edge TLS settings and CAA are manual operator changes, separate from Caddy. The VPS example adds NET_BIND_SERVICE only to proxy; verify against the exact live image digest before adopting it. The application retains cap_drop ALL with no added capability.
+- Review [save status](docs/SAVE-STATUS.md) second. Schema version and storage key remain v1. Optional `savedAt` shares the validated byte budget and atomic state write. Legacy timestamps remain unknown; older versions ignore/drop this optional field without losing plans. Exact-limit plans omit timestamp metadata if necessary and explicitly show session-only time. No startup rewrite occurs.
+- A stale tab must export its in-memory plan before reloading. Close old-version tabs before upgrading: old code cannot enforce the new stale-tab guard. Recovery originals stay protected until a successful explicit replacement. Complete backups remain the rollback path; unreadable originals may need offline repair.
+- Run the documented checks for this candidate and review native-browser/mobile/accessibility behavior. Recheck actual-size printing if the printing environment changes. Existing v0.3.0 CI/manual records do not establish v0.4.0 release readiness.
+
 # Upgrade 0.1.x / 0.2.x → 0.3.0
 
 1. Export a complete JSON backup from the running app. Keep the same browser profile and hostname to retain local plans.

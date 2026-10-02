@@ -92,7 +92,7 @@ export async function reviewRegressions(browser,base){
   assert.equal(JSON.parse(full).events[0].name,originalName+'🍌',acceptedDiagnostic);
   assert.ok(isDeepStrictEqual(JSON.parse(full),expectedAccepted),acceptedDiagnostic);
   assert.equal(await page.locator('#event-name').evaluate(n=>n.validity.valid),true,acceptedDiagnostic);
-  assert.match(await page.locator('#save-status').textContent(),/Saved on this device/,acceptedDiagnostic);
+  assert.match(await page.locator('#save-status').textContent(),/Saved just now/,acceptedDiagnostic);
   await reload('accepted boundary edit reload');
   assert.equal(await page.locator('#event-name').inputValue(),originalName+'🍌',await budgetDiagnostics('accepted edit after reload',2_000_000));
   assert.ok((await stored())===full,'Reload must preserve the accepted backup');

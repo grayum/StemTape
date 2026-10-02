@@ -3,7 +3,7 @@
 name: stemtape
 services:
   app:
-    image: ${STEMTAPE_IMAGE:-stemtape:0.3.0}
+    image: ${STEMTAPE_IMAGE:-stemtape:0.4.0}
     build:
       context: .
       args:

@@ -1,5 +1,26 @@
 # Validation record
 
+## 2026-10-02 — v0.4.0 review preparation (not release approval)
+
+Prepared from bundled `origin/main` `60fa526389fa6940420a18cb1f4a92bdb9785cce` on `review/v0.4.0`, in [two reviewable changes](REVIEW-v0.4.0.md): security/deployment first, save-status UX and version metadata second. The owner-provided Internet.nl baseline for `stemtape.cc` was 95% on 2026-10-02; no new public test or production change was performed. Official Cloudflare/Caddy guidance was read from their maintainers' GitHub sources after documentation sites returned HTTP 403.
+
+Executed locally:
+
+- `npm test`: **40/40 passed** (30 existing tests plus 10 save-status tests covering successful/failed writes, reload/legacy compatibility, drafts, imports, recovery, clocks, tab conflicts and exact UTF-8 metadata boundaries).
+- `npm run check`, browser/test JavaScript syntax checks, `sh -n scripts/caddy-smoke.sh`, and `git diff --check`: **passed**.
+- Temporary synthetic jsdom app checks: **passed** success/time display, read-only timer behavior with unchanged editor/preview nodes and storage, draft correction/cancellation, quota failure/retry, pending total edits, protected fallback editing, retained original-export access after failed recovery replacement, and exportability when a quota failure coincides with timestamp metadata no longer fitting. These are **not native-browser or visual/accessibility verification**.
+- `python3 scripts/check-private-files.py`: **passed** its tracked-file/basic-pattern checks; not a full secret scan.
+- Source comparison: `makeSheet` and `preparePrint` remain unchanged from the base. This is not new PDF or physical-print evidence.
+- Application container built with `nginx@sha256:0985e772fb9f729e6fa0980da05fca5d9c468e870eed43071545afa9d2e27d94`; local smoke checks **passed** health, UID 10001, read-only application root, CSP-header presence and POST rejection. The included smoke script was copied to `/tmp` with only sandbox port 18080 changed to 18081, to avoid mapping the reserved router port in nested Docker. The build emitted the existing empty-default NGINX_IMAGE lint warning; the required explicit digest was supplied successfully.
+- Public local/VPS Compose examples validated using only their public example env files. The repository Caddyfile validated with synthetic hostname `stemtape.test`, no network and the restricted capability-enabled container.
+- `scripts/caddy-smoke.sh` on official `caddy:2.10.2-alpine`, digest `sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d`: all capabilities dropped reproduced `exec caddy failed: Operation not permitted`; adding only NET_BIND_SERVICE passed version and offline non-root HTTP startup. This proves the mechanism for this image, **not the unidentified live pin**. A requested `caddy:2.11.6-alpine` probe was unavailable in the accessible registry and was not tested.
+
+Pre-commit review reran the 40 Node tests, syntax/diff and basic tracked-file checks, all three synthetic app scenarios, the application smoke test and the representative pinned-Caddy probe above; all passed. The existing Git author identity was verified. Only the reviewed repository files are included in the two logical changes; private configuration and generated artifacts are excluded.
+
+Browser execution: the complete suite was attempted with the existing temporary Playwright installation but failed before assertions because Chromium headless shell is unavailable. No Chromium download or restriction bypass was attempted. New condition-based browser regressions are **unexecuted**; the [manual checklist](SAVE-STATUS.md#focused-browser-checklist--pending-execution) is also unexecuted. The v0.3.0 CI/manual results below are not evidence for v0.4.0.
+
+Remaining decisions and gates: supply the exact public live Caddy image digest for verification; verify a private vulnerability-report contact before publishing security.txt; perform the manual Cloudflare/CAA changes and separate public/origin TLS retests only under operator authorization. No DNS, Cloudflare, Droplet or deployment settings were changed. Native browser/mobile/themes/screen-reader behavior, actual-size PDF/physical print, production proxy routing/TLS and full secret/image scans remain pending. Very large active-plan rendering still needs profiling; save-status timers do not rebuild it. No security audit or production-readiness claim is made.
+
 ## 2026-10-01 — successful main CI validation
 
 Main GitHub Actions run [36886880381](https://github.com/grayum/StemTape/actions/runs/36886880381) **passed** on 2026-10-01. The repository owner supplied this run result; coverage below was checked against `.github/workflows/checks.yml` and its test scripts at the supplied main commit `51de86501a5dded7c3c691d906bc5ca902cda3a9`. This records execution in GitHub CI, not a new local browser run or independent inspection of the CI artifacts.

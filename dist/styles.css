@@ -40,3 +40,8 @@ footer a:hover{color:var(--ring)}
 }
 
 .intro{justify-content:flex-end;margin-bottom:16px}
+
+/* Save age is not a live region; exact UTC time remains visible and accessible. */
+#save-status{display:flex;flex-direction:column;align-items:flex-end;gap:3px;max-width:100%;white-space:normal;color:var(--text)}
+#save-status-time{font-size:11px;overflow-wrap:anywhere;color:var(--muted)}
+#save-status-time[hidden]{display:none}

@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.4.0 — review candidate (2026-10-02)
+
+### Security/deployment change
+
+- Add an owner-specific Cloudflare/DNS/Caddy runbook based on the 95% Internet.nl baseline, preserving passing controls and separating edge TLS from origin checks.
+- Add only NET_BIND_SERVICE to the VPS proxy for capability-marked official Caddy images; retain non-root, read-only, dropped capabilities and no-new-privileges. Include an offline digest-specific startup probe. Live-pin verification and a verified security.txt contact remain decisions.
+
+### Save-status UX change
+
+- Show relative successful-save age and accessible exact UTC time only after successful storage; preserve prior time on failures and remove success for invalid/pending drafts or protected recovery.
+- Keep optional validated timing metadata within the atomic v1 state byte budget; preserve exact-limit data with explicit session-only timing when metadata cannot fit. No timestamp invented for old data.
+- Detect known stale-tab storage changes and retain recovery originals when explicit replacement fails. Timers do not write storage, rebuild the editor/preview or repeatedly announce age.
+- Add focused Node and condition-based browser regressions. Print geometry, makeSheet and preparePrint remain unchanged; see the validation record for executed and pending checks.
+
 ## 0.3.0 — review fixes (2026-09-29, uncommitted)
 
 - Share a validated 2,000,000-byte UTF-8 policy across accepted state, storage, JSON exports and imports; reject oversized mutations without truncation and preserve original oversized/unreadable storage for recovery export.
