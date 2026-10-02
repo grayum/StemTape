@@ -46,3 +46,7 @@ Build and scan once, push to your registry, then use the exact same application 
 Use a supported, patched VPS OS/Docker and key-based restricted SSH. Keep management off the public network. Verify provider and Docker-aware firewall rules, IPv4 and IPv6; do not rely only on UFW for published Docker ports. DNS must resolve to the proxy. Verify valid TLS, exact-host routing, HTTP redirection, CSP/security headers and no exposed app port/dashboard. Check external Host/IP-only requests do not serve the application. Provider-level denial-of-service protection is a separate hosting concern; the standalone Caddy example has timeouts/resource limits but no third-party rate-limit module.
 
 Only plan content stays client-side: servers necessarily receive ordinary connection metadata. No access logging is enabled by the app example; operator proxy logging may differ. A server compromise could change delivered JavaScript and threaten browser data. Keep the build/deployment supply chain protected.
+
+## Cloudflare in front of the Caddy origin
+
+For `stemtape.cc` (Cloudflare → DigitalOcean → Caddy → app), use the [v0.4.0 security runbook](SECURITY-DEPLOYMENT.md). It distinguishes edge TLS from origin TLS, gives manual Cloudflare/CAA and verified Host/SNI checks, and records the proxy-only `NET_BIND_SERVICE` requirement for capability-marked Caddy images. The live private deployment path is `/opt/docker/stemtape-config`; source is `/opt/docker/stemtape`. Keep the working private mounts and certificate data rather than replacing them with example-relative paths.
