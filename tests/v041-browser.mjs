@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {assertWrappedLabel} from './svg-label.mjs';
 import {initialState,column,serializeState} from '../dist/core.js';
 export async function v041Regressions(browser,base){
  const context=await browser.newContext({locale:'en-GB',timezoneId:'Europe/Amsterdam',viewport:{width:390,height:844},hasTouch:true}),page=await context.newPage();
@@ -13,7 +14,22 @@ export async function v041Regressions(browser,base){
   const raw=serializeState(s);await page.evaluate(raw=>localStorage.setItem('stemtape.v1',raw),raw);await page.reload();
   await page.locator('#mode-time').click();assert.equal(await page.locator('#unit').isDisabled(),true);assert.equal(await page.locator('#unit').inputValue(),'mi');
   assert.equal(await page.locator('#dimension-unit').isEnabled(),true);assert.equal(await page.getByLabel('Water distance, row 1',{exact:true}).inputValue(),'2');
-  assert.match(await page.locator('#sheet-preview').textContent(),/Water distance \(mi\)/);
+  await page.evaluate(()=>document.fonts.ready);
+  const sheet=page.locator('#sheet-preview svg[aria-label="Printable cue sheet"]');assert.equal(await sheet.count(),1);
+  const rendered=await sheet.evaluate(svg=>{
+   const group=svg.querySelector(':scope > g'),children=[...group.children];
+   // The first horizontal rule ends the header; x coordinates identify columns
+   // independently of their text. This fixture has three columns, no rotation.
+   const headerBottom=Number(children.find(n=>n.tagName==='line').getAttribute('y1'));
+   const text=children.filter(n=>n.tagName==='text').map(n=>({x:Number(n.getAttribute('x')),y:Number(n.getAttribute('y')),text:n.textContent}));
+   const headers=text.filter(n=>n.y<headerBottom),columns=[...new Set(headers.map(n=>n.x))].sort((a,b)=>a-b);
+   const targetX=columns[2],inOrder=nodes=>nodes.sort((a,b)=>a.y-b.y).map(n=>n.text);
+   return {columnCount:columns.length,headerLines:inOrder(headers.filter(n=>n.x===targetX)),cueLines:inOrder(text.filter(n=>n.x===targetX&&n.y>headerBottom))};
+  });
+  const diagnostic=JSON.stringify(rendered);
+  assert.equal(rendered.columnCount,3,diagnostic);
+  assertWrappedLabel(rendered.headerLines,'Water distance (mi)',diagnostic);
+  assert.deepEqual(rendered.cueLines,['2'],diagnostic);
   await page.reload();await page.locator('#editor-rows tr').first().waitFor();assert.equal(await page.locator('#unit').isDisabled(),true);
   await page.locator('#mode-distance').click();assert.equal(await page.locator('#unit').isEnabled(),true);assert.equal(await page.locator('#unit').inputValue(),'mi');
   const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('stemtape.v1')));

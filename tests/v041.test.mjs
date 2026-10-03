@@ -31,3 +31,10 @@ test('exact save date respects locale clock conventions and explicitly includes 
  assert.match(formatSaveTime(at,'en-GB','UTC'),/2026/);
  for(const unknown of [null,undefined,NaN,0,-1])assert.equal(formatSaveTime(unknown),'');
 });
+
+// Independent extraction examples include both word and character wrapping.
+test('SVG label assertion restores only wrap-boundary spaces and rejects altered content',async()=>{
+ const {assertWrappedLabel}=await import('./svg-label.mjs'),expected='Water distance (mi)';
+ for(const lines of [['Water distance (mi)'],['Water','distance (mi)'],['Wat','er','dis','tan','ce','(mi',')'],['Water ','distance (mi)']])assertWrappedLabel(lines,expected);
+ for(const lines of [[],['Waterdistance (mi)'],['Water','distance(mi)'],['Water','distance (km)'],['Water','distan (mi)'],['Water','distance  (mi)'],['distance (mi)','Water']])assert.throws(()=>assertWrappedLabel(lines,expected));
+});

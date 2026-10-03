@@ -1,5 +1,15 @@
 # Validation record
 
+## 2026-10-03 — v0.4.1 SVG header assertion follow-up
+
+The owner-reported CI failure extracted `h:mmFuelWaterdistance (mi)1:00Water2` from the whole preview. `cueHeader` produces the full `Water distance (mi)` label. The print renderer places each wrapped line in its own SVG text element, consumes a space when wrapping at a word boundary, and also supports hard wrapping inside words. DOM textContent concatenates those separate lines and cells without separators. This is a test extraction defect; the reported concatenation is not evidence of a missing word or incorrect distance unit in the rendered sheet.
+
+The test now waits for fonts, scopes to exactly one printable SVG, identifies the third header column by its x position above the header rule, and checks its lines against the complete expected label. The test helper restores only a single expected ASCII space at a line boundary, preserving hard wraps and rejecting changed text/units or whitespace within a line. It does not broadly normalize the preview. The same column's rendered cue must equal exactly `2`, alongside the existing editor value and unit-preference checks. No application, fixture dimensions, makeSheet or preparePrint code changed.
+
+Checks: `npm test` **45/45 passed**; `npm run check`, browser/helper test syntax and `git diff --check` **passed**. Added independent examples cover word/hard wraps and reject missing spaces inside a line, incorrect units, missing letters, doubled spaces and reordered lines. A temporary synthetic actual-app SVG check ran the same extraction callback successfully with mocked font metrics, producing header lines `["Wat","er","dis","tan","ce","(mi",")"]` and cue `["2"]`. This is not real-browser, font-layout, PDF or physical-print verification.
+
+Full browser suite attempted: **unexecuted**, Chromium headless shell remains unavailable. CI must verify the revised extraction against native SVG/font rendering. No browser installation, commit, push or production action is part of this follow-up.
+
 ## 2026-10-03 — v0.4.1 preparation (not release approval)
 
 Verified the refreshed bundle and its `origin/main` hash `4c45af7c4b79e9590eab90111806afb2a0672dd6`, including the merged v0.4.0 commits. Created `review/v0.4.1` from that exact commit. The three uncommitted formatting files were inspected/backed up before switching and reconciled into the tooltip. No untracked files were present before switching. [Review groups](REVIEW-v0.4.1.md) separate security.txt/static serving from application presentation and metadata.
