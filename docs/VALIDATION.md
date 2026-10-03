@@ -1,5 +1,45 @@
 # Validation record
 
+## 2026-10-03 — v0.4.1 SVG header assertion follow-up
+
+The owner-reported CI failure extracted `h:mmFuelWaterdistance (mi)1:00Water2` from the whole preview. `cueHeader` produces the full `Water distance (mi)` label. The print renderer places each wrapped line in its own SVG text element, consumes a space when wrapping at a word boundary, and also supports hard wrapping inside words. DOM textContent concatenates those separate lines and cells without separators. This is a test extraction defect; the reported concatenation is not evidence of a missing word or incorrect distance unit in the rendered sheet.
+
+The test now waits for fonts, scopes to exactly one printable SVG, identifies the third header column by its x position above the header rule, and checks its lines against the complete expected label. The test helper restores only a single expected ASCII space at a line boundary, preserving hard wraps and rejecting changed text/units or whitespace within a line. It does not broadly normalize the preview. The same column's rendered cue must equal exactly `2`, alongside the existing editor value and unit-preference checks. No application, fixture dimensions, makeSheet or preparePrint code changed.
+
+Checks: `npm test` **45/45 passed**; `npm run check`, browser/helper test syntax and `git diff --check` **passed**. Added independent examples cover word/hard wraps and reject missing spaces inside a line, incorrect units, missing letters, doubled spaces and reordered lines. A temporary synthetic actual-app SVG check ran the same extraction callback successfully with mocked font metrics, producing header lines `["Wat","er","dis","tan","ce","(mi",")"]` and cue `["2"]`. This is not real-browser, font-layout, PDF or physical-print verification.
+
+Full browser suite attempted: **unexecuted**, Chromium headless shell remains unavailable. CI must verify the revised extraction against native SVG/font rendering. No browser installation, commit, push or production action is part of this follow-up.
+
+## 2026-10-03 — v0.4.1 preparation (not release approval)
+
+Verified the refreshed bundle and its `origin/main` hash `4c45af7c4b79e9590eab90111806afb2a0672dd6`, including the merged v0.4.0 commits. Created `review/v0.4.1` from that exact commit. The three uncommitted formatting files were inspected/backed up before switching and reconciled into the tooltip. No untracked files were present before switching. [Review groups](REVIEW-v0.4.1.md) separate security.txt/static serving from application presentation and metadata.
+
+Executed:
+
+- `npm test`: **44/44 passed**. The four added tests cover new Fuel defaults, preservation of old/custom/imported/preset labels, time plans with additional distance columns and locale/timezone date formatting. Existing save success/failure, recovery and independent exact-byte boundary tests remain passing.
+- `npm run check`, syntax checks for all test modules, `sh -n scripts/container-smoke.sh` and `git diff --check`: **passed**.
+- Actual application image built as `stemtape:0.4.1` using `nginx@sha256:0985e772fb9f729e6fa0980da05fca5d9c468e870eed43071545afa9d2e27d94`. `STEMTAPE_TEST_PORT=18081 sh scripts/container-smoke.sh stemtape:0.4.1`: **passed** health, UID 10001, read-only root, CSP and POST rejection, plus security.txt HTTP 200/exact source bytes/`text/plain; charset=utf-8`/CSP, hidden-path 403 responses and gzip for app.js. Port 18080 was not published by the nested test container. The existing Dockerfile empty-default ARG lint warning remains; an explicit digest was supplied.
+- Temporary synthetic jsdom checks of the actual app: **passed** save-age and read-only timer behavior, failures/recovery/budget exportability, tooltip focus/Escape and invalid-draft access, and time-mode unit preference preservation. Mocked canvas/dialogs are involved: these are **not real-browser, visual or screen-reader results**.
+- `python3 scripts/check-private-files.py`: **passed** its tracked-file/basic-pattern checks; not a full secret scan. New filenames were inspected separately; no private files or generated artifacts are part of the diff.
+- Exact source comparison: `makeSheet` and `preparePrint` are unchanged from the verified base. This is not new PDF/physical-print evidence.
+
+Full browser suite attempted using the existing temporary Playwright module: **unexecuted**, because Chromium headless shell is missing at launch. No browser download or network bypass attempted. New browser tests include touch/focus/Escape, overlay geometry, previous time during invalid drafts, unit disabling/reload/restoration and custom distance-column formatting; they still require CI or a supported local browser. No new manual checks are reported as passed.
+
+The owner supplied the security.txt contact, resolving the older contact-pending notes below. Expiry is 2027-09-01; review/renew beforehand. The owner accepts remaining Cloudflare cipher/key-exchange findings for now. No new Internet.nl score, public endpoint test, DNS/Cloudflare change, security audit or production deployment is claimed. Exact live Caddy-pin verification, full secret/image scans, browser visual/accessibility/PDF/physical checks and large-active-plan performance profiling remain outstanding.
+
+Pre-commit review confirmed and fixed one tooltip defect: mouse hover could open details while focus stayed in an input, but Escape only worked on the status button and could cancel an invalid draft instead. A synthetic actual-app reproduction failed before the fix and passed afterward. Escape now dismisses an open tooltip before editor cancellation handlers. Browser regressions cover hover-to-tooltip movement, hover dismissal with editor focus, draft preservation and absence of a success check after quota failure; these remain unexecuted locally.
+
+The 44 Node tests, application/test/shell syntax checks, diff checks, four synthetic DOM scenarios and rebuilt application-container smoke checks were rerun successfully. Browser launch was attempted again and remains blocked by missing Chromium. Git author identity was verified as the existing Graham van der Wielen GitHub noreply configuration. The original formatting backup remains intact. Changes are committed as separate security/serving and application/metadata groups; no push or deployment is part of this review.
+
+### v0.4.1 manual checklist — unexecuted
+
+1. Save, wait a minute and reload: relative age remains honest. Hover or Tab to status for localized date/time and explicit timezone; Escape dismisses. Test 12/24-hour locales and screen-reader description without repeated age announcements.
+2. On touch/mobile, tap status then outside. Inspect light/dark and 200% zoom: no clipped tooltip, hidden failure text, layout shift or editor focus disruption.
+3. Test invalid drafts, blocked/quota writes, recovery originals and exact-limit session-only timestamps. The check disappears when unsaved; known previous time stays available. Reload must not invent a missing timestamp. Export/restore both modes/presets and original recovery bytes.
+4. Choose Miles, switch to Time and reload: units are grey/disabled, physical dimensions remain enabled, additional distance columns stay in miles. Switch back: Miles remains selected and both mode lists are intact.
+5. New nutrition plans show Fuel in both modes; existing/custom/imported labels and personal templates remain unchanged. Exercise cue ordering and invalid-draft guards, then compare preview/PDF and actual-size printing in the test setup.
+6. After a separately authorized deployment, verify public security.txt content/type/security headers through Cloudflare, contact/expiry maintenance and compression. Local container results do not establish this public check.
+
 ## 2026-10-02 — v0.4.0 review preparation (not release approval)
 
 Prepared from bundled `origin/main` `60fa526389fa6940420a18cb1f4a92bdb9785cce` on `review/v0.4.0`, in [two reviewable changes](REVIEW-v0.4.0.md): security/deployment first, save-status UX and version metadata second. The owner-provided Internet.nl baseline for `stemtape.cc` was 95% on 2026-10-02; no new public test or production change was performed. Official Cloudflare/Caddy guidance was read from their maintainers' GitHub sources after documentation sites returned HTTP 403.

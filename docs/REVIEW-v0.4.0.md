@@ -1,5 +1,7 @@
 # v0.4.0 review order
 
+Historical record: v0.4.0 is now merged. v0.4.1 supplies the owner-authorized security.txt contact, superseding the contact-pending decision below.
+
 Base: bundled `origin/main` commit `60fa526389fa6940420a18cb1f4a92bdb9785cce`, verified before creating `review/v0.4.0`. No production files were read or changed. The changes are organized into the two commits below. No push, merge, tag or deployment is part of this review.
 
 ## 1. Security/deployment

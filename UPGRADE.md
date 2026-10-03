@@ -1,3 +1,15 @@
+# Upgrade to 0.4.1 (review candidate)
+
+Export a complete JSON backup, close other StemTape tabs and retain the previous tested image digest and private configuration before an operator-authorized upgrade. No deployment is part of this preparation. Rebuild the static image to include `dist/.well-known/security.txt`; preserve browser origin/profile and existing volumes/config. Do not copy examples over working private configuration. Use `vim` for operator edits.
+
+Schema/key remain v1. Optional savedAt, the 2,000,000-byte budget, session-only time fallback and original recovery protection are unchanged. Existing Eat / drink (or customized) labels stay intact; only newly created nutrition templates use Fuel. There is no reliable default-label provenance in older records, so no migration guesses user intent. To rename an existing plan, edit its column label explicitly.
+
+Distance preferences are retained across Time mode; additional distance columns continue to use that preference. Switch to Distance to change it, then back to Time. Physical mm/in settings remain available. Custom-preset plans themselves still use distance mode; customized nutrition plans and time CSV imports may contain additional distance columns.
+
+Self-hosters must customize security.txt Contact, Canonical and Expires and maintain the reporting channel. The bundled contact is for stemtape.cc. Public endpoint/headers and existing Cloudflare compression should be checked after an authorized deployment. Remaining edge cipher/key-exchange findings are accepted limitations, not fixed by this patch.
+
+Rollback: restore the previous tested application image and its compatible public proxy configuration, retaining certificate volumes and browser data. v0.4.0 reads v0.4.1 v1 data; it may show the older status UI but keeps Fuel/custom labels. Older versions may drop optional savedAt on their next write. Restore JSON only if needed and after exporting the current state; unreadable original recovery files may require offline repair. No data migration or storage reset is required. Removing the security.txt endpoint on rollback also removes the published discovery channel; check it explicitly.
+
 # Upgrade to 0.4.0 (review candidate)
 
 Keep a complete JSON backup and the prior tested image. This review does not authorize deployment. Source remains at `/opt/docker/stemtape`; preserve private configuration and certificate data under `/opt/docker/stemtape-config`. Use `vim` for any later operator edits; do not copy public examples over private files.

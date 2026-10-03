@@ -32,3 +32,9 @@ Invalid drafts block actions that could discard them, including pointer/keyboard
 ## Save status (0.4)
 
 `save-status.js` owns the storage-success boundary, optional validated `savedAt` metadata and relative-age formatting. See [save-status behavior and compatibility](SAVE-STATUS.md). A single state write includes metadata only when it fits the existing byte budget; metadata never displaces plan data. Display timers update status nodes only. Recovery remains protected until an explicitly requested replacement is successfully written, and stale tabs are warned rather than silently replacing known newer data.
+
+## v0.4.1 presentation and reporting
+
+The saved timestamp uses an overlay tooltip with locale date/time and explicit timezone offset; hover, focus and tap expose the same accessible description. Unknown timestamps remain absent. Display ticks do not rebuild the editor or preview. Native disabled distance units are visually muted in Time mode, without changing stored units; extra distance columns still use the retained preference. New nutrition templates use Fuel; existing labels lack provenance and are preserved.
+
+The static image includes the exact `/.well-known/security.txt` resource. Nginx allows that exact location with inherited security headers and UTF-8 text/plain; the general hidden-path denial remains. No reporting API or server-side plan handling is added.

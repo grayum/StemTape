@@ -17,6 +17,11 @@ export async function saveStatusRegressions(browser,base){
   await page.locator('#event-name').fill('Saved plan');await waitStatus('Saved just now');
   const first=await stored(),timestamp=JSON.parse(first).savedAt;
   assert.ok(Number.isSafeInteger(timestamp));assert.equal(await page.locator('#save-status-time').getAttribute('datetime'),new Date(timestamp).toISOString());
+  assert.equal(await page.locator('#save-tooltip').isVisible(),false);
+  await page.locator('#save-status-toggle').focus();assert.equal(await page.locator('#save-tooltip').isVisible(),true);
+  assert.match(await page.locator('#save-status-time').textContent(),/GMT|UTC/);
+  assert.equal(await page.locator('#save-status-toggle').getAttribute('aria-describedby'),'save-tooltip');
+  await page.locator('#save-status-toggle').press('Escape');assert.equal(await page.locator('#save-tooltip').isVisible(),false);
   const announcement=await page.locator('#save-announcement').textContent();
   await page.waitForFunction(()=>document.fonts.status==='loaded');
   await page.evaluate(()=>{window.savedEditorNode=document.querySelector('#editor-rows tr');window.savedPreviewNode=document.querySelector('#sheet-preview svg');});
@@ -29,6 +34,8 @@ export async function saveStatusRegressions(browser,base){
   await position.press('Escape');await waitStatus('Saved 1 minute ago');
   await page.evaluate(()=>{window.originalSetItem=Storage.prototype.setItem;Storage.prototype.setItem=function(){throw new DOMException('Full','QuotaExceededError');};});
   await page.locator('#event-name').fill('Unsaved plan');await waitStatus('Not saved');assert.equal(await stored(),first);
+  assert.equal((await status()).includes('✓'),false);
+  await page.locator('#save-status-toggle').focus();assert.equal(await page.locator('#save-tooltip').isVisible(),true);
   assert.match(await page.locator('#save-status-time').textContent(),/Previous successful save/);
   for(const theme of ['dark','light']){
    await page.getByRole('button',{name:theme==='dark'?'Dark theme':'Light theme',exact:true}).click();

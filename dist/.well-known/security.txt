@@ -1,0 +1,4 @@
+Contact: mailto:securitytxt.reps@mail.gray-um.com
+Expires: 2027-09-01T00:00:00Z
+Preferred-Languages: en, nl
+Canonical: https://stemtape.cc/.well-known/security.txt

@@ -9,7 +9,8 @@ export const clone = value => JSON.parse(JSON.stringify(value));
 export function column(label, type='text', width=50) { return {id:uid(), label, type, width, visible:true, align:type==='distance'||type==='number'?'right':'left', bold:false}; }
 export function createEvent(preset='nutrition') {
   const first=column('km','distance',32); first.bold=true;
-  const columns = [first, column(preset==='nutrition'?'Eat / drink':'Note','text',68)];
+  // No provenance marker exists on stored labels; only new templates get the new default.
+  const columns = [first, column(preset==='nutrition'?'Fuel':'Note','text',68)];
   const values = BUILTIN_CUES[preset] || [];
   const rows=values.map(([d,s,t])=>({id:uid(),cells:{[first.id]:d*1000,[columns[1].id]:t},symbol:s}));
   return {id:uid(),name:'Sunday 120 km',preset,mode:'distance',unit:'km',dimensionUnit:'mm',totalM:120000,remaining:false,columns,rows:{distance:rows,time:[]},layout:{width:32,length:90,font:11,padding:2,gap:2,rotation:0,header:true,paper:'A4',copies:1}};

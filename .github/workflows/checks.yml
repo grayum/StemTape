@@ -49,5 +49,5 @@ jobs:
         run: |
           docker pull nginx:stable-alpine
           base_image=$(docker image inspect --format '{{index .RepoDigests 0}}' nginx:stable-alpine)
-          docker build --build-arg NGINX_IMAGE="$base_image" -t stemtape:0.4.0 .
-          sh scripts/container-smoke.sh stemtape:0.4.0
+          docker build --build-arg NGINX_IMAGE="$base_image" -t stemtape:0.4.1 .
+          sh scripts/container-smoke.sh stemtape:0.4.1

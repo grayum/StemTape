@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.1 — review candidate (2026-10-03)
+
+- Publish owner-authorized security.txt with exact-path Nginx access, UTF-8 plain text, inherited headers and expiry/self-hosting guidance. Keep HTTP compression and document accepted edge cipher/key-exchange limitations.
+- Replace the permanent ISO timestamp with locale-aware hover/focus/touch details including timezone; retain relative save status and all v0.4.0 storage guarantees.
+- Visually disable time-mode distance units without changing the preference, distance columns or physical dimensions.
+- Use Fuel for new nutrition templates; preserve existing/custom/imported labels without a speculative migration.
+- Update hosted-app README, upgrade/rollback guidance and focused regressions. See validation for executed and pending checks.
+
 ## 0.4.0 — review candidate (2026-10-02)
 
 ### Security/deployment change

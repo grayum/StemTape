@@ -1,12 +1,12 @@
 {
   "name": "stemtape",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": true,
   "type": "module",
   "description": "Local-first printable cycling cue sheets",
   "scripts": {
     "start": "python3 scripts/serve.py",
-    "test": "node --test tests/core.test.mjs tests/save-status.test.mjs",
+    "test": "node --test tests/core.test.mjs tests/save-status.test.mjs tests/v041.test.mjs",
     "check": "node --check dist/app.js && node --check dist/core.js && node --check dist/save-status.js",
     "test:browser": "node tests/browser.mjs"
   },
