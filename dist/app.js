@@ -1,5 +1,5 @@
 import {KEY,LIMITS,SYMBOLS,uid,clone,column,createEvent,initialState,validateEvent,displayDistance,toMetres,formatTime,parseTime,cueHeader,cellText,exportCSV,importCSV,moveCue,sortCuesByPosition,serializeState,parseState,restoreObject,totalDistanceMaximum,validatedTotal} from './core.js';
-import {SaveSession} from './save-status.js';
+import {SaveSession,formatSaveTime} from './save-status.js';
 import {ICONS} from './icons.js';
 const $=id=>document.getElementById(id),NS='http://www.w3.org/2000/svg';
 const names={'':'None',banana:'Banana',bottle:'Bottle',bar:'Bar',gel:'Gel',smile:'Smile',mountain:'Climb',feed:'Feed zone',flag:'Finish',coffee:'Coffee',warning:'Caution',cobbles:'Cobbles / pavé',ricecake:'Rice cake',can:'Softdrink',neutral:'Neutral zone',litter:'Litter zone'};
@@ -17,12 +17,30 @@ if(!state.active)state.active=state.events[0].id;
 let acceptedState=serializeState(state);
 const saveSession=new SaveSession({read:()=>localStorage.getItem(KEY),write:raw=>localStorage.setItem(KEY,raw),raw:loadedRaw,savedAt:state.savedAt,available:storageOK,recovery:recoveryBlocked});
 const pendingEdits=new Set();let lastSaveAnnouncement='';
+function showSaveTime(show){
+ $('save-tooltip').hidden=!show||$('save-status-toggle').disabled;
+ $('save-status-toggle').setAttribute('aria-expanded',String(!$('save-tooltip').hidden));
+}
+// A real disclosure supplements hover: keyboard and touch users get the same details.
+$('save-status').addEventListener('pointerenter',ev=>{if(ev.pointerType==='mouse')showSaveTime(true);});
+$('save-status').addEventListener('pointerleave',()=>{if(document.activeElement!==$('save-status-toggle'))showSaveTime(false);});
+$('save-status-toggle').addEventListener('focus',()=>showSaveTime(true));
+$('save-status-toggle').addEventListener('blur',()=>showSaveTime(false));
+$('save-status-toggle').onclick=()=>showSaveTime(true);
+// Hover does not move focus. Dismiss before editor Escape handlers can cancel a draft.
+document.addEventListener('keydown',ev=>{
+ if(ev.key==='Escape'&&!$('save-tooltip').hidden){ev.preventDefault();ev.stopImmediatePropagation();showSaveTime(false);}
+},true);
+document.addEventListener('pointerdown',ev=>{if(!ev.target.closest('#save-status'))showSaveTime(false);},true);
 function refreshSaveStatus(announce=true){
  const view=saveSession.view({draft:pendingEdits.size>0||hasInvalidEdits()});
  $('save-status-label').textContent=view.text;$('save-status').dataset.saved=String(view.success);
- const time=$('save-status-time');time.hidden=!view.exact;
- time.textContent=view.exact?`${view.success?'Saved at':'Previous successful save:'} ${view.exact}${saveSession.timePersisted?'':' (time available in this tab only)'}`:'';
- if(view.exact){time.dateTime=view.exact;time.title=view.exact;}else{time.removeAttribute('datetime');time.removeAttribute('title');}
+ const time=$('save-status-time');$('save-status-toggle').disabled=!view.exact;
+ const prefix=view.success?'Saved at':'Previous successful save:',suffix=saveSession.timePersisted?'':' (time available in this tab only)';
+ const detail=view.exact?`${prefix} ${formatSaveTime(saveSession.lastSavedAt)}${suffix}`:'';
+ // Age ticks must not replace controls, move focus or repeatedly announce an unchanged date.
+ if(time.textContent!==detail)time.textContent=detail;
+ if(view.exact)time.dateTime=view.exact;else{time.removeAttribute('datetime');showSaveTime(false);}
  if(announce&&view.announcement!==lastSaveAnnouncement){$('save-announcement').textContent=view.announcement;lastSaveAnnouncement=view.announcement;}
 }
 window.addEventListener('storage',ev=>{try{if(ev.storageArea!==localStorage)return;}catch{return;}if(ev.key===KEY||ev.key===null){saveSession.observe(ev.newValue);refreshSaveStatus();}});
@@ -55,11 +73,13 @@ function save(draftInput=null){
   else render();
   toast(err.message);renderPreview();return false;
  }
+ // Drop stale metadata even if storage fails: in-memory backups must still fit the plan budget.
  acceptedState=serialized;delete state.savedAt;
  const result=saveSession.save(state,{recovery:recoveryBlocked&&!replaceRecovery});
  if(result.ok){
   if(result.savedAt===null)delete state.savedAt;else state.savedAt=result.savedAt;
   acceptedState=result.raw;storageOK=true;
+  // The original remains exportable until its explicit replacement actually reaches storage.
   if(replaceRecovery){recoveryBlocked=false;recoveryOriginal=null;}
  }else if(!result.blocked){storageOK=false;toast(result.conflict?'Storage changed in another tab. Export this plan before reloading.':'Storage is full or unavailable. Please export a JSON backup.');}
  if(draftInput)pendingEdits.delete(draftInput);
@@ -74,7 +94,7 @@ function cancelEdits(){
 }
 // Guard before action handlers mutate state. Correction or explicit Escape cancellation is required.
 for(const type of ['click','pointerdown','keydown','change'])document.addEventListener(type,ev=>{
- if(!hasInvalidEdits())return;
+ if(!hasInvalidEdits()||ev.target.closest('#save-status'))return;
  if(type==='keydown'&&ev.key==='Escape'){ev.preventDefault();ev.stopImmediatePropagation();cancelEdits();return;}
  const target=ev.target;
  if(target.id==='cancel-edits')return;
@@ -148,7 +168,7 @@ function download(content,type,name){const url=URL.createObjectURL(new Blob([con
 function filename(){return event().name.replace(/[^a-zA-Z0-9_-]/g,'-').replace(/-+/g,'-').slice(0,60)||'stemtape';}
 $('export').onclick=()=>{const d=openDialog('Export your plan');if(recoveryBlocked)offerOriginal(d);d.append(el('p',{},'CSV contains the current mode’s cues, including hidden columns. JSON backs up all events, both modes, presets and preferences.'));d.append(button('CSV · current cue table',()=>{download(exportCSV(event()),'text/csv;charset=utf-8',`${filename()}-${event().mode}.csv`);$('dialog').close();},'export-option','download'),button('JSON · complete backup',()=>{download(serializeState(state),'application/json','stemtape-backup.json');$('dialog').close();},'export-option','save'));d.append(el('p',{},'CSV protects formula-like text for spreadsheets. Use JSON for exact preservation of custom types, formatting and text.'));};
 $('import').onclick=()=>{const d=openDialog('Import from your device');d.append(el('p',{},'CSV creates a new event. The first column must be distance_km, distance_mi or time (h:mm), optionally followed by icon, then your cue columns. Files stay on this device.'));d.append(el('p',{},'JSON backups are validated before you choose whether to restore. Maximum file and complete-state size: 2,000,000 UTF-8 bytes.'));d.append(button('Choose CSV or JSON',()=>$('file-input').click(),'primary','upload'), button('Paste spreadsheet table',pasteTable));};
-$('file-input').onchange=async()=>{const f=$('file-input').files[0];$('file-input').value='';if(!f)return;try{if(f.size>LIMITS.bytes)throw Error('File exceeds 2,000,000 UTF-8 bytes. Keep this original file for recovery; it has not been changed.');const text=await f.text();if(hasInvalidEdits())throw Error('Correct or cancel unaccepted edits before importing.');if(f.name.toLowerCase().endsWith('.csv')){const e=importCSV(text);$('dialog').close();if(addEvent(e))toast('CSV imported as a new event.');}else if(f.name.toLowerCase().endsWith('.json')){const candidate=parseState(text),d=openDialog('Restore backup?');d.append(el('p',{},`This replaces your ${state.events.length} current event(s) with ${candidate.events.length} event(s) from the backup, including preferences and presets.`));if(recoveryBlocked)offerOriginal(d);const a=el('div',{class:'dialog-actions'});a.append(button(recoveryBlocked?'Back up temporary in-memory plan':'Back up current data',()=>download(serializeState(state),'application/json','stemtape-before-restore.json')),button('Restore backup',()=>{state=candidate;allowRecoveryReplacement=true;$('dialog').close();if(commit(true))toast(recoveryBlocked?'Backup loaded in memory; original still protected.':storageOK?'Backup restored.':'Backup loaded in memory — not saved.');},'primary'));d.append(a);}else throw Error('Choose a .csv or .json file.');}catch(err){const d=openDialog('Import could not be completed');d.append(el('p',{},`${err.message} Your existing plans have not been changed.`));}};
+$('file-input').onchange=async()=>{const f=$('file-input').files[0];$('file-input').value='';if(!f)return;try{if(f.size>LIMITS.bytes)throw Error('File exceeds 2,000,000 UTF-8 bytes. Keep this original file for recovery; it has not been changed.');const text=await f.text();/* Reading yields: recheck drafts created while the file was loading. */if(hasInvalidEdits())throw Error('Correct or cancel unaccepted edits before importing.');if(f.name.toLowerCase().endsWith('.csv')){const e=importCSV(text);$('dialog').close();if(addEvent(e))toast('CSV imported as a new event.');}else if(f.name.toLowerCase().endsWith('.json')){const candidate=parseState(text),d=openDialog('Restore backup?');d.append(el('p',{},`This replaces your ${state.events.length} current event(s) with ${candidate.events.length} event(s) from the backup, including preferences and presets.`));if(recoveryBlocked)offerOriginal(d);const a=el('div',{class:'dialog-actions'});a.append(button(recoveryBlocked?'Back up temporary in-memory plan':'Back up current data',()=>download(serializeState(state),'application/json','stemtape-before-restore.json')),button('Restore backup',()=>{state=candidate;allowRecoveryReplacement=true;$('dialog').close();if(commit(true))toast(recoveryBlocked?'Backup loaded in memory; original still protected.':storageOK?'Backup restored.':'Backup loaded in memory — not saved.');},'primary'));d.append(a);}else throw Error('Choose a .csv or .json file.');}catch(err){const d=openDialog('Import could not be completed');d.append(el('p',{},`${err.message} Your existing plans have not been changed.`));}};
 function offerOriginal(d){d.append(el('p',{class:'warning'},'The original saved data is protected. The visible plan is temporary fallback data, not your original. Replacement will overwrite the original; export it first.'),button('Export original recovery data',()=>download(recoveryOriginal??'','application/json','stemtape-recovery.json')));}
 function help(){const d=openDialog('Your plan. Your device.');for(const text of ['Create your cues, choose a usable stem or top-tube width and length, then print at 100% / Actual size. Disable browser print headers and footers. Check the 50 mm calibration line with a ruler.','The preview is enlarged. If content does not fit, printing is blocked: increase the strip size, simplify text, hide columns or reduce spacing. Font size never shrinks automatically.','Nutrition entries are your own reminders. Distance and elapsed-time modes keep separate cue lists. Switching units converts distances; switching to time does not estimate ride speed.','Changing a distance or elapsed time sorts cues when you leave the field or press Enter. You can then drag cues or use the arrow buttons to keep a manual order until the next position edit. Equal positions keep their relative order.','Outline icons are bundled Lucide graphics. Pasted Unicode emojis use your device’s emoji font and can look different on another device. Test-print custom emojis before your ride.','Your ride plans stay yours. Everything you enter, including imported files, is processed and saved only on this device, in your browser. Your cue data is never uploaded to or stored on our servers. There are no accounts, trackers or third-party font requests.','When you load the website, the host still receives normal connection information such as your IP address. Hosting logs depend on the operator; this is separate from your locally stored plans.','Browser storage is not encrypted and can be cleared by you or your browser. Each domain has its own data. Export JSON to transfer plans or keep a backup.'])d.append(el('p',{},text));if(recoveryBlocked){offerOriginal(d);d.append(el('p',{class:'warning'},startupWarning),button('Reset saved data',()=>confirmAction('Reset browser data?','The unreadable copy will be replaced. Export the recovery file first.',()=>{allowRecoveryReplacement=true;commit(true);}),'danger-button'));}d.append(button('Clear all local StemTape data',()=>confirmAction('Clear local data?','All events, presets, preferences and bike dimensions in this browser will be removed. Export JSON first.',()=>{try{localStorage.removeItem('stemtape.bike');}catch{}state=initialState();state.active=state.events[0].id;allowRecoveryReplacement=true;if(commit(true))toast(storageOK&&!recoveryBlocked?'Local StemTape data reset.':'Reset is in memory only — not saved.');}),'danger-button'));}
 $('help').onclick=help;$('privacy').onclick=help;

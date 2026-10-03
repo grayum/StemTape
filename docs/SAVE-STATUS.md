@@ -1,6 +1,8 @@
-# v0.4.0 save status
+# Save status (v0.4.0 storage semantics, v0.4.1 presentation)
 
-The app reports a successful save only after the single `localStorage.setItem('stemtape.v1', …)` call succeeds. The status shows a check and relative age, plus the exact UTC timestamp as visible `<time datetime>` text. Time updates are not live announcements; a separate polite status region announces meaningful state changes. Errors and previous successful timestamps remain visible on mobile and both themes.
+The app reports a successful save only after the single `localStorage.setItem('stemtape.v1', …)` call succeeds. The visible status keeps its check and relative age. Hover, keyboard focus or tap reveals the localized saved date/time with an explicit UTC offset; the machine-readable `<time datetime>` retains the exact timestamp. The trigger has an accessible description; Escape or tapping outside dismisses the tooltip. No native title is required. Unknown time has no tooltip or invented date. Failures show “Not saved”, with the previous successful time available through the same interaction when known.
+
+The tooltip is an overlay and reserves no editor space. Timer ticks update text only, never rebuild controls or write storage. A separate polite region announces meaningful save/failure transitions, not the ticking age. Errors stay visible on mobile and both themes.
 
 A fresh in-memory example says `Not saved yet`. Previously stored v1 data without a timestamp says `Stored on this device — save time unknown`; loading/rendering it does not create a timestamp or write storage. Invalid or pending drafts remove the check. Correction/cancellation can reveal the previous save without changing its time; a valid edit that is actually written records a new time. Quota, blocked storage and failed reads/writes show `Not saved` and retain the previous successful time when known. Accepted in-memory changes remain exportable after a failed write.
 
@@ -23,7 +25,7 @@ A storage event, a window-focus check, or the pre-write comparison detects chang
 1. Load legacy data: time stays unknown. Edit a name: check, relative age and exact time appear. Reload: the same timestamp remains.
 2. Advance the test clock or wait a minute: age changes without a storage write, cue/preview rebuild, focus change or repeated screen-reader announcement.
 3. Enter invalid input or a pending layout edit: check disappears. Correct or cancel; verify previous timestamp behavior.
-4. Force quota/blocked storage: `Not saved` remains visible on light/dark mobile layouts with the previous successful time. Retry successfully and reload.
+4. Force quota/blocked storage: `Not saved` remains visible on light/dark mobile layouts with the previous successful time available from the status tooltip. Retry successfully and reload.
 5. Open two tabs, save in one, then try editing the stale tab: newer storage must remain intact; export/reload guidance appears.
 6. Restore a backup containing an old timestamp: local successful restore gets the current write time. Exercise protected recovery and a failed replacement; export original bytes unchanged.
 7. Save at exact budget including optional timestamp bytes, then at full plan-only budget: plan data must round-trip, session-only time must be explicit, and reload must not invent a time. Check backwards clock behavior.

@@ -2,6 +2,8 @@
 
 **A little tape. A clear plan.**
 
+**[Free hosted app / live demo](https://stemtape.cc/)** — ride plans stay in your browser. Docker self-hosting remains available.
+
 Local-first cycling cue sheets for a stem or top tube. A portable static web app with light/dark/system themes and a lime folded-tape identity. All editing, imports, storage and printing happen in the browser.
 
 ## Start on your laptop
@@ -14,11 +16,11 @@ python3 scripts/serve.py
 
 Open **http://127.0.0.1:8080**. Use this local server rather than opening `index.html` as a file: ES modules require HTTP. The development server binds to loopback only and is not intended for public hosting.
 
-## Included in 0.4.0 (review candidate)
+## Included in StemTape
 
 - Saved events, duplication/deletion and project-owner presets.
-- Honest successful-save age and exact UTC time, with persistent failure/recovery feedback.
-- Cloudflare/DNS/Caddy security runbook and proxy-only capability fix; manual production steps remain pending.
+- Relative last-save status with honest failure/recovery feedback (shipped in v0.4.0).
+- Deployment hardening and Cloudflare/Caddy guidance, including the proxy-only capability fix (shipped in v0.4.0). Edge settings are separate from repository fixes.
 - Nutrition by distance **or elapsed h:mm**, with separate cue lists; route and custom presets.
 - Metric defaults and explicit mile/inch overrides; canonical distance storage.
 - Local Lucide outline icon picker plus pasted emojis/text.
@@ -33,6 +35,15 @@ Open **http://127.0.0.1:8080**. Use this local server rather than opening `index
 
 Custom Unicode emojis use the user's system font. The outlined symbols combine **Lucide** with four original StemTape symbols, not Font Awesome. Lucide 1.8.0 and DejaVu font notices are bundled in `dist/assets/`. No CDN assets or analytics.
 
+## v0.4.1 changes (review candidate)
+
+- Publish the owner-authorized security.txt with maintained expiry and an exact hidden-path exception.
+- Keep the relative save status; hover, focus or tap it for the localized saved date/time and explicit timezone. No permanent ISO line.
+- Grey out distance units in Time mode, retaining the preference and formatting of additional distance columns. Sheet dimensions stay editable.
+- Use **Fuel** in newly created nutrition templates, in both modes. Existing/imported labels remain unchanged because v1 stores no reliable marker distinguishing an untouched default from a chosen label.
+
+Remaining Cloudflare cipher/key-exchange findings are accepted deployment limitations for now. No perfect Internet.nl score, security audit or production check is claimed. See [upgrade/rollback instructions](UPGRADE.md).
+
 ## Data and privacy
 
 Plans live in your current browser's localStorage, not the server. Different domains, profiles and browsers have separate data. Clearing site data removes plans. Export JSON backups regularly; CSV preserves cue data, not full layout/types. Remembered bike dimensions are included in JSON. Optional last-save timing metadata shares the same atomic state record and byte budget; exact-limit plans preserve their data and explicitly retain time only for the current tab when metadata cannot fit. Old data with no timestamp keeps an unknown save time. See [save-status behavior](docs/SAVE-STATUS.md). Saved state, complete JSON backups and imported files share a 2,000,000-byte UTF-8 limit. State includes all events, both cue modes, presets and preferences; changes exceeding the limit are rejected without truncation. Existing oversized or unreadable storage remains protected with an original-data recovery export. Imports also allow at most 200 rows per mode and 8 columns. No GPX parsing, accounts, automatic nutrition advice or route detection.
@@ -40,7 +51,7 @@ Plans live in your current browser's localStorage, not the server. Different dom
 CSV example:
 
 ```csv
-distance_km,icon,Eat / drink
+distance_km,icon,Fuel
 20,banana,Banana
 40,bottle,Drink
 ```
@@ -48,7 +59,7 @@ distance_km,icon,Eat / drink
 Time example:
 
 ```csv
-time,icon,Eat / drink
+time,icon,Fuel
 0:30,bar,Bar
 1:00,gel,Gel
 ```
@@ -99,16 +110,16 @@ npm run test:browser
 This creates screenshots and an actual PDF in ignored `artifacts/`. Review all screenshots and verify PDF dimensions; passing assertions alone is not visual QA.
 
 ```sh
-sh scripts/container-smoke.sh stemtape:0.4.0
+sh scripts/container-smoke.sh stemtape:0.4.1
 ```
 
-**v0.4.0 validation:** this is a review candidate; see [current evidence and remaining gates](docs/VALIDATION.md). The two changes are described in [review order](docs/REVIEW-v0.4.0.md).
+**v0.4.1 validation:** see [current evidence and remaining gates](docs/VALIDATION.md) and [separate security/application review groups](docs/REVIEW-v0.4.1.md). v0.4.0 was merged to main; that does not establish unperformed production checks.
 
 **Prior v0.3.0 validation:** [Main CI run 36886880381](https://github.com/grayum/StemTape/actions/runs/36886880381) passed on 2026-10-01: 30 data tests, app/core syntax checks, Chromium browser regressions with screenshot/PDF generation, basic tracked-file checks and the container smoke test. User-reported manual and actual-size-print checks are recorded separately. Production proxy checks, full secret/image scans, broader visual/device checks and large-active-plan performance profiling remain outstanding; this is not a security audit or production-deployment verification. See the [validation record](docs/VALIDATION.md) for coverage and limitations.
 
 ## Repository workflow
 
-Unzip into a fresh development directory, review, then initialise Git and create your chosen private GitHub repository. Keep `.env`, actual deployment overrides and `runtime/` outside version control. CI is included and does not publish or deploy. Public release needs a chosen project license, verified private security contact, domain/trademark checks and release gates. First-party code/brand licensing remains for the owner to choose; bundled third-party assets retain their own notices.
+Unzip into a fresh development directory, review, then initialise Git and create your chosen private GitHub repository. Keep `.env`, actual deployment overrides and `runtime/` outside version control. CI is included and does not publish or deploy. Public release needs a chosen project license, domain/trademark checks and release gates. First-party code/brand licensing remains for the owner to choose; bundled third-party assets retain their own notices.
 
 ## Credits
 

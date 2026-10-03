@@ -1,6 +1,7 @@
 // npm install --no-save playwright@1.62.1 && npx playwright install chromium
 // Run against the local development server or Docker: BASE_URL=http://127.0.0.1:8080 npm run test:browser
 import assert from 'node:assert/strict';
+import {v041Regressions} from './v041-browser.mjs';
 import {saveStatusRegressions} from './save-status-browser.mjs';
 import {reviewRegressions} from './review-browser.mjs';
 import {mkdir} from 'node:fs/promises';
@@ -63,9 +64,9 @@ await page.waitForFunction(id=>document.querySelectorAll('#editor-rows tr')[0]?.
 await page.getByRole('button',{name:'Dark theme',exact:true}).click();assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');
 assert.equal(await page.locator('#sheet-preview svg>rect').getAttribute('fill'),'white');
 await page.screenshot({path:'artifacts/desktop-dark.png',fullPage:true});
-await page.getByLabel('Eat / drink, row 1',{exact:true}).fill('Banana 🍌');await page.reload();await page.evaluate(()=>document.fonts.ready);
-assert.equal(await page.getByLabel('Eat / drink, row 1',{exact:true}).inputValue(),'Banana 🍌');
-await page.locator('#mode-time').click();assert.equal(await page.locator('#editor-rows tr').count(),0);await page.locator('#add-row').click();await page.getByLabel('Time, row 1',{exact:true}).fill('1:30');await page.getByLabel('Eat / drink, row 1',{exact:true}).fill('Gel');
+await page.getByLabel('Fuel, row 1',{exact:true}).fill('Banana 🍌');await page.reload();await page.evaluate(()=>document.fonts.ready);
+assert.equal(await page.getByLabel('Fuel, row 1',{exact:true}).inputValue(),'Banana 🍌');
+await page.locator('#mode-time').click();assert.equal(await page.locator('#editor-rows tr').count(),0);await page.locator('#add-row').click();await page.getByLabel('Time, row 1',{exact:true}).fill('1:30');await page.getByLabel('Fuel, row 1',{exact:true}).fill('Gel');
 await page.locator('#add-row').click();
 const earlierId=await page.locator('#editor-rows tr').last().getAttribute('data-row-id');
 await page.getByLabel('Time, row 2',{exact:true}).fill('0:45');await page.getByLabel('Time, row 2',{exact:true}).press('Enter');
@@ -76,8 +77,8 @@ await page.getByRole('button',{name:'Delete row 2',exact:true}).click();
 await page.locator('#mode-distance').click();assert.equal(await page.locator('#editor-rows tr').count(),6);await page.locator('#mode-time').click();assert.equal(await page.getByLabel('Time, row 1',{exact:true}).inputValue(),'1:30');
 await page.getByLabel('Time, row 1',{exact:true}).fill('1:99');assert.equal(await page.locator('#print').isDisabled(),true);await page.getByLabel('Time, row 1',{exact:true}).fill('1:30');
 await page.locator('#mode-distance').click();await page.locator('#unit').selectOption('mi');assert.equal(await page.getByLabel('mi, row 1',{exact:true}).inputValue(),'12.43');await page.locator('#unit').selectOption('km');
-await page.getByLabel('Eat / drink, row 1',{exact:true}).fill('<img src=x onerror=alert(1)>');assert.equal(await page.locator('#sheet-preview img').count(),0);
-await page.getByLabel('Eat / drink, row 1',{exact:true}).fill('X'.repeat(160));assert.equal(await page.locator('#print').isDisabled(),true);await page.getByLabel('Eat / drink, row 1',{exact:true}).fill('Banana');
+await page.getByLabel('Fuel, row 1',{exact:true}).fill('<img src=x onerror=alert(1)>');assert.equal(await page.locator('#sheet-preview img').count(),0);
+await page.getByLabel('Fuel, row 1',{exact:true}).fill('X'.repeat(160));assert.equal(await page.locator('#print').isDisabled(),true);await page.getByLabel('Fuel, row 1',{exact:true}).fill('Banana');
 await page.locator('#export').click();const [download]=await Promise.all([page.waitForEvent('download'),page.getByRole('button',{name:'JSON · complete backup',exact:true}).click()]);assert.equal(download.suggestedFilename(),'stemtape-backup.json');
 await page.locator('#import').click();await page.locator('#file-input').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from('{"version":999}')});await page.getByRole('heading',{name:'Import could not be completed'}).waitFor();assert.equal(await page.locator('#editor-rows tr').count(),6);await page.locator('#close-dialog').click();
 const beforeCSVEvent=await page.locator('#event-select').inputValue();
@@ -114,5 +115,6 @@ await page.setViewportSize({width:390,height:844});await page.screenshot({path:'
 assert.deepEqual(external,[]);assert.deepEqual(errors,[]);
 await reviewRegressions(browser,base);
 await saveStatusRegressions(browser,base);
+await v041Regressions(browser,base);
 console.log('PASS: desktop/mobile, local persistence, theme, time/distance, XSS, imports, columns, overflow, export and PDF.');
 }finally{await context?.close();await browser.close();}

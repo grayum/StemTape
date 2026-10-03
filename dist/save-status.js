@@ -19,6 +19,11 @@ export function relativeSaveAge(savedAt,now){
  if(hours<24)return `${hours} hour${hours===1?'':'s'} ago`;
  const days=Math.floor(hours/24);return `${days} day${days===1?'':'s'} ago`;
 }
+// Locale controls the clock convention; the numeric UTC offset disambiguates local dates/DST.
+export function formatSaveTime(savedAt,locales=undefined,timeZone=undefined){
+ if(!validSaveTime(savedAt))return '';
+ return new Intl.DateTimeFormat(locales,{year:'numeric',month:'long',day:'numeric',hour:'numeric',minute:'2-digit',second:'2-digit',timeZoneName:'longOffset',...(timeZone?{timeZone}:{})}).format(new Date(savedAt));
+}
 // Dependency injection keeps storage, quota, clocks and tab-conflict tests deterministic.
 export class SaveSession{
  constructor({read,write,raw=null,savedAt=null,available=true,recovery=false,now=()=>Date.now()}){
