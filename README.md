@@ -33,9 +33,17 @@ Open **http://127.0.0.1:8080**. Use this local server rather than opening `index
 - Transparent SVG logos, symbol files, banners and SVG/ICO favicon assets.
 - Hardened Docker recipe and local / standalone VPS / existing Traefik examples.
 
-Custom Unicode emojis use the user's system font. The outlined symbols combine **Lucide** with four original StemTape symbols, not Font Awesome. Lucide 1.8.0 and DejaVu font notices are bundled in `dist/assets/`. No CDN assets or analytics.
+Custom Unicode emojis use the user's system font. The outlined symbols combine **Lucide** with original StemTape symbols, including the approved Bar, Bottle, Gel and Cobbles replacements, not Font Awesome. Lucide 1.8.0 and DejaVu font notices are bundled in `dist/assets/`. No CDN assets or analytics.
 
-## v0.4.1 changes (review candidate)
+## v0.5.0 changes (review candidate)
+
+- Four approved local SVG replacements: smiling unwrapped Bar, cycling Bottle, diagonal blank Gel sachet and perspective Cobbles/Pavé. Existing icon keys and saved cues keep their identity.
+- Optional per-plan printed footer under Layout & print settings, off by default. Plain text/emojis stay inside the chosen sheet dimensions; overflow blocks printing. Turning it off preserves the text; JSON includes it, cue CSV stays unchanged.
+- Lime expand/collapse arrow on Layout & print settings, retaining native keyboard operation.
+
+Footer text uses the plan font on one centered line, with a maximum of 80 UTF-16 units (most emojis use two). The actual measured line must also fit. Review [compatibility and manual checks](docs/REVIEW-v0.5.0.md), [validation](docs/VALIDATION.md) and [upgrade/rollback](UPGRADE.md). Approved column ordering and optional Note columns remain [deferred](docs/ROADMAP.md) until this release is deployed and verified live.
+
+## v0.4.1 changes
 
 - Publish the owner-authorized security.txt with maintained expiry and an exact hidden-path exception.
 - Keep the relative save status; hover, focus or tap it for the localized saved date/time and explicit timezone. No permanent ISO line.
@@ -110,10 +118,12 @@ npm run test:browser
 This creates screenshots and an actual PDF in ignored `artifacts/`. Review all screenshots and verify PDF dimensions; passing assertions alone is not visual QA.
 
 ```sh
-sh scripts/container-smoke.sh stemtape:0.4.1
+sh scripts/container-smoke.sh stemtape:0.5.0
 ```
 
-**v0.4.1 validation:** see [current evidence and remaining gates](docs/VALIDATION.md) and [separate security/application review groups](docs/REVIEW-v0.4.1.md). v0.4.0 was merged to main; that does not establish unperformed production checks.
+**v0.5.0 validation:** this review candidate has pending browser/physical/production gates. See [current validation](docs/VALIDATION.md).
+
+**Prior v0.4.1 validation:** see [current evidence and remaining gates](docs/VALIDATION.md) and [separate security/application review groups](docs/REVIEW-v0.4.1.md). v0.4.0 was merged to main; that does not establish unperformed production checks.
 
 **Prior v0.3.0 validation:** [Main CI run 36886880381](https://github.com/grayum/StemTape/actions/runs/36886880381) passed on 2026-10-01: 30 data tests, app/core syntax checks, Chromium browser regressions with screenshot/PDF generation, basic tracked-file checks and the container smoke test. User-reported manual and actual-size-print checks are recorded separately. Production proxy checks, full secret/image scans, broader visual/device checks and large-active-plan performance profiling remain outstanding; this is not a security audit or production-deployment verification. See the [validation record](docs/VALIDATION.md) for coverage and limitations.
 

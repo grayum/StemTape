@@ -50,3 +50,9 @@ Only plan content stays client-side: servers necessarily receive ordinary connec
 ## Cloudflare in front of the Caddy origin
 
 For `stemtape.cc` (Cloudflare → DigitalOcean → Caddy → app), use the [v0.4.0 security runbook](SECURITY-DEPLOYMENT.md). It distinguishes edge TLS from origin TLS, gives manual Cloudflare/CAA and verified Host/SNI checks, and records the proxy-only `NET_BIND_SERVICE` requirement for capability-marked Caddy images. The live private deployment path is `/opt/docker/stemtape-config`; source is `/opt/docker/stemtape`. Keep the working private mounts and certificate data rather than replacing them with example-relative paths.
+
+## v0.5.0 deployment completion reminder
+
+After a separately authorized deployment, verify the served version, all four replacement icons, footer toggle/text persistence and overflow blocking, light/dark settings arrow, recovery and actual-size print behavior on stemtape.cc. Record the actual results; do not infer production success from local/container checks. Preserve the tested image/configuration and JSON backup for rollback.
+
+Only after v0.5.0 is successfully deployed and verified live, begin the [approved column ordering and optional Note-column follow-ups](ROADMAP.md). They are deliberately absent from this release.

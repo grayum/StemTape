@@ -1,6 +1,6 @@
 # Architecture and data
 
-`dist/` is the complete browser application; deploy only this directory. There is no framework or runtime package installation. `index.html` defines accessible controls, `app.js` owns the DOM, dialogs, local state, SVG layout and printing. `core.js` owns pure validation/conversion/CSV operations. `presets.js` holds the project owner's published example cues. `icons.js` contains a vendored Lucide subset with the upstream license and four original StemTape outline symbols (cobbles, rice cake, can, neutral zone). Assets contain fonts and independently editable vector brand files.
+`dist/` is the complete browser application; deploy only this directory. There is no framework or runtime package installation. `index.html` defines accessible controls, `app.js` owns the DOM, dialogs, local state, SVG layout and printing. `core.js` owns pure validation/conversion/CSV operations. `presets.js` holds the project owner's published example cues. `icons.js` contains a vendored Lucide subset with the upstream license and original StemTape outline symbols (bar, bottle, gel, cobbles, rice cake, can, neutral zone). Assets contain fonts and independently editable vector brand files.
 
 State in `stemtape.v1`: schema version, theme, active event ID, events, personal presets, optional remembered bike dimensions. Event: ID/name, preset, mode, distance/dimension units, total metres, remaining-distance switch, columns, independent distance/time row lists, physical layout. Values in distance columns are metres; primary time values are integer elapsed minutes. Unit changes never rewrite canonical data. Display rounding occurs only in UI/CSV; JSON retains precision.
 
@@ -38,3 +38,11 @@ Invalid drafts block actions that could discard them, including pointer/keyboard
 The saved timestamp uses an overlay tooltip with locale date/time and explicit timezone offset; hover, focus and tap expose the same accessible description. Unknown timestamps remain absent. Display ticks do not rebuild the editor or preview. Native disabled distance units are visually muted in Time mode, without changing stored units; extra distance columns still use the retained preference. New nutrition templates use Fuel; existing labels lack provenance and are preserved.
 
 The static image includes the exact `/.well-known/security.txt` resource. Nginx allows that exact location with inherited security headers and UTF-8 text/plain; the general hidden-path denial remains. No reporting API or server-side plan handling is added.
+
+## Footer and approved artwork (0.5)
+
+Optional layout fields footerEnabled/footerText are absent in old state and default to off/empty without inflating legacy byte-budget records. Footer text is a validated single line, limited to 80 UTF-16 units; markup-like text/emojis use SVG textContent. Both mode lists share per-plan layout settings. Footer fields remain in JSON/personal presets/duplicates, while CSV keeps its cue-only format.
+
+`footer.js` calculates measured ink/advance width and baseline/descent bounds in the existing millimetre coordinate system. makeSheet appends the centered line below the cue table inside its rotated content group only when enabled and nonempty. It uses the plan font, reserves 1 mm above it and reports width/length overflow. preparePrint still clones that shared SVG and adds the unchanged calibration/cut marks. No sheet size, font shrinking or unrelated rendering redesign is introduced.
+
+Four icon keys retain their identities with owner-approved lightweight fixed geometry. Native details/summary handles settings disclosure semantics; only its arrow is styled lime, with a charcoal outline for light-theme contrast. Column features remain in the gated roadmap.

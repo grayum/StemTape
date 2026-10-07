@@ -1,5 +1,46 @@
 # Validation record
 
+## v0.5.0 — mobile disclosure browser-test follow-up
+
+The owner reports that CI executed the browser suite and failed at `tests/v050-browser.mjs:65`, where the test expected `.more-settings.open` to be true after Space. This is a failed real-browser CI result, not a successful suite run. The rotation loop opens and closes settings for each rotation, leaving it closed. Reloads leave the mobile workspace on Edit; no Preview selection occurs before resizing to 390 px. Below 740 px the stylesheet hides `.preview-card` unless `body[data-tab=preview]` is selected. The summary is inside that hidden card, so calling programmatic focus does not put the keyboard target on the summary; Space cannot open that disclosure. The source/setup trace identifies a test precondition defect, rather than a demonstrated delayed toggle or application keyboard defect.
+
+The test now selects the visible mobile Preview button, waits at most five seconds for the preview card to be visible, and explicitly asserts selection, summary visibility, initially closed settings and focus on the summary. Its button locator is scoped to `.mobile-tabs`, since the body also acquires a data-tab attribute on selection. Descriptive Space assertions retain the expected open state and also check closing and reopening. No arbitrary sleep, larger suite timeout, forced open state or application change is introduced. Failure diagnostics include test phase, viewport, selected view, calculated display/boxes, focused element identifiers, disclosure state, invalid-input count and page-error count, without stored plans or input contents.
+
+Checks: `npm test` **53/53 passed**; `npm run check`, syntax checks for all test modules and `git diff --check` **passed**. A temporary synthetic actual-app/CSS check passed: applying the actual matching mobile stylesheet rules hides the preview ancestor in Edit, and the actual Preview handler exposes it and updates selection without replacing the summary or writing storage. jsdom does not provide native responsive layout/focus/key activation; those are not verified by this check. Full local browser execution was attempted again and failed at launch because Chromium headless shell is unavailable, so the revised browser assertions remain **unexecuted locally** and require CI verification. No Chromium installation, production check or new automated browser pass is claimed.
+
+## 2026-10-07 — v0.5.0 icons/footer/settings preparation (not release approval)
+
+Verified `/tmp/stemtape-v0.5.0-base.bundle` and bundled origin/main `cd196fbcd7754414841aee5fe37077aa7fa79872`. Prepared on review/v0.5.0 in the isolated `/tmp/stemtape-v050-worktree`. Existing unrelated README changes remain in the original docs/readme-v0.4.1 checkout and their backup; they were not included. All four supplied PNG references were available and inspected before drawing fixed SVG replacements. They are design references only, not runtime assets.
+
+Executed checks:
+
+- `npm test`: **53/53 passed** (45 existing plus eight footer/icon tests). Coverage includes legacy byte-identical loading, footer JSON/preset/duplicate round trips, retained text when disabled, single-line/80-unit validation, cue-only CSV, independent exact UTF-8 budget boundaries with emoji/footer fields, quota failure, rotated bounds and existing icon keys.
+- `npm run check`, syntax checks for all test modules, shell syntax and `git diff --check`: **passed**. The tracked-file/basic credential-pattern checker passed; new filenames were inspected separately. This is not a full secret scan.
+- Temporary synthetic actual-app jsdom checks with native canvas metrics: **passed** disabled/empty geometry equality, toggle retention, over-limit draft preservation and guarded Sort/cancellation, literal markup/emoji text, horizontal overflow, quota-failure status and saved-state protection, all four rotations and shared preview/print footer text. These are not native-browser or screen-reader checks.
+- Synthetic footer-disabled SVG output for the same icon-free fixture was byte-identical to the verified base. `preparePrint` source remains unchanged. `makeSheet` has only the required footer addition; the original table draw/physical dimensions/calibration behavior is retained. These checks are not a new physical-print verification.
+- Enlarged light/dark icon previews with 24 px and 11 pt samples were rendered and inspected. Actual-size 32 × 90 mm sheet SVGs (off/on and four rotations) and print-page SVGs with calibration/cut marks were generated from the app renderer using native canvas metrics and bundled fonts. PNG versions are enlarged review images. Artifact generation used temporary external development tooling only; no runtime dependency was added. The generated previews are synthetic standalone artifacts, not browser/PDF or physical-print evidence.
+- Application container built as stemtape:0.5.0 using `nginx@sha256:0985e772fb9f729e6fa0980da05fca5d9c468e870eed43071545afa9d2e27d94`. `STEMTAPE_TEST_PORT=18081 sh scripts/container-smoke.sh stemtape:0.5.0`: **passed** health, UID 10001, read-only app, CSP header, POST rejection, security.txt bytes/type/headers, hidden-path denial and gzip. The existing empty-default NGINX_IMAGE Dockerfile warning remains; an explicit digest was supplied. The nested test did not publish port 18080.
+- Both public local/VPS Compose examples validated with only their public example env files. No private deployment files were read.
+
+Browser suite attempted with the existing temporary Playwright installation: **unexecuted**, missing Chromium headless shell at launch. No Chromium installation or restriction bypass was attempted. Added condition-based regressions cover disclosure keyboard/themes/mobile, footer toggles/invalid drafts/reload/duplicate/JSON restore, quota feedback, horizontal/vertical overflow and preview/print equivalence for every rotation. They require CI or a supported real browser.
+
+User-reported manual results are recorded separately below. Mobile/200% zoom, keyboard/screen-reader accessibility, emoji glyph availability, browser PDF dimensions, failed-save/recovery and exact-byte manual checks remain unconfirmed. The [manual checklist and artifact guide](REVIEW-v0.5.0.md) includes measuring the sheet and 50 mm calibration line and checking footer/icon readability. Production routing/TLS, live Caddy pin, full secret/image scans and large-active-plan performance concern remain outstanding. No live deployment or Internet.nl re-test is claimed. Approved column features remain deferred until successful v0.5.0 deployment and verification on stemtape.cc, as recorded in ROADMAP.md and the deployment completion checklist.
+
+Pre-commit review reran all 53 Node tests, application/test/shell syntax and diff checks, the synthetic actual-app checks with native canvas metrics, the footer-disabled baseline comparison and the application-container smoke checks successfully. No further application defect was confirmed. The complete browser suite was attempted again and failed at launch because Chromium is unavailable; no browser assertions ran. The existing Git author configuration was verified as Graham van der Wielen with the configured GitHub noreply address. At that point, no v0.5.0 user-reported manual passes had been supplied; the later report is recorded below. The review commits exclude generated previews, temporary tooling and the unrelated README checkout/backup; committing the candidate does not satisfy the outstanding release gates or authorize deployment.
+
+### 2026-10-07 — user-reported manual checks
+
+Graham van der Wielen reports these checks passed immediately after the v0.5.0 Docker preview was started at http://127.0.0.1:18080/:
+
+- Replacement icons at actual cue size.
+- Footer toggle and reload persistence.
+- Backup/restore.
+- Themes and rotation.
+- Printing, with physical output measured after printing.
+- Footer overflow blocking, subsequently confirmed as passed on 2026-10-07.
+
+The preview was built from `/tmp/stemtape-v050-worktree`; its served public assets were checked byte-for-byte against that worktree. These are user-reported manual results, not automated browser-suite results or independent physical-print verification. Specific print scaling, measured values and calibration-line measurements were not supplied. Footer overflow was initially reported as not retested; the owner has now confirmed the manual check passed on 2026-10-07. Local automated browser execution remains **unexecuted**; the separately reported CI run failed as described above. No production deployment checks are implied.
+
 ## 2026-10-03 — v0.4.1 SVG header assertion follow-up
 
 The owner-reported CI failure extracted `h:mmFuelWaterdistance (mi)1:00Water2` from the whole preview. `cueHeader` produces the full `Water distance (mi)` label. The print renderer places each wrapped line in its own SVG text element, consumes a space when wrapping at a word boundary, and also supports hard wrapping inside words. DOM textContent concatenates those separate lines and cells without separators. This is a test extraction defect; the reported concatenation is not evidence of a missing word or incorrect distance unit in the rendered sheet.

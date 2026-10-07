@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0 — review candidate (2026-10-07)
+
+- Replace bar, bottle, gel and cobbles artwork with lightweight local SVGs based on the four owner-approved references. Preserve icon keys, labels and transparent/theme behavior.
+- Add optional per-plan Show footer / Footer text settings, off by default for old and new plans. Keep text on toggle-off, duplicate/preset/JSON round trips; do not add footer data to cue CSV.
+- Measure one centered footer line inside the physical sheet, blocking print on horizontal/vertical overflow. Disabled/empty footers keep the previous geometry; calibration and preparePrint remain unchanged.
+- Use a scoped lime settings disclosure arrow with a contrasting outline and native heading/keyboard semantics.
+- Record column ordering and optional Note columns as approved follow-ups gated on successful live deployment verification; no column features are implemented here.
+
 ## 0.4.1 — review candidate (2026-10-03)
 
 - Publish owner-authorized security.txt with exact-path Nginx access, UTF-8 plain text, inherited headers and expiry/self-hosting guidance. Keep HTTP compression and document accepted edge cipher/key-exchange limitations.
