@@ -2,7 +2,7 @@ import {BUILTIN_CUES} from './presets.js';
 // Pure data model: canonical metres and elapsed minutes; no HTML or network access.
 export const VERSION = 1;
 export const KEY = 'stemtape.v1';
-export const LIMITS = {events: 30, rows: 200, columns: 8, text: 160, bytes: 2_000_000};
+export const LIMITS = {events: 30, rows: 200, columns: 8, text: 160, footer: 80, bytes: 2_000_000};
 export const SYMBOLS = ['','banana','bottle','bar','gel','smile','mountain','feed','flag','coffee','warning','cobbles','ricecake','can','neutral','litter'];
 export const uid = () => globalThis.crypto.randomUUID();
 export const clone = value => JSON.parse(JSON.stringify(value));
@@ -46,6 +46,12 @@ export function validateEvent(e){
   }
   const l=e.layout||{};out.layout={width:finite(l.width,20,180,'width (20–180 mm)'),length:finite(l.length,30,260,'length (30–260 mm)'),font:finite(l.font,8,24,'font size (8–24 pt)'),padding:finite(l.padding,1,8,'padding'),gap:finite(l.gap,0.5,6,'row spacing'),rotation:choice(l.rotation,[0,90,180,270],'rotation'),header:boolean(l.header,'header'),paper:choice(l.paper,['A4','Letter'],'paper'),copies:finite(l.copies,1,4,'copies')};
   if(!Number.isInteger(l.copies))throw Error('Copies must be a whole number.');
+  // Absent footer fields mean disabled/empty. Do not inflate old exact-budget plans on load.
+  if(Object.hasOwn(l,'footerEnabled'))out.layout.footerEnabled=boolean(l.footerEnabled,'footer visibility');
+  if(Object.hasOwn(l,'footerText')){
+    out.layout.footerText=str(l.footerText,LIMITS.footer,'footer text (80-character maximum; most emojis count as two)');
+    if(/[\r\n\t\u2028\u2029]/.test(l.footerText))throw Error('Footer must be a single line.');
+  }
   return out;
 }
 export function validateState(s){

@@ -1,3 +1,13 @@
+# Upgrade to 0.5.0 (review candidate)
+
+Export a complete JSON backup, close other StemTape tabs and retain the previous tested app image and private proxy configuration. This preparation does not authorize deployment. Use `vim` for any later operator edits; keep private configuration and certificate volumes in place. Rebuild from the reviewed source with a pinned base image only after the outstanding validation gates pass.
+
+Schema/key remain v1. Footer settings are optional layout fields `footerEnabled` and `footerText`; absent fields mean off/empty. Loading old data does not add these fields or consume extra bytes. Footer metadata, both mode lists, presets and preferences share the existing 2,000,000-byte UTF-8 budget. Rejected edits and failed storage writes preserve saved data and recovery originals. The footer is one centered line at the plan font, maximum 80 UTF-16 units; actual overflow blocks printing. JSON backups and duplication preserve it, while cue CSV intentionally carries only cues. Icon keys stay unchanged; existing bar/bottle/gel/cobbles cues display the replacements automatically.
+
+Rollback: restore the previous tested image and compatible public proxy configuration, preserving browser origin/profile and certificate volumes. v0.4.1 reads the plan/cues but ignores the new optional footer fields; its next save or re-export drops them. Keep a v0.5.0 JSON backup before rollback so footer settings can be restored later. Do not let an older tab overwrite newer state. No migration or reset is required. Recheck actual-size output when changing print setup; no new physical-print verification is claimed here.
+
+After a separately authorized v0.5.0 deployment and successful verification on stemtape.cc, revisit the [approved column follow-ups](docs/ROADMAP.md). Their implementation belongs to a subsequent stage, not this release.
+
 # Upgrade to 0.4.1 (review candidate)
 
 Export a complete JSON backup, close other StemTape tabs and retain the previous tested image digest and private configuration before an operator-authorized upgrade. No deployment is part of this preparation. Rebuild the static image to include `dist/.well-known/security.txt`; preserve browser origin/profile and existing volumes/config. Do not copy examples over working private configuration. Use `vim` for operator edits.
