@@ -1,5 +1,13 @@
 # Validation record
 
+## v0.5.0 — mobile disclosure browser-test follow-up
+
+The owner reports that CI executed the browser suite and failed at `tests/v050-browser.mjs:65`, where the test expected `.more-settings.open` to be true after Space. This is a failed real-browser CI result, not a successful suite run. The rotation loop opens and closes settings for each rotation, leaving it closed. Reloads leave the mobile workspace on Edit; no Preview selection occurs before resizing to 390 px. Below 740 px the stylesheet hides `.preview-card` unless `body[data-tab=preview]` is selected. The summary is inside that hidden card, so calling programmatic focus does not put the keyboard target on the summary; Space cannot open that disclosure. The source/setup trace identifies a test precondition defect, rather than a demonstrated delayed toggle or application keyboard defect.
+
+The test now selects the visible mobile Preview button, waits at most five seconds for the preview card to be visible, and explicitly asserts selection, summary visibility, initially closed settings and focus on the summary. Its button locator is scoped to `.mobile-tabs`, since the body also acquires a data-tab attribute on selection. Descriptive Space assertions retain the expected open state and also check closing and reopening. No arbitrary sleep, larger suite timeout, forced open state or application change is introduced. Failure diagnostics include test phase, viewport, selected view, calculated display/boxes, focused element identifiers, disclosure state, invalid-input count and page-error count, without stored plans or input contents.
+
+Checks: `npm test` **53/53 passed**; `npm run check`, syntax checks for all test modules and `git diff --check` **passed**. A temporary synthetic actual-app/CSS check passed: applying the actual matching mobile stylesheet rules hides the preview ancestor in Edit, and the actual Preview handler exposes it and updates selection without replacing the summary or writing storage. jsdom does not provide native responsive layout/focus/key activation; those are not verified by this check. Full local browser execution was attempted again and failed at launch because Chromium headless shell is unavailable, so the revised browser assertions remain **unexecuted locally** and require CI verification. No Chromium installation, production check or new automated browser pass is claimed.
+
 ## 2026-10-07 — v0.5.0 icons/footer/settings preparation (not release approval)
 
 Verified `/tmp/stemtape-v0.5.0-base.bundle` and bundled origin/main `cd196fbcd7754414841aee5fe37077aa7fa79872`. Prepared on review/v0.5.0 in the isolated `/tmp/stemtape-v050-worktree`. Existing unrelated README changes remain in the original docs/readme-v0.4.1 checkout and their backup; they were not included. All four supplied PNG references were available and inspected before drawing fixed SVG replacements. They are design references only, not runtime assets.
@@ -29,8 +37,9 @@ Graham van der Wielen reports these checks passed immediately after the v0.5.0 D
 - Backup/restore.
 - Themes and rotation.
 - Printing, with physical output measured after printing.
+- Footer overflow blocking, subsequently confirmed as passed on 2026-10-07.
 
-The preview was built from `/tmp/stemtape-v050-worktree`; its served public assets were checked byte-for-byte against that worktree. These are user-reported manual results, not automated browser-suite results or independent physical-print verification. Specific print scaling, measured values and calibration-line measurements were not supplied. Footer overflow was explicitly **not retested**; the passing Node/synthetic overflow checks do not establish a manual browser pass. The automated browser suite remains **unexecuted**, and no production deployment checks are implied.
+The preview was built from `/tmp/stemtape-v050-worktree`; its served public assets were checked byte-for-byte against that worktree. These are user-reported manual results, not automated browser-suite results or independent physical-print verification. Specific print scaling, measured values and calibration-line measurements were not supplied. Footer overflow was initially reported as not retested; the owner has now confirmed the manual check passed on 2026-10-07. Local automated browser execution remains **unexecuted**; the separately reported CI run failed as described above. No production deployment checks are implied.
 
 ## 2026-10-03 — v0.4.1 SVG header assertion follow-up
 

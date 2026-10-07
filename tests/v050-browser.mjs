@@ -6,6 +6,7 @@ export async function v050Regressions(browser,base){
  const stored=()=>page.evaluate(()=>localStorage.getItem('stemtape.v1'));
  const ready=()=>page.waitForFunction(()=>document.fonts.status==='loaded'&&document.querySelector('#sheet-preview svg'));
  const seed=async raw=>{await page.evaluate(raw=>localStorage.setItem('stemtape.v1',raw),raw);await page.reload();await ready();};
+ let phase='footer workflows';
  try{
   await page.goto(base);await ready();
   const s=initialState(),e=s.events[0];s.active=e.id;e.rows.distance=e.rows.distance.slice(0,4);
@@ -61,8 +62,36 @@ export async function v050Regressions(browser,base){
    assert.equal(await page.locator('.settings-arrow').evaluate(n=>getComputedStyle(n).fill),'rgb(197, 248, 42)');
    await page.screenshot({path:`artifacts/v050-${theme}.png`,fullPage:true});
   }
-  await page.setViewportSize({width:390,height:844});await summary.focus();await summary.press('Space');
-  assert.equal(await page.locator('.more-settings').evaluate(n=>n.open),true);await page.screenshot({path:'artifacts/v050-mobile.png',fullPage:true});
+  phase='mobile preview selection';await page.setViewportSize({width:390,height:844});
+  // Mobile starts on Edit, which hides the preview and its native summary.
+  const previewTab=page.locator('.mobile-tabs button[data-tab="preview"]'),details=page.locator('.more-settings');
+  await previewTab.click();await page.locator('.preview-card').waitFor({state:'visible',timeout:5000});
+  assert.equal(await previewTab.getAttribute('aria-pressed'),'true','Preview is the selected mobile workspace view');
+  assert.equal(await summary.isVisible(),true,'Settings summary is visible in the mobile Preview view');
+  assert.equal(await details.evaluate(n=>n.open),false,'Rotation checks leave settings closed before the mobile keyboard test');
+  phase='mobile summary focus';await summary.focus();
+  assert.equal(await summary.evaluate(n=>document.activeElement===n),true,'The visible settings summary receives keyboard focus');
+  phase='mobile Space opens settings';await summary.press('Space');
+  assert.equal(await details.evaluate(n=>n.open),true,'Space opens the focused mobile settings disclosure');
+  phase='mobile Space closes settings';await summary.press('Space');
+  assert.equal(await details.evaluate(n=>n.open),false,'Space closes the focused mobile settings disclosure');
+  phase='mobile Space reopens settings';await summary.press('Space');
+  assert.equal(await details.evaluate(n=>n.open),true,'Space reopens the focused mobile settings disclosure');
+  await page.screenshot({path:'artifacts/v050-mobile.png',fullPage:true});
   assert.deepEqual(errors,[]);assert.ok(csv.includes('bar')); // CSV cue format is unchanged; Node tests cover byte-for-byte equality.
+ }catch(err){
+  try{
+   const diagnostic=await page.evaluate(()=>{
+    const summary=document.querySelector('.more-settings > summary'),preview=document.querySelector('.preview-card'),focused=document.activeElement;
+    return {viewport:{width:innerWidth,height:innerHeight},selectedView:document.body.dataset.tab??'edit',
+     previewTabPressed:document.querySelector('.mobile-tabs button[data-tab="preview"]')?.getAttribute('aria-pressed'),
+     previewDisplay:preview&&getComputedStyle(preview).display,summaryDisplay:summary&&getComputedStyle(summary).display,
+     summaryHasBox:!!summary?.getClientRects().length,summaryFocused:focused===summary,
+     focused:{tag:focused?.tagName,id:focused?.id,tab:focused?.getAttribute('data-tab'),theme:focused?.getAttribute('data-theme')},
+     settingsOpen:document.querySelector('.more-settings')?.open,invalidInputs:document.querySelectorAll('input:invalid,textarea:invalid').length};
+   });
+   console.error('v0.5.0 disclosure diagnostics',JSON.stringify({phase,pageErrorCount:errors.length,...diagnostic}));
+  }catch{console.error('v0.5.0 disclosure diagnostics unavailable',phase);}
+  throw err;
  }finally{await context.close();}
 }
