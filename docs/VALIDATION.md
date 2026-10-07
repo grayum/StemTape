@@ -16,9 +16,21 @@ Executed checks:
 
 Browser suite attempted with the existing temporary Playwright installation: **unexecuted**, missing Chromium headless shell at launch. No Chromium installation or restriction bypass was attempted. Added condition-based regressions cover disclosure keyboard/themes/mobile, footer toggles/invalid drafts/reload/duplicate/JSON restore, quota feedback, horizontal/vertical overflow and preview/print equivalence for every rotation. They require CI or a supported real browser.
 
-Manual light/dark/mobile/zoom/accessibility checks, emoji glyph availability, native SVG/font rendering, browser PDF dimensions and physical printing at 100% remain **unexecuted**. The [manual checklist and artifact guide](REVIEW-v0.5.0.md) includes measuring the sheet and 50 mm calibration line and checking footer/icon readability. Production routing/TLS, live Caddy pin, full secret/image scans and large-active-plan performance concern remain outstanding. No live deployment or Internet.nl re-test is claimed. Approved column features remain deferred until successful v0.5.0 deployment and verification on stemtape.cc, as recorded in ROADMAP.md and the deployment completion checklist.
+User-reported manual results are recorded separately below. Mobile/200% zoom, keyboard/screen-reader accessibility, emoji glyph availability, browser PDF dimensions, failed-save/recovery and exact-byte manual checks remain unconfirmed. The [manual checklist and artifact guide](REVIEW-v0.5.0.md) includes measuring the sheet and 50 mm calibration line and checking footer/icon readability. Production routing/TLS, live Caddy pin, full secret/image scans and large-active-plan performance concern remain outstanding. No live deployment or Internet.nl re-test is claimed. Approved column features remain deferred until successful v0.5.0 deployment and verification on stemtape.cc, as recorded in ROADMAP.md and the deployment completion checklist.
 
-Pre-commit review reran all 53 Node tests, application/test/shell syntax and diff checks, the synthetic actual-app checks with native canvas metrics, the footer-disabled baseline comparison and the application-container smoke checks successfully. No further application defect was confirmed. The complete browser suite was attempted again and failed at launch because Chromium is unavailable; no browser assertions ran. The existing Git author configuration was verified as Graham van der Wielen with the configured GitHub noreply address. No v0.5.0 user-reported manual passes have been supplied, so none are recorded. The review commits exclude generated previews, temporary tooling and the unrelated README checkout/backup; committing the candidate does not satisfy the outstanding release gates or authorize deployment.
+Pre-commit review reran all 53 Node tests, application/test/shell syntax and diff checks, the synthetic actual-app checks with native canvas metrics, the footer-disabled baseline comparison and the application-container smoke checks successfully. No further application defect was confirmed. The complete browser suite was attempted again and failed at launch because Chromium is unavailable; no browser assertions ran. The existing Git author configuration was verified as Graham van der Wielen with the configured GitHub noreply address. At that point, no v0.5.0 user-reported manual passes had been supplied; the later report is recorded below. The review commits exclude generated previews, temporary tooling and the unrelated README checkout/backup; committing the candidate does not satisfy the outstanding release gates or authorize deployment.
+
+### 2026-10-07 — user-reported manual checks
+
+Graham van der Wielen reports these checks passed immediately after the v0.5.0 Docker preview was started at http://127.0.0.1:18080/:
+
+- Replacement icons at actual cue size.
+- Footer toggle and reload persistence.
+- Backup/restore.
+- Themes and rotation.
+- Printing, with physical output measured after printing.
+
+The preview was built from `/tmp/stemtape-v050-worktree`; its served public assets were checked byte-for-byte against that worktree. These are user-reported manual results, not automated browser-suite results or independent physical-print verification. Specific print scaling, measured values and calibration-line measurements were not supplied. Footer overflow was explicitly **not retested**; the passing Node/synthetic overflow checks do not establish a manual browser pass. The automated browser suite remains **unexecuted**, and no production deployment checks are implied.
 
 ## 2026-10-03 — v0.4.1 SVG header assertion follow-up
 
