@@ -55,4 +55,8 @@ For `stemtape.cc` (Cloudflare → DigitalOcean → Caddy → app), use the [v0.4
 
 After a separately authorized deployment, verify the served version, all four replacement icons, footer toggle/text persistence and overflow blocking, light/dark settings arrow, recovery and actual-size print behavior on stemtape.cc. Record the actual results; do not infer production success from local/container checks. Preserve the tested image/configuration and JSON backup for rollback.
 
-Only after v0.5.0 is successfully deployed and verified live, begin the [approved column ordering and optional Note-column follow-ups](ROADMAP.md). They are deliberately absent from this release.
+The owner subsequently confirmed v0.5.0 is deployed and working. The [approved column follow-ups](ROADMAP.md) are therefore prepared in the separate v0.6.0 candidate; no independent production re-test is claimed.
+
+## v0.6.0 deployment completion reminder
+
+After a separately authorized deployment, verify the served version, fixed first column, movement/focus/buttons and mobile touch cancellation, Note rename/hide/reload, CSV/JSON alignment, save/recovery feedback and unchanged footer/physical dimensions. Check narrow and wide sheets and all rotations; physically print at 100% and measure the sheet/calibration line. Keep a v0.6.0 JSON backup and the previous tested image before deployment or rollback. Record actual results; local checks and prior v0.5.0 confirmation do not establish v0.6.0 production success.
