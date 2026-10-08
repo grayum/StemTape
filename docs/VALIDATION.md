@@ -1,5 +1,15 @@
 # Validation record
 
+## 2026-10-08 — v0.6.0 Note dialog locator follow-up
+
+The owner reports a native-browser CI timeout in the Note rename/hide/reload phase at `tests/v060-browser.mjs:40`, waiting for `getByLabel('Field type', {exact:true})`. This is a failed CI result, not a passing browser suite. The dialog uses an implicit wrapping label with a nested select. Playwright's label-text matcher includes all nested option text, producing `Field typetextnumberdistancesymbol`; its accessible-name calculation instead returns `Field type`, with role `combobox`.
+
+A temporary synthetic actual-app reproduction using the installed Playwright selector/accessibility functions confirmed that the dialog is open, exactly the retained Note configuration exists after movement/rename, its ID/order remain valid, and the select is disabled with value `text`. Exact label-text matching returns no control, while the exact combobox role/name finds the intended control. jsdom/canvas and synthetic accessibility calculations are involved; this is not native-browser or screen-reader verification. No timing delay or application type/lifecycle defect was established.
+
+The browser regression now waits for the Note configuration to be visible, checks the open dialog and unique configuration, then uses `getByRole('combobox', {name:'Field type', exact:true})`. It asserts exactly one control, value `text` and disabled state. This retains an accessible locator rather than masking missing labels with a generic select query. Existing rename/hide/reload identity, label, content and order checks remain, with an added persisted text-type assertion. Failure diagnostics report dialog state, Note index/type/configuration count and predefined select labels/values/disabled states without dumping saved plans. No application, print, storage or timeout increase is introduced.
+
+Checks: `npm test` **69/69 passed**; `npm run check`, revised browser-test syntax and `git diff --check` **passed**. The synthetic actual-app ordering/Note/focus/invalid-draft/quota/footer/rotation checks passed separately. The complete browser suite was attempted and failed at Chromium launch because the headless-shell executable is unavailable; **no browser assertions executed locally**. CI must verify the revised regression in a native browser. Earlier user-reported local-preview testing remains limited to the scope recorded below; no new manual, physical-print or production passes are inferred. Unrelated README work and its backup remain preserved; no remote fetch or commit/push/merge/tag/deploy is part of this follow-up.
+
 ## 2026-10-08 — user-reported v0.6.0 local-preview testing and commit review
 
 Graham van der Wielen reports testing v0.6.0 at http://127.0.0.1:18080/ and finding no issues. This is user-reported local-preview testing, not production verification. Individual checklist items, devices, accessibility methods, PDF dimensions and physical printing were not specified; no passes for those checks are inferred.

@@ -37,13 +37,21 @@ export async function v060Regressions(browser,base){
   const rows=(await plan()).rows;await item(note).locator('.column-drag-handle').press('End');assert.deepEqual((await plan()).rows,rows,'Column movement does not sort cues or change either mode list');
   phase='Note rename/hide/reload';await page.locator('#column-details').click();
   const config=page.locator(`#dialog-body .column-config[data-column-id="${note}"]`);
-  await config.getByLabel('Name',{exact:true}).fill('Location');assert.equal(await config.getAttribute('aria-label'),'Column Location');assert.equal(await config.getByLabel('Field type',{exact:true}).isDisabled(),true);
+  await config.waitFor({state:'visible',timeout:5000});assert.equal(await config.count(),1,'The dialog contains exactly one configuration for the retained Note ID');
+  assert.equal(await page.locator('#dialog').evaluate(n=>n.open),true,'Column details dialog is open');
+  await config.getByLabel('Name',{exact:true}).fill('Location');assert.equal(await config.getAttribute('aria-label'),'Column Location');
+  // Exact label-text matching includes nested option text; use the control's accessible name.
+  const noteType=config.getByRole('combobox',{name:'Field type',exact:true});
+  assert.equal(await noteType.count(),1,'Note has exactly one Field type combobox with its expected accessible name');
+  assert.equal(await noteType.inputValue(),'text','Managed Note remains a text column');
+  assert.equal(await noteType.isDisabled(),true,'Managed Note type cannot be changed');
   assert.equal(await config.getByRole('button',{name:'Remove',exact:true}).isDisabled(),true);
   await page.getByRole('button',{name:'Done',exact:true}).click();await page.locator('#show-note').uncheck();
   assert.equal(await cell(note).isVisible(),false);assert.equal((await plan()).rows.distance[0].cells[note],'Bridge 🍌');
   assert.equal(await page.locator('#sheet-preview').innerHTML(),originalSheet,'Hiding Note restores the original sheet geometry including its footer');
   await page.reload();await ready();await openSettings();await page.locator('#show-note').check();
   assert.equal((await plan()).columns[2].id,note);assert.equal((await plan()).columns[2].label,'Location');assert.equal(await cell(note).inputValue(),'Bridge 🍌');
+  assert.equal((await plan()).columns[2].type,'text','Reload preserves the Note text type together with its ID, label, content and order');
   const csv=exportCSV(await plan()),imported=importCSV(csv);assert.equal(imported.columns[2].label,'Location');assert.equal(imported.rows.distance[0].cells[imported.noteColumnId],'Bridge 🍌');assert.equal(imported.columns.length,3);
   phase='Invalid time drafts';await page.locator('#mode-time').click();await cell(first).fill('bad');const before=await raw();
   await item(note).getByRole('button',{name:'Move left',exact:true}).click();await page.locator('#show-note').click();
@@ -86,7 +94,13 @@ export async function v060Regressions(browser,base){
   const full=await raw();await page.locator('#show-note').click();assert.equal(await raw(),full);assert.equal(await page.locator('#show-note').isChecked(),false);assert.equal((await plan()).columns.length,2);
   assert.deepEqual(errors,[]);
  }catch(err){
-  try{console.error('v0.6.0 browser diagnostics',JSON.stringify({phase,errors,state:await page.evaluate(()=>({view:document.body.dataset.tab??'edit',invalid:document.querySelectorAll('input:invalid').length,columns:document.querySelectorAll('#column-order-list li').length,save:document.querySelector('#save-status-label')?.textContent,focusedTag:document.activeElement?.tagName}))}));}catch{}
+  try{console.error('v0.6.0 browser diagnostics',JSON.stringify({phase,errors,state:await page.evaluate(()=>{
+   let active;try{const s=JSON.parse(localStorage.getItem('stemtape.v1'));active=s.events.find(e=>e.id===s.active);}catch{}
+   const configs=[...document.querySelectorAll('#dialog-body .column-config')].filter(n=>n.dataset.columnId===active?.noteColumnId);
+   return {view:document.body.dataset.tab??'edit',invalid:document.querySelectorAll('input:invalid').length,columns:document.querySelectorAll('#column-order-list li').length,save:document.querySelector('#save-status-label')?.textContent,focusedTag:document.activeElement?.tagName,
+    dialogOpen:document.querySelector('#dialog')?.open,noteIndex:active?.columns.findIndex(c=>c.id===active.noteColumnId),noteType:active?.columns.find(c=>c.id===active.noteColumnId)?.type,noteConfigCount:configs.length,
+    noteSelects:configs.flatMap(n=>[...n.querySelectorAll('select')].map(s=>({disabled:s.disabled,value:s.value,labels:[...s.labels].map(l=>l.textContent)})))};
+  })}));}catch{}
   throw err;
  }finally{await context.close();}
 }
