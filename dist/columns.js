@@ -8,14 +8,15 @@ export function moveColumn(e,id,target){
 }
 export function canRemoveColumn(e,id){
  const at=e.columns.findIndex(c=>c.id===id);
- return at>0&&e.columns.length>2;
+ return at>0&&e.columns.length>2&&id!==e.noteColumnId&&
+  (id!==cueColumnId(e)||e.columns.slice(1).some(c=>c.id!==id&&c.id!==e.noteColumnId));
 }
 export function removeColumn(e,id){
  if(!canRemoveColumn(e,id))return false;
  const cue=cueColumnId(e),at=e.columns.findIndex(c=>c.id===id);e.columns.splice(at,1);
  for(const mode of ['distance','time'])for(const r of e.rows[mode])delete r.cells[id];
  // Explicit removal may change the icon host, but hiding/reordering never does.
- if(cue===id)e.cueColumnId=e.columns[1].id;
+ if(cue===id)e.cueColumnId=e.columns.slice(1).find(c=>c.id!==e.noteColumnId).id;
  else e.cueColumnId=cue;
  return true;
 }

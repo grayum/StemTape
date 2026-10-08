@@ -3,6 +3,7 @@ import {SaveSession,formatSaveTime} from './save-status.js';
 import {footerGeometry} from './footer.js';
 import {ICONS} from './icons.js';
 import {cueColumnId,moveColumn,canRemoveColumn,removeColumn} from './columns.js';
+import {noteColumn,showNoteColumn} from './note-column.js';
 import {columnControls} from './column-controls.js';
 const $=id=>document.getElementById(id),NS='http://www.w3.org/2000/svg';
 const names={'':'None',banana:'Banana',bottle:'Bottle',bar:'Bar',gel:'Gel',smile:'Smile',mountain:'Climb',feed:'Feed zone',flag:'Finish',coffee:'Coffee',warning:'Caution',cobbles:'Cobbles / pavé',ricecake:'Rice cake',can:'Softdrink',neutral:'Neutral zone',litter:'Litter zone'};
@@ -174,23 +175,31 @@ $('footer-text').oninput=()=>{const input=$('footer-text');event().layout.footer
 $('header').onchange=()=>{event().layout.header=$('header').checked;commit();};$('remaining').onchange=()=>{event().remaining=$('remaining').checked;commit();};$('total').onchange=()=>{const input=$('total');input.setCustomValidity('');try{const metres=validatedTotal(input.value,event().unit);if(!input.checkValidity())throw Error('Enter a valid total distance.');event().totalM=metres;commit(false,input);}catch(err){input.setCustomValidity(err.message);renderPreview();}};$('save-bike').onclick=()=>{try{const{width,length,padding,rotation}=event().layout;state.bike={width,length,padding,rotation};if(save())toast(storageOK&&!recoveryBlocked?'Bike dimensions saved for new plans.':'Bike dimensions changed in memory — not saved.');}catch{toast('Could not save bike dimensions.');}};
 $('add-row').onclick=()=>{const e=event(),rows=e.rows[e.mode];if(rows.length>=LIMITS.rows)return toast('Maximum 200 cues per mode.');const r={id:uid(),symbol:'',cells:{}};e.columns.forEach((c,i)=>r.cells[c.id]=c.type==='number'||c.type==='distance'?i===0?(rows.at(-1)?.cells[c.id]||0):0:'');rows.push(r);commit(true);$('editor-rows').lastElementChild?.querySelector('input')?.focus();};$('sort').onclick=()=>{const e=event();sortCuesByPosition(e.rows[e.mode],e.columns[0].id);commit(true);};
 $('save-preset').onclick=()=>{const d=openDialog('Save a personal preset');d.append(el('p',{},'Save columns, dimensions and both sets of cues as a reusable template on this device.'));const input=el('input',{maxlength:40,placeholder:'e.g. Long Sunday nutrition'});d.append(labelled('Preset name',input));d.append(button('Save preset',()=>{if(!input.value.trim())return input.focus();if(state.presets.length>=20)return toast('Maximum 20 presets.');state.presets.push({name:input.value.trim(),event:clone(event())});$('dialog').close();if(commit(true))toast(storageOK&&!recoveryBlocked?'Personal preset saved.':'Personal preset created in memory — not saved.');},'primary'));};
-function renderColumnSettings(){columnList.render();}
+function renderColumnSettings(){
+ columnList.render();const e=event(),note=noteColumn(e);$('show-note').checked=!!note?.visible;
+ $('show-note').disabled=!note&&e.columns.length>=LIMITS.columns;
+ $('note-help').textContent=!note&&e.columns.length>=LIMITS.columns?'Maximum 8 columns. Remove another column before enabling Note.':'Hide without deleting text. Rename and adjust widths in Column details. Adding a column may cause print overflow.';
+}
+$('show-note').onchange=()=>{
+ try{if(showNoteColumn(event(),$('show-note').checked))commit(true);}catch(err){toast(err.message);renderColumnSettings();}
+};
 function columnsDialog(){
  const d=openDialog('Columns');d.append(el('p',{},'Widths are relative shares of the strip. Hidden columns stay in JSON backups. Distance/time stays first. Reorder with the list in Layout & print settings or these movement buttons.'));
  const e=event();
  e.columns.forEach((c,i)=>{
-  const row=el('div',{class:'column-config','data-column-id':c.id,role:'group','aria-label':`Column ${c.label}`}),name=el('input',{value:c.label,maxlength:32});
+  const managed=c.id===e.noteColumnId,row=el('div',{class:'column-config','data-column-id':c.id,role:'group','aria-label':`Column ${c.label}`}),name=el('input',{value:c.label,maxlength:32});
   name.oninput=()=>{c.label=name.value;if(commit(false,name)){row.setAttribute('aria-label',`Column ${c.label}`);renderColumnSettings();}};row.append(labelled('Name',name));
   const type=select(['text','number','distance','symbol'].map(t=>[t,t]),c.type,v=>{
    const populated=['distance','time'].some(mode=>e.rows[mode].some(r=>r.cells[c.id]!==''&&r.cells[c.id]!==0));
    if(populated){toast('Add a new column to change type without losing values.');type.value=c.type;return;}
    c.type=v;for(const mode of ['distance','time'])e.rows[mode].forEach(r=>r.cells[c.id]=v==='number'||v==='distance'?0:'');commit(true);
-  });type.disabled=i===0;
+  });type.disabled=i===0||managed;
   const visibility=check(c.visible,'Show column',v=>{
    if(!v&&e.columns.filter(c=>c.visible).length===1){toast('Keep at least one visible column.');columnsDialog();return;}
    c.visible=v;commit(true);
-  });
+  });visibility.querySelector('input').disabled=managed;
   row.append(labelled('Field type',type),labelled('Width share',numberInput(c.width,5,95,1,(v,input)=>{c.width=v;commit(false,input);})),labelled('Alignment',select(['left','center','right'].map(v=>[v,v]),c.align,v=>{c.align=v;commit();})),visibility,check(c.bold,'Bold',v=>{c.bold=v;commit();}));
+  if(managed)row.append(el('p',{class:'wide'},'This is the optional Note column. Rename it here; hide or restore it with Show note column. Its text type and retained content stay protected.'));
   if(i>0){
    const actions=el('div',{class:'actions wide'});
    for(const [text,direction,delta]of [['Move left','left',-1],['Move right','right',1]]){

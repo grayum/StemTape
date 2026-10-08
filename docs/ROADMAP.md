@@ -1,8 +1,10 @@
-# Approved follow-ups
+# Approved column follow-ups
 
-Implement only **after v0.5.0 is successfully deployed and verified live on https://stemtape.cc/**. They are deferred from the icons/footer/settings release.
+The owner confirmed v0.5.0 is deployed and working on https://stemtape.cc/, satisfying the gate for beginning this stage. This is user-reported live confirmation, not an independently executed production audit.
 
-- Column ordering through a Columns settings list with drag handles and accessible movement buttons. Distance/time stays first; other columns can move. Values follow stable column IDs. Editor, preview, print and CSV must keep the same order.
-- Optional Note column, off by default, initially between distance/time and cue/Fuel. Renameable to Location or another user label. Reuse the Custom column system and account for limited physical print width.
+Prepared in the v0.6.0 review candidate:
 
-The deployment completion checklist must record successful live v0.5.0 verification before beginning this next stage. Approval here is not authorization to change production or ship these features in v0.5.0.
+- Column ordering in Layout & print settings through drag handles, keyboard controls and accessible Move left/right buttons. Distance/time stays fixed first; data and icon association follow stable IDs. Editor, preview, print and CSV order remain consistent.
+- Optional text Note column, off by default, initially before Cue/Fuel. Renameable and reorderable; hiding preserves data/order, using the existing Custom column machinery and layout limits.
+
+See REVIEW-v0.6.0.md and VALIDATION.md for scope and outstanding checks. These features have not been deployed. No further column features are authorized by this record, and candidate preparation does not authorize production changes.

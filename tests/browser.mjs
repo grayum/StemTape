@@ -2,6 +2,7 @@
 // Run against the local development server or Docker: BASE_URL=http://127.0.0.1:8080 npm run test:browser
 import assert from 'node:assert/strict';
 import {v050Regressions} from './v050-browser.mjs';
+import {v060Regressions} from './v060-browser.mjs';
 import {v041Regressions} from './v041-browser.mjs';
 import {saveStatusRegressions} from './save-status-browser.mjs';
 import {reviewRegressions} from './review-browser.mjs';
@@ -118,5 +119,6 @@ await reviewRegressions(browser,base);
 await saveStatusRegressions(browser,base);
 await v041Regressions(browser,base);
 await v050Regressions(browser,base);
+await v060Regressions(browser,base);
 console.log('PASS: desktop/mobile, local persistence, theme, time/distance, XSS, imports, columns, overflow, export and PDF.');
 }finally{await context?.close();await browser.close();}

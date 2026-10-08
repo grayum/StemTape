@@ -40,6 +40,10 @@ export function validateEvent(e){
     out.cueColumnId=str(e.cueColumnId,64,'cue column reference');
     if(!cols.slice(1).some(c=>c.id===out.cueColumnId))throw Error('Invalid cue column reference.');
   }
+  if(Object.hasOwn(e,'noteColumnId')){
+    out.noteColumnId=str(e.noteColumnId,64,'note column reference');
+    if(!cols.slice(1).some(c=>c.id===out.noteColumnId&&c.type==='text')||out.noteColumnId===(out.cueColumnId??cols[1].id))throw Error('Invalid note column reference.');
+  }
   for(const mode of ['distance','time']){
     if(!Array.isArray(e.rows?.[mode])||e.rows[mode].length>LIMITS.rows)throw Error('Too many rows (maximum 200 per mode).');
     out.rows[mode]=e.rows[mode].map(r=>{
@@ -99,12 +103,13 @@ export function importCSV(text){
   const iconIndex=h[1]?.toLowerCase()==='icon'?1:-1,start=iconIndex===1?2:1;
   if((h.length-start<1&&iconIndex!==1)||h.length-start>7)throw Error('CSV needs 1–7 cue columns, or position and icon only.');
   const meta=h.slice(start).map(parseCSVHeader);
-  if(['cue'].some(role=>meta.filter(c=>c.role===role).length>1))throw Error('Duplicate CSV column role.');
+  if(['cue','note'].some(role=>meta.filter(c=>c.role===role).length>1))throw Error('Duplicate CSV column role.');
   const e=createEvent('nutrition');e.name='Imported plan';e.mode=mode;e.unit=first.endsWith('mi')?'mi':'km';
   e.columns=[e.columns[0],...meta.map(c=>column(c.label,c.type,50))];e.rows={distance:[],time:[]};
-  for(const [i,c]of meta.entries())if(c.role)e.cueColumnId=e.columns[i+1].id;
-  // CSV omits hidden data, so icon-only imports need a blank data column.
-  if(e.columns.length===1)e.columns.push(column('Fuel','text',68));
+  for(const [i,c]of meta.entries())if(c.role)e[c.role==='cue'?'cueColumnId':'noteColumnId']=e.columns[i+1].id;
+  // CSV omits hidden data. Keep the model's required cue column distinct from an explicit Note.
+  if(!e.columns.slice(1).some(c=>c.id!==e.noteColumnId))e.columns.push(column('Fuel','text',68));
+  if(e.noteColumnId&&!e.cueColumnId)e.cueColumnId=e.columns.slice(1).find(c=>c.id!==e.noteColumnId).id;
   for(const values of data){
     if(values.length!==h.length)throw Error('CSV rows must match the header length.');
     const raw=values[0].trim();if(!raw)throw Error('Every row needs a distance or time.');
@@ -164,7 +169,7 @@ export function restoreObject(target,source) {
 // Explicit metadata avoids confusing literal labels such as "Water [km]" with units.
 const CSV_COLUMN_PREFIX='stemtape:column:';
 function csvHeader(c,unit,e) {
-  const role=c.id===e.cueColumnId?'cue':null;
+  const role=c.id===e.noteColumnId?'note':c.id===e.cueColumnId?'cue':null;
   const meta=[c.type==='distance'?'distance':'text',c.label,c.type==='distance'?unit:null];
   if(role)meta.push(role);
   return role||c.type==='distance'||c.label.startsWith(CSV_COLUMN_PREFIX)?CSV_COLUMN_PREFIX+JSON.stringify(meta):c.label;
@@ -173,6 +178,6 @@ function parseCSVHeader(header) {
   if(!header.startsWith(CSV_COLUMN_PREFIX))return {label:header,type:'text'};
   const meta=JSON.parse(header.slice(CSV_COLUMN_PREFIX.length));
   if(!Array.isArray(meta)||![3,4].includes(meta.length)||!['text','distance'].includes(meta[0])||typeof meta[1]!=='string'||(meta[0]==='distance'?!['km','mi'].includes(meta[2]):meta[2]!==null)||
-     (meta.length===4&&meta[3]!=='cue'))throw Error('Invalid CSV column metadata.');
+     (meta.length===4&&(!['cue','note'].includes(meta[3])||meta[3]==='note'&&meta[0]!=='text')))throw Error('Invalid CSV column metadata.');
   return {type:meta[0],label:meta[1],unit:meta[2],role:meta[3]};
 }

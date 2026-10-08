@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0 — review candidate (2026-10-07)
+
+- Add a compact column-order list with mouse/touch handles, keyboard movement, left/right buttons, boundary disabling, stable focus and position feedback. Keep distance/time first and cue icons attached to a stable data column.
+- Add an optional text Note column, initially before Cue/Fuel. Hide/restore without deleting its name, width, order or either mode’s content; reuse Custom column controls, including renaming. Do not infer identity from old Note/Location labels.
+- Keep old state byte-compatible on load. Validate optional cue/note references and CSV role metadata, preserving JSON/preset/duplicate identity and the existing atomic storage/recovery guarantees.
+- Export visible CSV columns in order; retain old CSV import support. Extend reserved metadata only where cue/note identity is needed. Use JSON to preserve hidden content and full layout.
+- Preserve explicit width shares, physical dimensions, v0.5.0 icons/footer and shared preview/print geometry; overflow continues to block printing.
+
 ## 0.5.0 — review candidate (2026-10-07)
 
 - Replace bar, bottle, gel and cobbles artwork with lightweight local SVGs based on the four owner-approved references. Preserve icon keys, labels and transparent/theme behavior.

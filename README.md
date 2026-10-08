@@ -35,13 +35,21 @@ Open **http://127.0.0.1:8080**. Use this local server rather than opening `index
 
 Custom Unicode emojis use the user's system font. The outlined symbols combine **Lucide** with original StemTape symbols, including the approved Bar, Bottle, Gel and Cobbles replacements, not Font Awesome. Lucide 1.8.0 and DejaVu font notices are bundled in `dist/assets/`. No CDN assets or analytics.
 
-## v0.5.0 changes (review candidate)
+## v0.6.0 changes (review candidate)
+
+- Compact Columns list under Layout & print settings: drag with mouse/touch, use Move left/right, or use arrow keys/Home/End on a handle. Distance/time stays fixed first; data follows column IDs. Boundary buttons are disabled and movement restores focus and announces position.
+- Optional **Show note column**, off by default. Initially insert Note before Cue/Fuel; rename it to Location, reorder it, or hide it without deleting its text. Column details uses the same labels, widths and cells as other custom columns. Existing columns named Note are not reclassified.
+- CSV exports visible data columns in display order, plus the required position/icon fields. Complete JSON retains hidden content, both modes, column identities, presets and layout. Existing width shares and physical sheet dimensions stay unchanged; adding a column can cause overflow and block printing.
+
+The new Note starts with a relative width share of 25; other shares are preserved. Review [design and manual checks](docs/REVIEW-v0.6.0.md), [validation](docs/VALIDATION.md) and [upgrade/rollback](UPGRADE.md). The owner confirmed v0.5.0 is deployed and working before this stage began; v0.6.0 has not been deployed.
+
+## v0.5.0 changes
 
 - Four approved local SVG replacements: smiling unwrapped Bar, cycling Bottle, diagonal blank Gel sachet and perspective Cobbles/Pavé. Existing icon keys and saved cues keep their identity.
 - Optional per-plan printed footer under Layout & print settings, off by default. Plain text/emojis stay inside the chosen sheet dimensions; overflow blocks printing. Turning it off preserves the text; JSON includes it, cue CSV stays unchanged.
 - Lime expand/collapse arrow on Layout & print settings, retaining native keyboard operation.
 
-Footer text uses the plan font on one centered line, with a maximum of 80 UTF-16 units (most emojis use two). The actual measured line must also fit. Review [compatibility and manual checks](docs/REVIEW-v0.5.0.md), [validation](docs/VALIDATION.md) and [upgrade/rollback](UPGRADE.md). Approved column ordering and optional Note columns remain [deferred](docs/ROADMAP.md) until this release is deployed and verified live.
+Footer text uses the plan font on one centered line, with a maximum of 80 UTF-16 units (most emojis use two). The actual measured line must also fit. Review [compatibility and manual checks](docs/REVIEW-v0.5.0.md), [validation](docs/VALIDATION.md) and [upgrade/rollback](UPGRADE.md). The previously deferred column features are now prepared for v0.6.0 following the owner’s live v0.5.0 confirmation; see the [roadmap](docs/ROADMAP.md).
 
 ## v0.4.1 changes
 
@@ -72,7 +80,7 @@ time,icon,Fuel
 1:00,gel,Gel
 ```
 
-Use point decimal separators in CSV numbers. A comma in text must be quoted. Supported icon keys: banana, bottle, bar, gel, smile, mountain, feed, flag, coffee, warning, cobbles, ricecake, can, neutral, litter (or empty). Unknown icons are rejected. Export includes the active mode, cumulative distance values and hidden columns. Custom distance columns export explicit `stemtape:column:` JSON metadata in their CSV headers, preserving labels and distance units. Literal labels ending in `[km]` or `[mi]` remain text unless explicitly marked; legacy CSV suffixes are not inferred. Use JSON for lossless backups.
+Use point decimal separators in CSV numbers. A comma in text must be quoted. Supported icon keys: banana, bottle, bar, gel, smile, mountain, feed, flag, coffee, warning, cobbles, ricecake, can, neutral, litter (or empty). Unknown icons are rejected. Export includes the active mode, cumulative position values, icons and visible data columns in display order. Hidden content requires JSON backup. The position column stays in the editor and CSV even when hidden in print. If no other data column is visible, a position/icon-only CSV import creates an empty Fuel column; it does not recover omitted hidden data. Custom distance columns export explicit `stemtape:column:` JSON metadata in their CSV headers, preserving labels and distance units. v0.6.0 extends that tuple with an optional validated cue/note role to preserve identity when columns move or are renamed; marked exports require v0.6.0 for import. Older CSV files remain supported. CSV still does not preserve all custom types, exact text, precision, hidden content or layout; use JSON for complete backups. Literal labels ending in `[km]` or `[mi]` remain text unless explicitly marked; legacy CSV suffixes are not inferred. Use JSON for lossless backups.
 
 ## Print workflow
 
@@ -118,10 +126,10 @@ npm run test:browser
 This creates screenshots and an actual PDF in ignored `artifacts/`. Review all screenshots and verify PDF dimensions; passing assertions alone is not visual QA.
 
 ```sh
-sh scripts/container-smoke.sh stemtape:0.5.0
+sh scripts/container-smoke.sh stemtape:0.6.0
 ```
 
-**v0.5.0 validation:** this review candidate has pending browser/physical/production gates. See [current validation](docs/VALIDATION.md).
+**v0.6.0 validation:** this review candidate has pending release gates. See [current validation](docs/VALIDATION.md). Prior v0.5.0 manual checks and the owner’s live confirmation are separate evidence; they do not verify v0.6.0.
 
 **Prior v0.4.1 validation:** see [current evidence and remaining gates](docs/VALIDATION.md) and [separate security/application review groups](docs/REVIEW-v0.4.1.md). v0.4.0 was merged to main; that does not establish unperformed production checks.
 
