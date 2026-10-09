@@ -71,3 +71,34 @@ footer a:hover{color:var(--ring)}
 .column-move-button{font-size:11px;padding:7px 5px;min-height:36px}
 .column-order-item.dragging{background:var(--soft);outline:2px solid var(--ring)}
 #column-order-status{min-height:1.45em}
+
+:root{--secondary-border:#7b877f;--secondary-hover:#e9eee5;--secondary-hover-border:#626f66}
+:root[data-theme=dark]{--secondary-border:#78857e;--secondary-hover:#343e38;--secondary-hover-border:#a1ada5}
+button.secondary-button{border:1px solid var(--secondary-border);background:var(--soft);color:var(--text);padding:9px 12px;border-radius:8px;min-height:44px;font-size:13px;font-weight:600;white-space:normal}
+button.secondary-button:hover{border-color:var(--secondary-hover-border);background:var(--secondary-hover)}
+/* The neutral edge keeps the lime focus ring visible against the light surface. */
+button.secondary-button:focus-visible{outline:3px solid var(--lime);outline-offset:2px;box-shadow:0 0 0 6px var(--text)}
+
+/* Equal grid tracks stretch the cards; flexible space aligns actions without fixed heights. */
+.import-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.import-card{display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--border);border-radius:10px;background:var(--soft);min-width:0;overflow-wrap:anywhere}
+.import-card h3{font-size:15px;margin:0;color:var(--text)}
+#dialog-body .import-card p{font-size:13px;margin:0}
+.import-card button{margin-top:auto;width:100%;white-space:normal}
+.settings-group{border-top:1px solid var(--border);padding-top:14px;margin-top:18px;min-width:0}
+.settings-group:first-of-type{border-top:0}
+.settings-group h3{font-size:14px;margin:0 0 10px;color:var(--text)}
+.settings-group .settings-grid{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;margin:0;gap:12px}
+.settings-group label{min-width:0;overflow-wrap:anywhere}
+.settings-group input,.settings-group select{max-width:100%}
+.settings-group .checkbox-label input{margin:0;flex-shrink:0}
+.settings-wide{grid-column:1/-1}
+.settings-group .settings-help{font-size:11px;color:var(--muted);margin:6px 0 0;font-weight:400}
+.settings-group #save-bike{margin-top:10px;white-space:normal;text-align:left}
+@media(max-width:520px){
+ .import-options{grid-template-columns:minmax(0,1fr)}
+ .import-card{padding:14px}
+ .settings-group .settings-grid{grid-template-columns:minmax(0,1fr)}
+ .settings-group .checkbox-label{align-items:flex-start}
+ .settings-group .checkbox-label input{margin-top:1px}
+}

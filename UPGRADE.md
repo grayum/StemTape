@@ -1,3 +1,11 @@
+# Upgrade to 0.6.1 (review candidate)
+
+This is a presentation-only patch from v0.6.0. Existing state/schema, CSV/JSON, column identities, save timestamps/recovery and physical sheet/print generation are unchanged. Export a complete JSON backup and keep the tested v0.6.0 image before any separately authorized deployment. Preserve private proxy configuration, certificates and the browser origin/profile. No automatic migration or data reset is required.
+
+Sheet dimensions and font controls now live inside Layout & print settings, with the existing controls grouped under five headings. Both import actions retain their names and behavior. Footer text stays visible but disabled when off; its stored content is unchanged.
+
+Rollback to the tested v0.6.0 image on the same browser origin does not introduce new metadata loss: this patch adds no data fields. Older v0.5.0 limitations described below still apply. Verify import cards/keyboard order, grouped settings and retained footer in both themes, narrow widths and actual 200% browser zoom before release; v0.6.0 live confirmation does not validate the new presentation. No production rebuild or deployment is part of preparation.
+
 # Upgrade to 0.6.0 (review candidate)
 
 Use a verified bundle/base for this private repository; do not substitute a stale checkout. Export complete JSON, close other tabs, retain the previous tested image and private configuration before any separately authorized deployment. Use `vim` for later operator edits. This preparation changes no production settings.

@@ -41,6 +41,8 @@ export async function reviewRegressions(browser,base){
  try{
   // Invalid drafts survive every full-render entry point; correction and cancellation work.
   const s=fresh();s.events.push({...clone(s.events[0]),id:uid()});await load(s);
+  // Sheet controls now live in the disclosure; expose them before creating an invalid draft.
+  await page.locator('.more-settings > summary').click();
   const position=page.locator('#editor-rows input').first();await position.fill('-1');const before=await stored();
   for(const selector of ['#sort','#add-row','#new-event','#duplicate-event','#delete-event','#mode-time','#column-settings','[data-theme=dark]','[data-move=down]','[data-move=trash]']){
    await page.locator(selector).first().click();assert.equal(await position.inputValue(),'-1',selector);assert.equal(await stored(),before,selector);
