@@ -35,13 +35,20 @@ Open **http://127.0.0.1:8080**. Use this local server rather than opening `index
 
 Custom Unicode emojis use the user's system font. The outlined symbols combine **Lucide** with original StemTape symbols, including the approved Bar, Bottle, Gel and Cobbles replacements, not Font Awesome. Lucide 1.8.0 and DejaVu font notices are bundled in `dist/assets/`. No CDN assets or analytics.
 
-## v0.6.0 changes (review candidate)
+## v0.6.1 changes (review candidate)
+
+- Responsive Import cards with equal widths and aligned actions; stack on mobile.
+- Understated secondary action buttons with visible borders, tinted backgrounds and lime keyboard focus in both themes.
+- Existing Layout & print settings grouped under Sheet size, Appearance, Columns, Footer and Printing. Open the native disclosure to edit dimensions or font. Footer text stays visible below its toggle, disabled when off and retained for later use.
+- Presentation-only patch: plans, backups, imports, save protections and physical print geometry are unchanged. See [changelog](CHANGELOG.md), [validation](docs/VALIDATION.md) and [upgrade/rollback](UPGRADE.md).
+
+## v0.6.0 changes
 
 - Compact Columns list under Layout & print settings: drag with mouse/touch, use Move left/right, or use arrow keys/Home/End on a handle. Distance/time stays fixed first; data follows column IDs. Boundary buttons are disabled and movement restores focus and announces position.
 - Optional **Show note column**, off by default. Initially insert Note before Cue/Fuel; rename it to Location, reorder it, or hide it without deleting its text. Column details uses the same labels, widths and cells as other custom columns. Existing columns named Note are not reclassified.
 - CSV exports visible data columns in display order, plus the required position/icon fields. Complete JSON retains hidden content, both modes, column identities, presets and layout. Existing width shares and physical sheet dimensions stay unchanged; adding a column can cause overflow and block printing.
 
-The new Note starts with a relative width share of 25; other shares are preserved. Review [design and manual checks](docs/REVIEW-v0.6.0.md), [validation](docs/VALIDATION.md) and [upgrade/rollback](UPGRADE.md). The owner confirmed v0.5.0 is deployed and working before this stage began; v0.6.0 has not been deployed.
+The new Note starts with a relative width share of 25; other shares are preserved. Review [design and manual checks](docs/REVIEW-v0.6.0.md), [validation](docs/VALIDATION.md) and [upgrade/rollback](UPGRADE.md). The owner confirms v0.6.0 is live and working; this is user-reported deployment status, not an independently executed production check.
 
 ## v0.5.0 changes
 
@@ -126,10 +133,10 @@ npm run test:browser
 This creates screenshots and an actual PDF in ignored `artifacts/`. Review all screenshots and verify PDF dimensions; passing assertions alone is not visual QA.
 
 ```sh
-sh scripts/container-smoke.sh stemtape:0.6.0
+sh scripts/container-smoke.sh stemtape:0.6.1
 ```
 
-**v0.6.0 validation:** this review candidate has pending release gates. See [current validation](docs/VALIDATION.md). Prior v0.5.0 manual checks and the owner’s live confirmation are separate evidence; they do not verify v0.6.0.
+**v0.6.1 validation:** the complete native Chromium suite against the local Docker app, real-browser screenshot/200% zoom review, 69 Node tests, syntax and container checks passed. The owner also reports a passing manual Docker-preview check on 2026-10-09. Physical printing, screen-reader/device testing and production verification are not inferred; remaining gates are recorded in [current validation](docs/VALIDATION.md).
 
 **Prior v0.4.1 validation:** see [current evidence and remaining gates](docs/VALIDATION.md) and [separate security/application review groups](docs/REVIEW-v0.4.1.md). v0.4.0 was merged to main; that does not establish unperformed production checks.
 

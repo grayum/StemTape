@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.1 — review candidate (2026-10-09)
+
+- Align the two existing import options in equal-width responsive cards, with bottom-aligned actions and natural mobile stacking. Keep action names, keyboard order and import handlers.
+- Group existing controls under Sheet size, Appearance, Columns, Footer and Printing inside the native lime-arrow disclosure. Footer text occupies its own full-width line below Show footer, remains visible when disabled and retains its value.
+- Give secondary actions a consistent neutral border/tinted background, stronger hover state, lime keyboard-focus ring and comfortable touch targets; scope the treatment to action buttons.
+- Use theme tokens, consistent labels/checkbox spacing and responsive grids without fixed card heights. No state/schema, CSV/JSON, column identity, save protection or sheet/print geometry changes.
+
 ## 0.6.0 — review candidate (2026-10-07)
 
 - Add a compact column-order list with mouse/touch handles, keyboard movement, left/right buttons, boundary disabling, stable focus and position feedback. Keep distance/time first and cue icons attached to a stable data column.
