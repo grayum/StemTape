@@ -95,6 +95,10 @@ Measure the **usable surface**, not the nominal stem length. Set width/length, a
 
 ## Docker development
 
+For the separate, manually deployed github.io test site, see
+[GitHub Pages testing](docs/GITHUB-PAGES.md). Production remains on the VPS at
+https://stemtape.cc/.
+
 Copy the examples once into your private configuration files:
 
 ```sh
