@@ -8,6 +8,7 @@ An anonymous internet-facing static site serves trusted HTML/CSS/ES modules, fon
 A compromised host, dependency or deployed JavaScript can access same-origin localStorage. Storage is not encryption or a secret vault. Do not enter secrets. A host sees connection metadata even when plan data stays in the browser.
 
 ## Controls implemented
+- HTML meta CSP supplies supported document restrictions on static hosts such as GitHub Pages; header-only protections still require the existing server configuration. See [Pages security differences](docs/GITHUB-PAGES.md#security-and-privacy-differences).
 - All data rendered through DOM textContent/SVG text nodes and fixed attributes. No user HTML/SVG, remote image URL, script eval or external fetch.
 - CSP at development and production servers: default deny, self scripts/styles/fonts, connect-src none, no objects/forms/frames. No inline script/style exceptions. X-Frame-Options DENY, nosniff, no-referrer and restricted permissions.
 - Strict reconstruction/validation of imported JSON; schema version, scalar types, duplicate IDs, prototype keys and list/text/range limits. Unknown keys discarded. Invalid import never mutates the active state. Incompatible persisted state is preserved and offered for recovery.

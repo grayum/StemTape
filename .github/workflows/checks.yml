@@ -1,5 +1,5 @@
 name: Check StemTape
-on: [push, pull_request, workflow_dispatch]
+on: [push, pull_request, workflow_dispatch, workflow_call]
 permissions:
   contents: read
 jobs:
@@ -10,6 +10,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 (Node.js 24)
         with:
           persist-credentials: false
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0 (Node.js 24)
+        with:
+          node-version: '22'
+          package-manager-cache: false
       - name: Syntax and data tests
         run: |
           npm run check
@@ -18,26 +23,20 @@ jobs:
         run: |
           npm install --no-save --package-lock=false playwright@1.62.1
           npx playwright install --with-deps chromium
-      - name: Browser workflows and PDF
-        run: |
-          mkdir -p artifacts
-          python3 scripts/serve.py --diagnostics > artifacts/stemtape-preview.log 2>&1 &
-          server_pid=$!
-          trap 'kill "$server_pid"' EXIT
-          for attempt in $(seq 1 15); do
-            curl -fsS http://127.0.0.1:8080/ >/dev/null && break
-            sleep 1
-          done
-          npm run test:browser
+      - name: Browser workflows and PDF at root and /StemTape/
+        run: sh scripts/browser-checks.sh
       - name: Preserve browser diagnostics even on failure
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2 (Node.js 24)
         with:
           name: browser-diagnostics
           path: artifacts/
           if-no-files-found: warn
       - name: Ensure private files are not tracked
-        run: python3 scripts/check-private-files.py
+        run: |
+          python3 scripts/check-private-files.py
+          python3 scripts/check-pages-artifact.py
+          git diff --exit-code -- dist/
   container:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -45,6 +44,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 (Node.js 24)
         with:
           persist-credentials: false
+          ref: ${{ github.sha }}
       - name: Resolve base image, build, test hardening
         run: |
           docker pull nginx:stable-alpine

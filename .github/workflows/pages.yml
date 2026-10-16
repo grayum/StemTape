@@ -1,0 +1,60 @@
+name: Test on GitHub Pages
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    if: github.ref == 'refs/heads/main' && github.repository == 'grayum/StemTape'
+    uses: ./.github/workflows/checks.yml
+
+  artifact:
+    needs: validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 (Node.js 24)
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      # dist is checked-in source: no generator or build/install step is needed.
+      - name: Verify publish directory
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          python3 scripts/check-pages-artifact.py
+          git diff --exit-code -- dist/
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0 (composite; upload-artifact v7.0.0, Node.js 24)
+        with:
+          path: dist/
+          include-hidden-files: true
+      - name: Inspect the archive produced by the pinned upload action
+        run: python3 scripts/check-pages-artifact.py "$RUNNER_TEMP/artifact.tar"
+
+  deploy:
+    needs: artifact
+    if: github.ref == 'refs/heads/main' && github.repository == 'grayum/StemTape'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0 (Node.js 24)
+        id: pages
+        with:
+          enablement: false
+      - name: Require the initial github.io test destination
+        env:
+          PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: test "${PAGES_BASE_URL%/}" = 'https://grayum.github.io/StemTape'
+      - uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1 (Node.js 24)
+        id: deployment
