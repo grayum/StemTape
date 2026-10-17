@@ -1,4 +1,14 @@
-# Deployment: laptop → homelab → VPS
+# Deployment: hosted service and optional self-hosting
+
+The current service at **https://stemtape.cc/** uses **GitHub Pages behind Cloudflare**.
+Use the [Pages migration/operations guide](GITHUB-PAGES.md) for the existing manual
+workflow, DNS/TLS, response-header and cache rules, verification limits and rollback.
+The user confirmed on 2026-10-17 that the former VPS is turned off, not immediately
+available for rollback. Rollback requires starting it and verifying its application,
+TLS and configuration before switching traffic back. Deletion of the VPS, disks,
+snapshots and backups is not confirmed.
+The laptop, homelab, Traefik and Caddy/VPS instructions below are optional
+self-hosting support, not instructions for deploying the current hosted service.
 
 ## Local laptop / SDX
 
@@ -35,28 +45,28 @@ docker compose --project-directory . --env-file .env -f deploy/docker-compose.vp
 
 `--project-directory .` is important: build context and bind mounts are relative to the project root. This file includes the app and Caddy and must not be combined with the local-test/Traefik example. It publishes only proxy ports 80/443. Caddy runs non-root internally on 8080/8443, obtains/renews TLS, and keeps certificates in the private runtime directories. Admin API and access logging are disabled in the example.
 
-## Base-image pinning and release
+## Self-hosted base-image pinning and release
 
 An explicit Nginx version tag is supplied for local testing. For production resolve the selected alpine image to a digest, scan it and set `NGINX_IMAGE=nginx@sha256:...`. The supplied Dockerfile requires Alpine. Pinning does not replace updates.
 
 Build and scan once, push to your registry, then use the exact same application digest in homelab and production via STEMTAPE_IMAGE. After pulling it, run Compose with `up -d --no-build`. Keep the previous digest and pre-upgrade JSON for rollback; preserve TLS state. Never automatically overwrite private .env, docker-compose.yaml or runtime directories.
 
-## Host and network checks
+## Self-hosted host and network checks
 
 Use a supported, patched VPS OS/Docker and key-based restricted SSH. Keep management off the public network. Verify provider and Docker-aware firewall rules, IPv4 and IPv6; do not rely only on UFW for published Docker ports. DNS must resolve to the proxy. Verify valid TLS, exact-host routing, HTTP redirection, CSP/security headers and no exposed app port/dashboard. Check external Host/IP-only requests do not serve the application. Provider-level denial-of-service protection is a separate hosting concern; the standalone Caddy example has timeouts/resource limits but no third-party rate-limit module.
 
 Only plan content stays client-side: servers necessarily receive ordinary connection metadata. No access logging is enabled by the app example; operator proxy logging may differ. A server compromise could change delivered JavaScript and threaten browser data. Keep the build/deployment supply chain protected.
 
-## Cloudflare in front of the Caddy origin
+## Optional Cloudflare in front of a Caddy origin
 
-For `stemtape.cc` (Cloudflare → DigitalOcean → Caddy → app), use the [v0.4.0 security runbook](SECURITY-DEPLOYMENT.md). It distinguishes edge TLS from origin TLS, gives manual Cloudflare/CAA and verified Host/SNI checks, and records the proxy-only `NET_BIND_SERVICE` requirement for capability-marked Caddy images. The live private deployment path is `/opt/docker/stemtape-config`; source is `/opt/docker/stemtape`. Keep the working private mounts and certificate data rather than replacing them with example-relative paths.
+The former `stemtape.cc` path was Cloudflare → DigitalOcean → Caddy → app. It is no longer the current hosted-service path. For optional Caddy installations or retained-VPS investigation, use the [historical v0.4.0 security runbook](SECURITY-DEPLOYMENT.md). It distinguishes edge TLS from origin TLS, gives manual Cloudflare/CAA and verified Host/SNI checks, and records the proxy-only `NET_BIND_SERVICE` requirement for capability-marked Caddy images. The former VPS used private configuration at `/opt/docker/stemtape-config` and source at `/opt/docker/stemtape`; these are rollback records, not Pages deployment paths. Keep the working private mounts and certificate data rather than replacing them with example-relative paths.
 
-## v0.5.0 deployment completion reminder
+## Historical v0.5.0 deployment completion reminder
 
 After a separately authorized deployment, verify the served version, all four replacement icons, footer toggle/text persistence and overflow blocking, light/dark settings arrow, recovery and actual-size print behavior on stemtape.cc. Record the actual results; do not infer production success from local/container checks. Preserve the tested image/configuration and JSON backup for rollback.
 
 The owner subsequently confirmed v0.5.0 is deployed and working. The [approved column follow-ups](ROADMAP.md) are therefore prepared in the separate v0.6.0 candidate; no independent production re-test is claimed.
 
-## v0.6.0 deployment completion reminder
+## Historical v0.6.0 deployment completion reminder
 
 After a separately authorized deployment, verify the served version, fixed first column, movement/focus/buttons and mobile touch cancellation, Note rename/hide/reload, CSV/JSON alignment, save/recovery feedback and unchanged footer/physical dimensions. Check narrow and wide sheets and all rotations; physically print at 100% and measure the sheet/calibration line. Keep a v0.6.0 JSON backup and the previous tested image before deployment or rollback. Record actual results; local checks and prior v0.5.0 confirmation do not establish v0.6.0 production success.

@@ -2,6 +2,12 @@
 
 `dist/` is the complete browser application; deploy only this directory. There is no framework or runtime package installation. `index.html` defines accessible controls, `app.js` owns the DOM, dialogs, local state, SVG layout and printing. `core.js` owns pure validation/conversion/CSV operations. `presets.js` holds the project owner's published example cues. `icons.js` contains a vendored Lucide subset with the upstream license and original StemTape outline symbols (bar, bottle, gel, cobbles, rice cake, can, neutral zone). Assets contain fonts and independently editable vector brand files.
 
+The current hosted service is GitHub Pages behind Cloudflare at https://stemtape.cc/.
+Cloudflare supplies the documented response-header/cache policies; Pages does not
+execute Nginx/Caddy configuration. Docker/VPS remains optional self-hosting. See
+[hosting operations and privacy](GITHUB-PAGES.md). The hostname stayed the same
+during migration, preserving browser origin; plans remain client-side.
+
 State in `stemtape.v1`: schema version, theme, active event ID, events, personal presets, optional remembered bike dimensions. Event: ID/name, preset, mode, distance/dimension units, total metres, remaining-distance switch, columns, independent distance/time row lists, physical layout. Values in distance columns are metres; primary time values are integer elapsed minutes. Unit changes never rewrite canonical data. Display rounding occurs only in UI/CSV; JSON retains precision.
 
 Column: ID/label/type/relative width/visibility/alignment/bold. First column is fixed distance-or-time. Text/symbol columns accept arbitrary Unicode text (160 chars); number columns accept nonnegative finite values. Typed edits are validated. Reordering/removing columns preserves stable IDs; destructive changes require confirmation. Icons are stored separately per row. Legacy state uses its second data column for printed icons; optional cueColumnId preserves that association when columns move or Note is inserted. Hidden data columns remain stored but are hidden in the editor, print and CSV; the mandatory position/icon editor and CSV fields remain available.

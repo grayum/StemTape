@@ -52,9 +52,9 @@ jobs:
         id: pages
         with:
           enablement: false
-      - name: Require the initial github.io test destination
+      - name: Require the configured canonical Pages destination
         env:
           PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
-        run: test "${PAGES_BASE_URL%/}" = 'https://grayum.github.io/StemTape'
+        run: test "${PAGES_BASE_URL%/}" = 'https://stemtape.cc'
       - uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1 (Node.js 24)
         id: deployment

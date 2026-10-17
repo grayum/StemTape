@@ -2,7 +2,10 @@
 
 **A little tape. A clear plan.**
 
-**[Free hosted app / live demo](https://stemtape.cc/)** — ride plans stay in your browser. Docker self-hosting remains available.
+**[Free hosted app / live demo](https://stemtape.cc/)** — hosted on GitHub Pages behind Cloudflare; ride plans stay in your browser. Docker/VPS self-hosting remains available.
+
+The canonical URL is https://stemtape.cc/; www redirects to it. See the
+[completed hosting migration and operational settings](docs/GITHUB-PAGES.md).
 
 Local-first cycling cue sheets for a stem or top tube. A portable static web app with light/dark/system themes and a lime folded-tape identity. All editing, imports, storage and printing happen in the browser.
 
@@ -69,7 +72,7 @@ Remaining Cloudflare cipher/key-exchange findings are accepted deployment limita
 
 ## Data and privacy
 
-Plans live in your current browser's localStorage, not the server. Different domains, profiles and browsers have separate data. Clearing site data removes plans. Export JSON backups regularly; CSV preserves cue data, not full layout/types. Remembered bike dimensions are included in JSON. Optional last-save timing metadata shares the same atomic state record and byte budget; exact-limit plans preserve their data and explicitly retain time only for the current tab when metadata cannot fit. Old data with no timestamp keeps an unknown save time. See [save-status behavior](docs/SAVE-STATUS.md). Saved state, complete JSON backups and imported files share a 2,000,000-byte UTF-8 limit. State includes all events, both cue modes, presets and preferences; changes exceeding the limit are rejected without truncation. Existing oversized or unreadable storage remains protected with an original-data recovery export. Imports also allow at most 200 rows per mode and 8 columns. No GPX parsing, accounts, automatic nutrition advice or route detection.
+The hosted service uses GitHub Pages and Cloudflare, which process normal hosting requests and connection metadata. Cloudflare Network Error Logging was disabled; this does not eliminate all provider logs or data processing. StemTape adds no application analytics or tracking scripts. Plans live in your current browser's localStorage, not the server. Different domains, profiles and browsers have separate data. Clearing site data removes plans. Export JSON backups regularly; CSV preserves cue data, not full layout/types. Remembered bike dimensions are included in JSON. Optional last-save timing metadata shares the same atomic state record and byte budget; exact-limit plans preserve their data and explicitly retain time only for the current tab when metadata cannot fit. Old data with no timestamp keeps an unknown save time. See [save-status behavior](docs/SAVE-STATUS.md). Saved state, complete JSON backups and imported files share a 2,000,000-byte UTF-8 limit. State includes all events, both cue modes, presets and preferences; changes exceeding the limit are rejected without truncation. Existing oversized or unreadable storage remains protected with an original-data recovery export. Imports also allow at most 200 rows per mode and 8 columns. No GPX parsing, accounts, automatic nutrition advice or route detection.
 
 CSV example:
 
@@ -93,11 +96,13 @@ Use point decimal separators in CSV numbers. A comma in text must be quoted. Sup
 
 Measure the **usable surface**, not the nominal stem length. Set width/length, adjust text and print at **100% / Actual size**; disable browser headers/footers. Save as PDF from that dialog if wanted. Measure the printed **50 mm calibration line** before fitting the strip. Each copy gets its own page. Actual printer scaling and readability still require a physical test. The app never silently shrinks fonts; default is 11 pt, minimum 8 pt.
 
-## Docker development
+## Optional Docker development and self-hosting
 
-For the separate, manually deployed github.io test site, see
-[GitHub Pages testing](docs/GITHUB-PAGES.md). Production remains on the VPS at
-https://stemtape.cc/.
+The current hosted service uses [GitHub Pages behind Cloudflare](docs/GITHUB-PAGES.md).
+The following Docker, Traefik and VPS examples are optional self-hosting paths.
+The user confirmed on 2026-10-17 that the former production VPS is turned off.
+Rollback requires starting it and verifying the app, TLS and configuration before
+switching traffic. Deletion of the VPS, disks, snapshots and backups is unconfirmed.
 
 Copy the examples once into your private configuration files:
 
@@ -148,7 +153,7 @@ sh scripts/container-smoke.sh stemtape:0.6.1
 
 ## Repository workflow
 
-Unzip into a fresh development directory, review, then initialise Git and create your chosen private GitHub repository. Keep `.env`, actual deployment overrides and `runtime/` outside version control. CI is included and does not publish or deploy. Public release needs a chosen project license, domain/trademark checks and release gates. First-party code/brand licensing remains for the owner to choose; bundled third-party assets retain their own notices.
+Unzip into a fresh development directory, review, then initialise Git and create your chosen private GitHub repository. Keep `.env`, actual deployment overrides and `runtime/` outside version control. CI validates changes; the separate Pages workflow deploys only when manually dispatched on main, after validation. See the [configured Pages destination guard](docs/GITHUB-PAGES.md#github-pages-settings-and-manual-deployment) before another deployment. Public release needs a chosen project license, domain/trademark checks and release gates. First-party code/brand licensing remains for the owner to choose; bundled third-party assets retain their own notices.
 
 ## Credits
 

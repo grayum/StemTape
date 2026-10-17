@@ -1,4 +1,14 @@
-# v0.4.0 security and deployment review
+# Historical v0.4.0 VPS security and deployment review
+
+**Current hosting:** since the owner-confirmed 2026-10-17 migration, stemtape.cc
+uses GitHub Pages behind Cloudflare. See [current Pages operations](GITHUB-PAGES.md).
+The user confirmed on 2026-10-17 that the former VPS is turned off. Rollback would
+require starting it and verifying its application, TLS and configuration before
+switching traffic. Deletion of the VPS, disks, snapshots and backups is unconfirmed.
+The review, CAA inventory and private paths below describe the former DigitalOcean/Caddy setup
+and optional self-hosting, not current Pages configuration. Do not apply its
+historical DNS/rule proposals as the confirmed production settings. Preserve
+backups and obtain separate authorization before any infrastructure change.
 
 This is an operator runbook, not a record of production changes. The owner-provided [Internet.nl baseline](https://internet.nl/site/stemtape.cc/4328313/) tested on 2026-10-02 scored 95%. Headers, HSTS, certificate, HTTPS redirect, IPv6, DNSSEC and RPKI passed; preserve those controls. No after-change public result is recorded.
 
@@ -13,7 +23,7 @@ This is an operator runbook, not a record of production changes. The owner-provi
 | Origin certificate, TLS, host routing and container execution | Caddy origin on DigitalOcean | Verify independently using the canonical Host and SNI. |
 | security.txt | Application/repository plus verified security contact owner | Publish the owner-authorized security.txt; maintain its contact and expiry. |
 
-Traffic is visitor → Cloudflare → DigitalOcean → Caddy → static app. The internal alias resolves directly to Droplet IPv4; it is an address-discovery aid, not the public certificate name. A Caddy cipher change cannot fix a Cloudflare edge handshake. Keep client-side plans, imports and exports out of server requests/logs.
+At the time of this review, traffic was visitor → Cloudflare → DigitalOcean → Caddy → static app. The internal alias resolves directly to Droplet IPv4; it is an address-discovery aid, not the public certificate name. A Caddy cipher change cannot fix a Cloudflare edge handshake. Keep client-side plans, imports and exports out of server requests/logs.
 
 ## Manual Cloudflare changes (not executed)
 
@@ -64,11 +74,11 @@ docker run --rm --init --user 10001:10001 --read-only --cap-drop ALL --cap-add N
 
 The first command is the negative reproduction, not a required failure for all possible custom images. If the pin lacks file capabilities or either result differs, investigate the actual binary/runtime before broadening permissions. Test configuration startup as well as `version`. Re-run this check when changing the pin.
 
-Source lives at `/opt/docker/stemtape`; private deployment config lives at `/opt/docker/stemtape-config`. Keep private files and certificate volumes outside Git. For a manual operator change, use `vim /opt/docker/stemtape-config/docker-compose.yaml` (adjust the basename to the existing private file). Add `cap_add: [NET_BIND_SERVICE]` to **proxy only**. If editing the private Caddyfile, use `vim /opt/docker/stemtape-config/Caddyfile`. Preserve the existing absolute source/config mounts, persistent certificate storage, private env-file location and project name. Do not copy the example over a working deployment or relocate its data. Review `docker compose --project-directory /opt/docker/stemtape --env-file /opt/docker/stemtape-config/.env -f /opt/docker/stemtape-config/docker-compose.yaml config --quiet` locally as operator before separately authorizing any restart. No production command was executed in this review.
+The former VPS source was at `/opt/docker/stemtape`; private deployment config was at `/opt/docker/stemtape-config`. Preserve those retained rollback files; they are not the Pages deployment mechanism. Keep private files and certificate volumes outside Git. For a manual operator change, use `vim /opt/docker/stemtape-config/docker-compose.yaml` (adjust the basename to the existing private file). Add `cap_add: [NET_BIND_SERVICE]` to **proxy only**. If editing the private Caddyfile, use `vim /opt/docker/stemtape-config/Caddyfile`. Preserve the existing absolute source/config mounts, persistent certificate storage, private env-file location and project name. Do not copy the example over a working deployment or relocate its data. Review `docker compose --project-directory /opt/docker/stemtape --env-file /opt/docker/stemtape-config/.env -f /opt/docker/stemtape-config/docker-compose.yaml config --quiet` locally as operator before separately authorizing any restart. No production command was executed in this review.
 
 ## security.txt maintenance
 
-v0.4.1 publishes the owner-authorized `mailto:securitytxt.reps@mail.gray-um.com` at `/.well-known/security.txt`, canonical URL `https://stemtape.cc/.well-known/security.txt`, preferred languages en/nl, expiry 2027-09-01T00:00:00Z. Review the mailbox and renew before expiry, keeping Expires less than one year ahead. The Nginx exact-location exception preserves inherited security headers and denies other hidden paths. Container tests check actual response bytes and UTF-8 text/plain. Public retrieval through Cloudflare still requires an authorized post-deployment check.
+v0.4.1 publishes the owner-authorized `mailto:securitytxt.reps@mail.gray-um.com` at `/.well-known/security.txt`, canonical URL `https://stemtape.cc/.well-known/security.txt`, preferred languages en/nl, expiry 2027-09-01T00:00:00Z. Review the mailbox and renew before expiry, keeping Expires less than one year ahead. The Nginx exact-location exception preserves inherited security headers and denies other hidden paths. Container tests check actual response bytes and UTF-8 text/plain. Public retrieval was subsequently confirmed by supplied 2026-10-17 evidence in the [Pages migration record](GITHUB-PAGES.md#securitytxt); this historical container review did not perform that check.
 
 Self-hosters: use `vim dist/.well-known/security.txt` to replace Contact and Canonical for your own monitored private channel and HTTPS origin; update Expires, rebuild, and verify your endpoint. GitHub private vulnerability reporting remains an alternative when enabled. Never publish a placeholder channel.
 
