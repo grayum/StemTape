@@ -1,3 +1,26 @@
+# Current hosting and rollback
+
+The hosted service is **https://stemtape.cc/** on **GitHub Pages behind Cloudflare**.
+Use the existing manual Pages workflow and its validation gates for future
+separately authorized deployments; see the [migration/operations record](docs/GITHUB-PAGES.md),
+including the focused configured-destination guard correction.
+The version-specific notes below retain their historical release context;
+Docker image/configuration steps apply to optional self-hosted installations.
+
+The user confirmed on **2026-10-17** that the former production VPS is **turned
+off**. It is not immediately available for rollback. A separately authorized
+rollback requires starting it and verifying its application/version, TLS and
+configuration before switching traffic back. Turning it off does not mean it or
+its disks, snapshots or backups were deleted or fully decommissioned; those
+deletions remain unconfirmed. Keep source, configuration, certificate state and
+image/Pages-artifact backups.
+Before serving an older application at the same origin, export current complete
+JSON, close old tabs and verify compatibility in an isolated profile. Sharing
+schema v1 does not ensure optional fields survive an older version's next save.
+Review the version-specific data-loss limitations below. Preserve current browser
+state and backups before any explicit restore; do not clear localStorage as part
+of a hosting rollback. No rollback or infrastructure action is authorized here.
+
 # Upgrade to 0.6.1 (review candidate)
 
 This is a presentation-only patch from v0.6.0. Existing state/schema, CSV/JSON, column identities, save timestamps/recovery and physical sheet/print generation are unchanged. Export a complete JSON backup and keep the tested v0.6.0 image before any separately authorized deployment. Preserve private proxy configuration, certificates and the browser origin/profile. No automatic migration or data reset is required.

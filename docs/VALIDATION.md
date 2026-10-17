@@ -1,5 +1,157 @@
 # Validation record
 
+## 2026-10-17 — migration finalization
+
+Reviewed the complete migration diff, including the two privacy strings and the
+focused Pages destination guard. Earlier no-commit statements below describe
+those preparation stages; this finalization is authorized for a local commit and
+complete-history bundle only. No push, merge, deployment or infrastructure change
+is included. Unrelated README edits and existing backups remain outside this change.
+
+Final documentation/link, diff, file-hygiene and publish-directory checks passed.
+Completed Node/syntax, native Chromium at `/` and `/StemTape/`, focused privacy
+visual checks, actionlint and guard-case evidence below is reused: the relevant
+application and workflow files have not changed since those checks. No remote
+workflow execution, new container smoke, physical printing or broader device/
+accessibility testing is claimed. Account-level domain verification and VPS/disk/
+snapshot/backup deletion remain unconfirmed.
+
+## 2026-10-17 — independent public retry after network approval
+
+New curl observations, distinct from the user-supplied production evidence:
+
+- **www:** HTTP 301 to `https://stemtape.cc/` (response Date 14:47:58 GMT).
+  Exactly one `Cache-Control: no-cache` header, unqualified, with no max-age.
+  Exactly one nosniff header; expected CSP, X-Frame-Options, Referrer-Policy and
+  Permissions-Policy present. HSTS `max-age=31536000` observed, source rule not
+  established. NEL and Report-To absent.
+- **github.io project URL:** HTTP 301 directly to `https://stemtape.cc/` with no
+  `/StemTape/` suffix (response Date 14:48:02 GMT). This public redirect does not
+  make the workflow's shell metadata comparison redirect-aware.
+- **Apex:** a subsequent direct retry succeeded with HTTP 200 and an HTML response
+  (response Date 14:49:12 GMT). Exactly one unqualified `Cache-Control: no-cache`,
+  expected CSP including frame-ancestors, X-Frame-Options, Referrer-Policy and
+  Permissions-Policy, one nosniff header and HSTS `max-age=31536000` were observed;
+  NEL/Report-To were absent. Header assertions passed, including an exact CSP
+  comparison with the documented policy. The earlier redirect-follow attempt was
+  policy-blocked; that was not an apex outage. These observations are HTTP/header
+  checks, not an application/browser, physical-print or remote deployment test.
+
+Automated inspection of the captured headers passed exact cache/redirect values,
+security-header values, single nosniff and absent NEL/Report-To. Documentation
+links and diff checks were run for this evidence-only update; application/workflow
+files were not changed again. No commit, push, merge, deployment or infrastructure
+change was performed. The earlier full local test results retain their scope.
+
+
+## 2026-10-17 — confirmations, destination guard and powered-off VPS
+
+User confirmation establishes **GitHub Pages Enforce HTTPS enabled** and the former
+production **VPS turned off**, both dated 2026-10-17. These are user confirmations,
+not independent authenticated settings or VPS lifecycle checks. The VPS is not
+running or immediately available for rollback. Rollback requires separately
+authorized startup and application/version, TLS and configuration verification
+before switching traffic back. Turning it off does not establish deletion/full
+decommissioning; deletion of the VPS, disks, snapshots and backups is unconfirmed.
+
+GitHub did not prompt the user for account-level domain verification. Completion
+and TXT value remain unconfirmed: account-level ownership verification is separate
+from repository DNS validation and certificate provisioning.
+
+The exact original pages.yml step was a shell string comparison of
+`steps.pages.outputs.base_url` with `https://grayum.github.io/StemTape`.
+Inspection of pinned configure-pages source confirms its URL comes from the Pages
+API's `html_url`, normalized without a trailing slash. It does not follow site
+redirects, append `/StemTape/` to the custom domain or validate public content.
+Canonical settings fail the original check before deployment; stale github.io
+settings can pass while naming the wrong intended destination. The focused fix
+changes only the guard label and expected value to `https://stemtape.cc`, keeping
+the configured output as input. Manual-only/main-only restrictions, permissions,
+action pins, every validation/artifact gate and both local mount-point suites remain.
+
+Initial attempted public checks were **not production-header evidence**: requests to
+www and github.io were stopped by environment network policy, yielding HTTP 403
+with “Approval required” bodies before a public response was available. The
+suggested `sbx` approval utility is unavailable. No network bypass was attempted.
+The corrected www Cache-Control was unverified at that point; the successful
+independent retry above subsequently confirmed it. Supplied prior apex evidence
+retains its original scope; the later independent apex retry above succeeded.
+
+Local follow-up checks passed:
+
+- Nine cases against the actual corrected shell guard: canonical root with/without
+  trailing slash accepted; github.io, canonical `/StemTape/`, www, HTTP, unexpected
+  host and empty input rejected. Original canonical failure/stale-github.io pass
+  reproduced separately. Source comparison proves only two workflow lines change.
+- `actionlint` v1.7.12: all workflows passed (shellcheck integration disabled).
+  The unchanged browser harness passed shell syntax checking.
+- `npm test`: **69/69 passed**; `npm run check`: **passed**.
+- Full native Chromium suites at **`/` and `/StemTape/` passed again**, including
+  PDF generation; Pages resource/navigation/security.txt/meta-CSP checks passed.
+  No project-path coverage was removed or retargeted to the production domain.
+- **48 local documentation links/anchors**, exact documented CSP/security.txt,
+  tracked-file/basic credential-pattern and publish-file gates, and
+  `git diff --check`: **passed**. The hygiene check is not a full secret scan.
+
+No new container smoke, physical print or remote workflow execution was performed;
+the container validation gate remains mandatory in the deployment workflow. No
+commit, push, merge, deployment, DNS/Cloudflare edit or VPS start/stop/delete was
+performed. All prior pending documentation/privacy changes remain in this branch.
+
+
+## 2026-10-17 — Pages/Cloudflare migration: supplied production evidence
+
+The owner confirms the hosted service now uses GitHub Pages behind Cloudflare at
+https://stemtape.cc/. The apex returns HTTP 200; www returns HTTP 301 to the
+canonical URL. Cloudflare Full (strict), the DNS/CAA export and the functional
+response-header/cache/NEL settings are recorded in [Pages operations](GITHUB-PAGES.md).
+The user subsequently confirmed on 2026-10-17 that the former VPS is turned off;
+deletions of the VPS, disks, snapshots and backups remain unconfirmed. Rollback
+requires startup and verification before any traffic switch.
+
+User-reported testing: **“Manual checks passed as far as the user could tell.”**
+The user previously confirmed saved plans, editing and print preview looked good
+with the restored CSP active. No physical printing, exhaustive browser/device
+coverage, screen-reader testing or independent automated production pass is inferred.
+
+Supplied curl evidence confirms expected security headers on apex and www,
+resolved duplicate nosniff, HSTS `max-age=31536000` (source setting unestablished),
+and absence of NEL/Report-To on both after disabling NEL. The final corrected apex
+header was `Cache-Control: no-cache`; that final corrected header was **not
+separately rechecked on www**. The canonical security.txt endpoint/contents were
+verified in the supplied evidence and match the repository. These are supplied
+observations, not curl checks newly performed by the agent.
+
+The user subsequently confirmed Enforce HTTPS enabled on 2026-10-17; the initial
+agent check had no working authenticated access. Account-level domain ownership
+verification remains recommended and unconfirmed despite repository DNS validation
+and certificate provisioning. The destination guard inherited from main was
+investigated and corrected in the focused follow-up above; all deployment triggers
+and validation gates remain. No DNS, Cloudflare setting or VPS service was changed.
+
+The documentation/privacy-text candidate is based on that verified public main
+in the isolated `chore/document-pages-migration` worktree. Local validation of
+this candidate is separate from the production evidence above:
+
+- `npm test`: **69/69 passed**; `npm run check`: **passed**.
+- Existing full native Chromium suites at `/` and `/StemTape/`: **passed**, including
+  PDF generation. Pages-specific assets/navigation/security.txt/meta-CSP checks passed.
+- Focused privacy-dialog check: **passed** at 1440px/390px in light/dark themes,
+  with no horizontal overflow; desktop light and mobile dark screenshots inspected.
+- Local Markdown file/heading links, exact documented CSP/security.txt values,
+  tracked-file/basic credential-pattern and publish-file gates, and diff checks:
+  **passed**. The hygiene gate is not a full secret scan.
+- Source comparison confirms the only application change is two privacy strings.
+  At the initial documentation stage workflows were unchanged; the follow-up
+  changes only the Pages URL guard and label. Triggers, deployment configs, version,
+  state/import/export/print logic and CHANGELOG.md remain unchanged. Docker/VPS support and prior release records remain.
+
+No new container, physical-print, screen-reader or exhaustive device checks were
+run for this documentation/text update. No independent automated production test,
+commit, push, merge, deployment, DNS/Cloudflare modification or VPS shutdown was
+performed. Unrelated README work and existing backups remain in place.
+
+
 ## 2026-10-09 — user-reported v0.6.1 manual preview testing and final review
 
 Graham van der Wielen reports that his manual check of the v0.6.1 Docker preview **passed**. This is user-reported local-preview testing. Individual checklist items and devices were not specified; physical printing, screen-reader/device testing and production verification are **not inferred**.
