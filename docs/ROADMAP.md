@@ -1,10 +1,15 @@
-# Approved column follow-ups
+# Approved release sequence
 
-The owner confirmed v0.5.0 is deployed and working on https://stemtape.cc/, satisfying the gate for beginning this stage. This is user-reported live confirmation, not an independently executed production audit.
+- **v0.6.2:** focused Bidon artwork, print guidance, Privacy & Help placement/text and README polish. Current review candidate only.
+- **v0.7.0:** bounded per-plan session Undo/Redo.
+- **v0.8.0:** preset updating and Tour of Flanders.
+- **v0.9.0:** per-cue icon colours and grid options.
 
-Prepared in the v0.6.0 review candidate:
+Only v0.6.2 is implemented in this change. Later releases require their own design,
+validation and review; no deployment is authorized by this sequence.
 
-- Column ordering in Layout & print settings through drag handles, keyboard controls and accessible Move left/right buttons. Distance/time stays fixed first; data and icon association follow stable IDs. Editor, preview, print and CSV order remain consistent.
-- Optional text Note column, off by default, initially before Cue/Fuel. Renameable and reorderable; hiding preserves data/order, using the existing Custom column machinery and layout limits.
+## Historical column follow-ups
 
-See REVIEW-v0.6.0.md and VALIDATION.md for scope and outstanding checks. These features have not been deployed. No further column features are authorized by this record, and candidate preparation does not authorize production changes.
+The v0.6.0 work implemented stable-ID column ordering and an optional text Note
+column using existing layout and storage limits. See [the review](REVIEW-v0.6.0.md)
+and [validation record](VALIDATION.md) for its historical scope and evidence.

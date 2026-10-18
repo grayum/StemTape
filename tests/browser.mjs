@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict';
 import {v050Regressions} from './v050-browser.mjs';
 import {v060Regressions} from './v060-browser.mjs';
+import {v062Regressions} from './v062-browser.mjs';
 import {v061Regressions} from './v061-browser.mjs';
 import {v041Regressions} from './v041-browser.mjs';
 import {saveStatusRegressions} from './save-status-browser.mjs';
@@ -122,5 +123,6 @@ await v041Regressions(browser,base);
 await v050Regressions(browser,base);
 await v060Regressions(browser,base);
 await v061Regressions(browser,base);
+await v062Regressions(browser,base);
 console.log('PASS: desktop/mobile, local persistence, theme, time/distance, XSS, imports, columns, overflow, export and PDF.');
 }finally{await context?.close();await browser.close();}

@@ -79,6 +79,7 @@ export async function saveStatusRegressions(browser,base){
   await page.getByRole('heading',{name:'Restore backup?',exact:true}).waitFor();
   await page.evaluate(()=>Storage.prototype.setItem=function(){throw new DOMException('Blocked','SecurityError');});
   await page.getByRole('button',{name:'Restore backup',exact:true}).click();await waitStatus('Not saved');assert.equal(await stored(),original);
+  await page.locator('button[data-tab=preview]').click();
   await page.locator('#privacy').click();assert.equal(await page.getByRole('button',{name:'Export original recovery data',exact:true}).count(),1);
   assert.deepEqual(errors,[]);
  }finally{await context.close();}

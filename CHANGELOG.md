@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.2 — review candidate (2026-10-18)
+
+- Rotate only Bidon/Bottle artwork 45° clockwise around its existing centre in the shared icon definition; retain `bottle` identity and all other icons.
+- Emphasize “Scale 100% / Actual size.” semantically in print guidance and Help; explain Fit to page scaling and ruler checks.
+- Move Privacy & help into normal flow, right-aligned within the bottom of the preview frame and trim its self-hosting sentence. Keep the GitHub Pages/Cloudflare privacy explanation and self-hosting documentation.
+- Move misplaced README sorting/format notes out of Credits. No state/schema, storage, import/export, sorting, save-protection or sheet-dimension changes.
+
 ## 0.6.1 — review candidate (2026-10-09)
 
 - Align the two existing import options in equal-width responsive cards, with bottom-aligned actions and natural mobile stacking. Keep action names, keyboard order and import handlers.
