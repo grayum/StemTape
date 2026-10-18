@@ -1,3 +1,23 @@
+# Upgrade to 0.7.0 (review candidate)
+
+The user confirms v0.6.2 is deployed and working. This candidate adds in-memory
+Undo/Redo; no schema migration, storage-key change or data reset is needed.
+Export complete JSON and preserve backups before any separately authorized update.
+History is not a backup: reload/closing the tab loses it, successful library
+restore clears it, and memory pressure evicts older actions. Switching plans
+retains their separate histories. See [history scope](docs/REVIEW-v0.7.0.md).
+
+Valid Undo/Redo changes follow the normal save path. If storage fails, the restored
+plan remains in memory, status says Not saved, and JSON export remains available.
+A failed whole-library restore instead retains the previous plans and histories;
+it is only accepted after a successful atomic storage write. Invalid drafts must
+be corrected or explicitly cancelled before applying history.
+
+Rollback to v0.6.2 introduces no new saved fields; session history will be lost.
+Keep the same browser origin and verify backups/compatibility before rollback.
+Older-version limitations below still apply. Preparation is not deployment or a
+physical-print pass; outstanding release gates remain recorded in validation.
+
 # Upgrade to 0.6.2 (review candidate)
 
 Focused artwork, layout and text polish from v0.6.1. No state/schema, storage-key,

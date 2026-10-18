@@ -60,3 +60,15 @@ Four icon keys retain their identities with owner-approved lightweight fixed geo
 Order is the existing columns array; no parallel order list is added. Optional event references cueColumnId/noteColumnId must resolve to non-primary columns; the Note reference must resolve to a distinct text column. They are absent in legacy data and added only by a relevant mutation. Note visibility is the existing column.visible flag, not a second boolean. Creating Note fills an empty cell in every row of both modes and retains existing shares/dimensions. Turning it off retains cells and position. The managed Note cannot be deleted or retyped through generic controls; the explicit toggle controls visibility. Existing user-created columns named Note/Location are ordinary custom columns.
 
 CSV uses ordered visible data columns after mandatory position/icon fields. The existing reserved metadata tuple accepts an optional fourth field, cue or note, to preserve those roles without guessing labels. Older three-field metadata remains accepted. Invalid/duplicate roles reject the import. An icon-only or only-Note export imports with a blank Fuel column so the model still has a separate non-primary icon host. Hidden content and complete types/layout require JSON. `makeSheet` changes only the stable-ID icon-host comparison; physical layout, footer measurement and preparePrint remain unchanged.
+
+## Session history (0.7)
+
+`history.js` retains per-plan snapshot pairs in memory, capped at 20 combined
+Undo/Redo entries per plan and an 8 MiB shared serialized-payload accounting
+budget. App-level field completion groups accepted keystrokes and position sorts;
+completed drags are single actions. Restore uses existing validation/save paths,
+with no recursive history capture. Invalid drafts block history; ordinary storage
+failures retain valid in-memory state with truthful status. Whole-library replacement
+is accepted and clears history only after successful storage; failure retains the
+prior plans/history. Nothing is persisted or exported. See [history design,
+boundaries and memory accounting](REVIEW-v0.7.0.md).

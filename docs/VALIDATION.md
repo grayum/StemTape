@@ -1,5 +1,115 @@
 # Validation record
 
+## 2026-10-18 — final v0.7.0 manual acceptance and handoff
+
+The user accepts the complete v0.7.0 work, including the final Undo/Redo placement
+immediately before Save as preset, dated **2026-10-18**. This supersedes the pending
+placement review below. It is user-reported manual acceptance; no physical
+printing, screen-reader testing or exhaustive device/browser coverage is inferred.
+
+Final review confirms v0.7.0 package/UI/image metadata, changelog, history scope
+and validation documentation. Final `npm test` (73 tests), `npm run check` and
+`git diff --check` passed. Completed native Chromium/container evidence is reused
+for unchanged code. The final placement has explicit root and `/StemTape/`
+geometry/tab/focus coverage at desktop/mobile widths in both themes and actual
+200% Chromium zoom on the Docker preview, as recorded below.
+
+This handoff commits only the reviewed v0.7.0 source, tests, metadata and docs;
+local screenshots, PDFs, browser binaries, artifacts, unrelated README edits and
+backups are excluded. The existing Git author identity is retained. The working
+preview remains available at http://127.0.0.1:18080/ with unchanged forwarding.
+No push, merge, tag, deployment or infrastructure change is part of this handoff.
+Outstanding physical-print, broader accessibility/device, production proxy and
+full secret/image-scanning gates remain accurately recorded below; manual
+acceptance does not supply those missing checks.
+
+## 2026-10-18 — user-reported v0.7.0 review and action placement
+
+The user reports that manual testing of the v0.7.0 preview passed on 2026-10-18.
+This does not imply physical printing, screen-reader testing or exhaustive device
+coverage. A subsequent placement-only adjustment moves Undo/Redo immediately
+before Save as preset in DOM/tab order. Undo/Redo retain their 6px gap; the action
+group uses the existing 12px spacing before the preset action and wraps on narrow
+screens. History/saving behavior is unchanged. At this stage the placement
+adjustment awaited the user's final visual check; final acceptance is recorded above.
+
+Follow-up validation passed: native Chromium v0.7.0 regressions at the Docker
+root and plain static `/StemTape/`; explicit geometry, 6px/12px spacing, DOM/tab
+order and visible keyboard focus at 1440/390/320 widths in both themes; actual
+200% browser zoom on the refreshed Docker preview. Real desktop/mobile and zoom
+screenshots were opened for inspection. Test syntax and `git diff --check` passed.
+Existing history/saving test evidence is retained; neither implementation changed.
+Only the preview container was replaced using the same sandbox 8080 publish and
+HTTP configuration; all 29 served assets match the worktree and Nginx syntax
+passed. The laptop URL/forwarding remains http://127.0.0.1:18080/. The user's
+initial passing test applied to the earlier placement; the later final acceptance
+above includes the adjusted placement.
+
+
+## 2026-10-18 — v0.7.0 Undo/Redo candidate
+
+Environment: Linux aarch64 sandbox, Node 22.22.1, native Playwright 1.62.1
+Chromium (not a WASM/browser substitute). Branch `review/v0.7.0` was isolated from
+public HTTPS main `bf6fb4736745f0306ead5dac64744d07fb9dcb43`; fetched commit and
+public main advertisement matched, and the released v0.6.2 tip is an ancestor.
+The user's v0.6.2 deployment confirmation is separate from candidate validation.
+
+- **PASS:** `npm test`, 73 tests; `npm run check`; explicit syntax checks for new
+  browser/zoom tests; `git diff --check` and shell syntax checks.
+- **PASS:** complete existing native Chromium suite plus v0.7.0 regressions at
+  hardened root HTTP, plain static `/StemTape/` without rewrites, and the actual
+  Docker preview. Focused final additions were rerun at both Docker root and
+  project path; earlier full-suite evidence remains applicable (no later app edits).
+- **PASS:** completed multi-keystroke field/no-op/Redo grouping; one-click
+  blur-to-Undo; automatic value+sort restoration; insertion/deletion/manual and
+  explicit ordering; stable column/Note identities, rename/type/width/order and
+  hidden contents; plan name/layout/footer/copies, mode and unit snapshots.
+- **PASS:** isolated histories across plan switches, empty new/duplicate/CSV/preset
+  plans, excluded preset/bike changes, cancelled preset and failed import,
+  successful restore clearing, failed quota restore preserving current plans and
+  history, 20-action bound, no-op preservation and Redo invalidation, reload reset.
+  Pure history tests cover shared-budget chain-end eviction and oversize boundaries.
+- **PASS:** invalid drafts block Undo without losing text; platform shortcuts,
+  native field shortcut noninterception, modal exclusion, disabled buttons and
+  local focus fallback. Quota-failed Undo/Redo retain valid matching in-memory
+  state/history and truthful Not saved status. UTF-8 budget-rejected Undo preserves
+  current state/storage/stacks. Existing recovery/conflict save tests also passed.
+- **PASS:** actual Chromium browser zoom **2.0**, 720 CSS px at DPR 2, using a
+  temporary local test extension, both themes, edit/preview/Help, focus and wrapping;
+  rerun against Docker. Desktop 1440 and mobile 390/320 screenshots in light/dark
+  and actual zoom screenshots were opened for visual inspection. Mobile actions
+  use the visible Edit/Preview tab. Condition-based readiness waits are used.
+- **PASS:** identical preview/printed sheet SVG content after Undo/Redo, actual-size
+  PDF generation and print-render screenshot inspection. Cut marks/calibration and
+  the shared black-on-white print generator remain unchanged. This is not physical
+  printing or a ruler measurement.
+- **PASS:** Docker build from this worktree with the previously verified immutable
+  Nginx digest documented in local development. Container smoke on temporary sandbox
+  port 18081: UID 10001, read-only app, headers, GET/POST rejection, exact security.txt,
+  hidden-path denial and gzip. Expected read-only write failure was part of the check.
+- **PASS:** project-path resource/font/home/security.txt and meta-only CSP checks;
+  basic tracked-file credential/privacy guard. Prospective Pages allowlist checked
+  with a disposable Git index including new `dist/history.js`: exactly 29 files,
+  no CNAME/symlinks/unintended hidden paths. The real Git index was not staged.
+- **PASS:** preview replaced only the inspected v0.6.2 container, retained its image,
+  reused explicit loopback-development HTTP configuration and sandbox 8080 publish.
+  New `stemtape-v070-preview` is healthy; Nginx syntax and all 29 served assets
+  match the candidate. Established laptop URL remains http://127.0.0.1:18080/;
+  forwarding was preserved. Internal checks do not establish new laptop access.
+
+At the initial preparation stage no v0.7.0 user manual pass had been supplied;
+the later user report is recorded above. No physical print, exhaustive
+browser/device or screen-reader pass is claimed. Production TLS/canonical-host routing were not rechecked for this
+local candidate; production configuration/Pages deployment workflow are unchanged.
+Full secret/image scanners were unavailable; the basic private-file guard is not
+an equivalent scan. These required release gates remain outstanding; this is a
+review candidate, not release approval. No commit, push, merge, tag or deployment
+was performed. Unrelated original-checkout README edits and backups were preserved.
+
+See [design, memory accounting, boundaries and manual checklist](REVIEW-v0.7.0.md)
+and [the refreshed local preview record](LOCAL-DEVELOPMENT.md).
+
+
 ## 2026-10-18 — v0.6.2 final user review and local handoff
 
 The user reports that the final manual preview check passed, including the

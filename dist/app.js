@@ -1,4 +1,5 @@
 import {KEY,LIMITS,SYMBOLS,uid,clone,column,createEvent,initialState,validateEvent,displayDistance,toMetres,formatTime,parseTime,cueHeader,cellText,exportCSV,importCSV,moveCue,sortCuesByPosition,serializeState,parseState,restoreObject,totalDistanceMaximum,validatedTotal} from './core.js';
+import {PlanHistory} from './history.js';
 import {SaveSession,formatSaveTime} from './save-status.js';
 import {footerGeometry} from './footer.js';
 import {ICONS} from './icons.js';
@@ -52,6 +53,78 @@ window.addEventListener('storage',ev=>{try{if(ev.storageArea!==localStorage)retu
 setInterval(()=>refreshSaveStatus(false),15000);
 window.addEventListener('focus',()=>{try{saveSession.observe(localStorage.getItem(KEY));}catch{saveSession.phase='failed';}refreshSaveStatus();});
 const event=()=>state.events.find(e=>e.id===state.active)||state.events[0];
+// Only active-plan working snapshots are retained outside the bounded history store.
+const history=new PlanHistory();let historyPlan=JSON.stringify(event()),historyPlanId=event().id,fieldHistory=null,applyingHistory=false,lastSaveOK=false;
+function fieldLabel(input){
+ if(input.closest('#editor-rows'))return input.dataset.columnId===event().columns[0].id?'edit position':'edit cell';
+ if(input.id==='event-name')return 'rename plan';
+ if(input.id==='footer-text')return 'edit footer';
+ if(input.closest('.column-config'))return input.type==='number'?'column width':'column rename';
+ return 'edit layout';
+}
+function historyField(input){return input?.matches('input:not([type=checkbox]),textarea')&&input.matches('#event-name,#editor-rows input,.layout-controls input,.settings-grid input,.column-config input');}
+function finishHistoryField(){
+ if(!fieldHistory)return;const pending=fieldHistory;fieldHistory=null;
+ if(pending.id===historyPlanId)recordHistory(pending.id,pending.before,historyPlan,pending.label);
+ refreshHistory();
+}
+function recordHistory(id,before,after,label){
+ if(history.record(id,before,after,label).trimmed)toast('Older Undo history was dropped to keep session memory bounded.');
+}
+function trackPlan(label){
+ const after=JSON.stringify(event()),id=event().id;
+ if(!applyingHistory&&id===historyPlanId&&!fieldHistory)recordHistory(id,historyPlan,after,label);
+ historyPlan=after;historyPlanId=id;history.retain(state.events.map(e=>e.id));refreshHistory();
+}
+function refreshHistory(){
+ const pending=fieldHistory&&fieldHistory.before!==historyPlan;
+ const view=history.view(event().id),blocked=hasInvalidEdits();
+ for(const direction of ['undo','redo']){
+  const label=direction==='undo'&&pending?fieldHistory.label:direction==='redo'&&pending?'':view[direction];
+  $(direction).disabled=blocked||!label;$(direction).setAttribute('aria-label',`${direction==='undo'?'Undo':'Redo'}${label?' '+label:''}`);
+ }
+}
+document.addEventListener('focusin',ev=>{
+ if(!historyField(ev.target))return;
+ finishHistoryField();fieldHistory={input:ev.target,id:historyPlanId,before:historyPlan,label:fieldLabel(ev.target)};
+});
+// Blur's position-sort handler runs before bubbling focusout finalizes the action.
+document.addEventListener('focusout',ev=>{if(fieldHistory?.input===ev.target)finishHistoryField();});
+function applyHistory(direction){
+ if($('dialog').open)return;
+ if(hasInvalidEdits()){toast('Correct or cancel invalid edits before Undo or Redo.');return;}
+ if(historyField(document.activeElement))document.activeElement.blur();
+ finishHistoryField();if(hasInvalidEdits())return;
+ const target=history.peek(event().id,direction);if(!target)return;
+ const focused=document.activeElement;
+ try{
+  const candidate=validateEvent(JSON.parse(target.snapshot));
+  if(candidate.id!==event().id)throw Error('History belongs to another plan.');
+  restoreObject(event(),candidate);applyingHistory=true;
+  if(!commit(true))return;
+  history.accept(event().id,direction);refreshHistory();
+  $('history-status').textContent=`${direction==='undo'?'Undid':'Redid'} ${target.label}.${lastSaveOK?'':' Not saved; export a backup.'}`;
+  if(focused?.isConnected&&!focused.disabled)focused.focus({preventScroll:true});else $('history-controls').focus({preventScroll:true});
+ }catch(err){toast(err.message);}finally{applyingHistory=false;}
+}
+for(const direction of ['undo','redo']){
+ $(direction).addEventListener('pointerdown',()=>{if(!hasInvalidEdits()&&historyField(document.activeElement))document.activeElement.blur();});
+ $(direction).onclick=()=>applyHistory(direction);
+}
+document.addEventListener('keydown',ev=>{
+ if(ev.defaultPrevented||ev.altKey||$('dialog').open||ev.target.closest('input,textarea,[contenteditable]:not([contenteditable=false])'))return;
+ const mac=/Mac|iPhone|iPad/.test(navigator.platform),key=ev.key.toLowerCase();
+ const modifier=mac?ev.metaKey&&!ev.ctrlKey:ev.ctrlKey&&!ev.metaKey;
+ if(!modifier)return;
+ const direction=key==='z'?(ev.shiftKey?'redo':'undo'):!mac&&key==='y'&&!ev.shiftKey?'redo':null;
+ if(direction){ev.preventDefault();applyHistory(direction);}
+});
+// Library replacement is transactional: failed storage/recovery writes keep old plans/history.
+function replaceLibrary(candidate){
+ const previous=state,raw=acceptedState;state=candidate;allowRecoveryReplacement=true;
+ if(!save()||!lastSaveOK){state=previous;acceptedState=raw;render(true);toast('Restore could not be saved. Existing plans and Undo history are unchanged.');return false;}
+ fieldHistory=null;history.clear();historyPlan=JSON.stringify(event());historyPlanId=event().id;pendingEdits.clear();render(true);return true;
+}
 let activeDrag=null,pointerHeld=false,rowRefreshPending=false,rowRefreshTimer;
 document.addEventListener('pointerdown',()=>{pointerHeld=true;},true);
 for(const type of ['pointerup','pointercancel'])document.addEventListener(type,()=>{pointerHeld=false;if(rowRefreshPending)scheduleRowRefresh();},true);
@@ -69,7 +142,7 @@ function scheduleRowRefresh(){
 let fits=true,invalidCells=new Set(),toastTimer;
 function toast(text){$('toast').textContent=text;$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,4500);}
 function save(draftInput=null){
- const replaceRecovery=allowRecoveryReplacement;allowRecoveryReplacement=false;
+ lastSaveOK=false;const replaceRecovery=allowRecoveryReplacement;allowRecoveryReplacement=false;
  let serialized;
  try{const {savedAt,...plan}=state;serialized=serializeState(plan);}catch(err){
   restoreObject(state,JSON.parse(acceptedState));
@@ -80,6 +153,7 @@ function save(draftInput=null){
  // Drop stale metadata even if storage fails: in-memory backups must still fit the plan budget.
  acceptedState=serialized;delete state.savedAt;
  const result=saveSession.save(state,{recovery:recoveryBlocked&&!replaceRecovery});
+ lastSaveOK=result.ok;
  if(result.ok){
   if(result.savedAt===null)delete state.savedAt;else state.savedAt=result.savedAt;
   acceptedState=result.raw;storageOK=true;
@@ -89,11 +163,11 @@ function save(draftInput=null){
  if(draftInput)pendingEdits.delete(draftInput);
  refreshSaveStatus();return true;
 }
-function commit(full=false,draftInput=null){if(!save(draftInput))return false;if(full)render();else renderPreview();return true;}
+function commit(full=false,draftInput=null,label='edit plan'){if(!save(draftInput))return false;trackPlan(draftInput?fieldLabel(draftInput):label,draftInput);if(full)render();else renderPreview();return true;}
 function invalidInput(){return document.querySelector('input:invalid,textarea:invalid');}
 function hasInvalidEdits(){return invalidCells.size>0||!!invalidInput();}
 function cancelEdits(){
- pendingEdits.clear();invalidCells.clear();document.querySelectorAll('input,textarea').forEach(n=>n.setCustomValidity(''));
+ finishHistoryField();pendingEdits.clear();invalidCells.clear();document.querySelectorAll('input,textarea').forEach(n=>n.setCustomValidity(''));
  if($('dialog').open){$('dialog').close();$('dialog-body').replaceChildren();}render(true);toast('Unaccepted edits cancelled. Last accepted values restored.');
 }
 // Guard before action handlers mutate state. Correction or explicit Escape cancellation is required.
@@ -113,8 +187,8 @@ document.addEventListener('input',ev=>{
  ev.target.setCustomValidity?.('');invalidCells.delete('state-edit');
  if(ev.target.type!=='checkbox'&&ev.target.matches('#event-name,#editor-rows input,.layout-controls input,.settings-grid input,.column-config input'))pendingEdits.add(ev.target);
 },true);
-document.addEventListener('input',()=>refreshSaveStatus());
-document.addEventListener('change',()=>refreshSaveStatus());
+document.addEventListener('input',()=>{refreshSaveStatus();refreshHistory();});
+document.addEventListener('change',()=>{refreshSaveStatus();refreshHistory();});
 $('cancel-edits').onclick=cancelEdits;
 function rememberSelects(){document.querySelectorAll('select').forEach(n=>n.dataset.acceptedValue=n.value);}
 function openDialog(title){$('column-dialog-status').hidden=title!=='Columns';$('column-dialog-status').textContent='';$('dialog-title').textContent=title;$('dialog-body').replaceChildren();if(!$('dialog').open)$('dialog').showModal();return $('dialog-body');}
@@ -131,7 +205,7 @@ function render(force=false){if(!force&&hasInvalidEdits())return;applyTheme();co
 $('preset').replaceChildren(el('option',{value:'nutrition'},'Nutrition plan'),el('option',{value:'route'},'Route notes'),el('option',{value:'custom'},'Custom'),...state.presets.map((p,i)=>el('option',{value:`saved:${i}`},`${p.name} · saved`)));$('preset').value=e.preset;
 $('unit').value=e.unit;$('mode-distance').setAttribute('aria-pressed',e.mode==='distance');$('mode-time').setAttribute('aria-pressed',e.mode==='time');$('mode-time').disabled=e.preset!=='nutrition';$('unit').disabled=e.mode==='time';$('dimension-unit').value=e.dimensionUnit;
 const factor=e.dimensionUnit==='in'?25.4:1;for(const[id,min,max]of [['width',20,180],['length',30,260]]){const n=$(id);n.min=min/factor;n.max=max/factor;n.step='any';n.value=e.layout[id]/factor;}
-for(const id of ['font','padding','gap','rotation','paper','copies'])$(id).value=e.layout[id];$('header').checked=e.layout.header;$('footer-enabled').checked=e.layout.footerEnabled??false;$('footer-text').value=e.layout.footerText??'';$('footer-text').disabled=!e.layout.footerEnabled;$('total').max=totalDistanceMaximum(e.unit);$('total').step='any';$('total').value=Math.min(displayDistance(e.totalM,e.unit),totalDistanceMaximum(e.unit));$('remaining').checked=e.remaining;$('remaining').disabled=e.mode==='time';$('mode-note').textContent=e.mode==='time'?'Elapsed time since the start. Enter hours:minutes.':'Distances are entered from the start. Display units can be changed.';renderRows(force);renderPreview();renderColumnSettings();rememberSelects();}
+for(const id of ['font','padding','gap','rotation','paper','copies'])$(id).value=e.layout[id];$('header').checked=e.layout.header;$('footer-enabled').checked=e.layout.footerEnabled??false;$('footer-text').value=e.layout.footerText??'';$('footer-text').disabled=!e.layout.footerEnabled;$('total').max=totalDistanceMaximum(e.unit);$('total').step='any';$('total').value=Math.min(displayDistance(e.totalM,e.unit),totalDistanceMaximum(e.unit));$('remaining').checked=e.remaining;$('remaining').disabled=e.mode==='time';$('mode-note').textContent=e.mode==='time'?'Elapsed time since the start. Enter hours:minutes.':'Distances are entered from the start. Display units can be changed.';renderRows(force);renderPreview();renderColumnSettings();rememberSelects();if(fieldHistory&&!fieldHistory.input.isConnected)finishHistoryField();refreshHistory();}
 function renderRows(force=false){if(!force&&hasInvalidEdits())return;rowRefreshPending=false;clearTimeout(rowRefreshTimer);const e=event(),rows=e.rows[e.mode];$('row-count').textContent=`${rows.length} ${rows.length===1?'cue':'cues'}`;const head=el('tr');head.append(el('th',{},'#'));e.columns.forEach((c,i)=>{if(i===1)head.append(el('th',{},'Icon'));const th=el('th',{'data-column-id':c.id},i===0?(e.mode==='time'?'h:mm':e.unit):c.label);th.hidden=i>0&&!c.visible;head.append(th);});head.append(el('th',{},''));$('editor-head').replaceChildren(head);const body=$('editor-rows');body.replaceChildren();
 rows.forEach((r,index)=>{const tr=el('tr',{'data-row-id':r.id});const order=el('td',{class:'row-order'}),grip=button('',()=>{},'drag-handle','grip');grip.setAttribute('aria-label',`Reorder row ${index+1}`);grip.setAttribute('aria-describedby','drag-help');grip.title='Drag to reorder · Arrow Up / Down';attachRowDrag(grip,tr,r.id);order.append(grip,el('span',{class:'row-number'},String(index+1)));tr.append(order);e.columns.forEach((c,i)=>{if(i===1){const td=el('td',{class:'symbol-cell'}),b=button('',()=>symbolPicker(r),'symbol-button');b.dataset.symbol=r.symbol;b.setAttribute('aria-label',`Choose icon for row ${index+1}`);b.title=names[r.symbol];b.append(icon(r.symbol||'plus'));td.append(b);tr.append(td);}
 const td=el('td',{class:i===0?'distance-cell':''}),isTime=i===0&&e.mode==='time',input=el('input',{'aria-label':`${i===0?(isTime?'Time':e.unit):c.label}, row ${index+1}`});if(isTime){input.type='text';input.placeholder='1:30';input.pattern='[0-9]{1,3}:[0-5][0-9]';input.value=formatTime(r.cells[c.id]);}else if(c.type==='distance'||c.type==='number'){input.type='number';input.min='0';input.max=c.type==='distance'?String(10_000_000/(e.unit==='mi'?1609.344:1000)):'10000000';input.step='any';input.value=c.type==='distance'?displayDistance(r.cells[c.id],e.unit):r.cells[c.id];}else{input.type='text';input.maxLength=LIMITS.text;input.value=r.cells[c.id];}
@@ -141,12 +215,12 @@ input.onfocus=()=>{if(!invalidCells.has(key))originalValue=r.cells[c.id];};
 input.onblur=()=>{
  if(invalidCells.has(key))return;
  if(i===0&&r.cells[c.id]!==originalValue){
-  originalValue=r.cells[c.id];sortCuesByPosition(rows,c.id);commit();scheduleRowRefresh();
+  originalValue=r.cells[c.id];sortCuesByPosition(rows,c.id);commit(false,input);scheduleRowRefresh();
  }
 };
 if(i===0)input.onkeydown=ev=>{if(ev.key==='Enter'){ev.preventDefault();input.blur();}};td.append(input);tr.append(td);});
-const td=el('td'),actions=el('div',{class:'row-actions'});for(const[label,name,action]of [['Move row up','up',()=>{const at=rows.findIndex(row=>row.id===r.id);if(moveCue(rows,r.id,at-1)){commit(true);announceMove(r.id,'up');}}],['Move row down','down',()=>{const at=rows.findIndex(row=>row.id===r.id);if(moveCue(rows,r.id,at+1)){commit(true);announceMove(r.id,'down');}}],['Delete row','trash',()=>{const at=rows.findIndex(row=>row.id===r.id);if(at>=0)rows.splice(at,1);commit(true);}]] ){const b=button('',action,'',name);b.setAttribute('aria-label',`${label} ${index+1}`);b.dataset.move=name;if(name!=='trash')b.setAttribute('aria-disabled',String(name==='up'&&index===0||name==='down'&&index===rows.length-1));actions.append(b);}td.append(actions);tr.append(td);body.append(tr);});}
-function symbolPicker(row){const d=openDialog('Choose a cue symbol');d.append(el('p',{},'These outline icons print consistently. You can also paste emojis directly into any text field.'));const g=el('div',{class:'option-grid'});for(const name of ['',...SYMBOLS.filter(Boolean).sort((a,b)=>names[a].localeCompare(names[b],'en',{sensitivity:'base'}))]){const b=button(names[name],()=>{row.symbol=name;$('dialog').close();commit(true);});if(name)b.prepend(icon(name));g.append(b);}d.append(g);}
+const td=el('td'),actions=el('div',{class:'row-actions'});for(const[label,name,action]of [['Move row up','up',()=>{const at=rows.findIndex(row=>row.id===r.id);if(moveCue(rows,r.id,at-1)){commit(true,null,'row reorder');announceMove(r.id,'up');}}],['Move row down','down',()=>{const at=rows.findIndex(row=>row.id===r.id);if(moveCue(rows,r.id,at+1)){commit(true,null,'row reorder');announceMove(r.id,'down');}}],['Delete row','trash',()=>{const at=rows.findIndex(row=>row.id===r.id);if(at>=0)rows.splice(at,1);commit(true,null,'delete row');}]] ){const b=button('',action,'',name);b.setAttribute('aria-label',`${label} ${index+1}`);b.dataset.move=name;if(name!=='trash')b.setAttribute('aria-disabled',String(name==='up'&&index===0||name==='down'&&index===rows.length-1));actions.append(b);}td.append(actions);tr.append(td);body.append(tr);});}
+function symbolPicker(row){const d=openDialog('Choose a cue symbol');d.append(el('p',{},'These outline icons print consistently. You can also paste emojis directly into any text field.'));const g=el('div',{class:'option-grid'});for(const name of ['',...SYMBOLS.filter(Boolean).sort((a,b)=>names[a].localeCompare(names[b],'en',{sensitivity:'base'}))]){const b=button(names[name],()=>{row.symbol=name;$('dialog').close();commit(true,null,'change icon');});if(name)b.prepend(icon(name));g.append(b);}d.append(g);}
 const ctx=document.createElement('canvas').getContext('2d');
 function wrap(text,width,font,bold){ctx.font=`${bold?'700':'400'} ${font}px StemSans`;const lines=[];let line='';for(const ch of Array.from(new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(text),s=>s.segment)){if(ch==='\n'){lines.push(line);line='';continue;}if(line&&ctx.measureText(line+ch).width>width){const p=line.lastIndexOf(' ');if(p>0){lines.push(line.slice(0,p));line=line.slice(p+1)+ch;}else{lines.push(line);line=ch;}}else line+=ch;}lines.push(line);return lines;}
 function makeSheet(){const e=event(),l=e.layout,rotated=l.rotation===90||l.rotation===270,w=rotated?l.length:l.width,h=rotated?l.width:l.length;const root=svg('svg',{xmlns:NS,viewBox:`0 0 ${l.width} ${l.length}`,width:`${l.width}mm`,height:`${l.length}mm`,role:'img','aria-label':'Printable cue sheet'});root.append(svg('rect',{width:l.width,height:l.length,fill:'white'}));const g=svg('g');if(l.rotation===90)g.setAttribute('transform',`translate(${l.width} 0) rotate(90)`);if(l.rotation===180)g.setAttribute('transform',`translate(${l.width} ${l.length}) rotate(180)`);if(l.rotation===270)g.setAttribute('transform',`translate(0 ${l.length}) rotate(270)`);root.append(g);
@@ -167,13 +241,13 @@ function withBike(e){try{const p=state.bike;if(p){const candidate=clone(e);candi
 $('event-select').onchange=()=>{state.active=$('event-select').value;commit(true);};$('new-event').onclick=()=>{const e=withBike(createEvent());e.name='Untitled ride';e.rows={distance:[],time:[]};addEvent(e);};$('duplicate-event').onclick=()=>{const e=clone(event());e.id=uid();e.name=(e.name+' · copy').slice(0,80);addEvent(e);};
 $('delete-event').onclick=()=>confirmAction('Delete this event?',`“${event().name}” will be removed from this browser. Export a backup first if you need a copy.`,()=>{const id=event().id;state.events=state.events.filter(e=>e.id!==id);if(!state.events.length)state.events=[withBike(createEvent())];state.active=state.events[0].id;commit(true);});
 $('event-name').oninput=()=>{const input=$('event-name');event().name=input.value;commit(false,input);updateEvents();};
-$('preset').onchange=()=>{const val=$('preset').value;if(val==='custom'){event().preset='custom';event().mode='distance';commit(true);return;}if(val.startsWith('saved:')){confirmAction('Apply saved preset?','This creates a new event with the saved template. Your current event is kept.',()=>{const e=clone(state.presets[Number(val.split(':')[1])].event);e.id=uid();addEvent(e);});render();return;}if(val===event().preset)return;confirmAction('Start with this preset?','A new event will be created with example cues. Your current event is kept.',()=>addEvent(withBike(createEvent(val))));render();};
-for(const mode of ['distance','time'])$(`mode-${mode}`).onclick=()=>{if(mode==='time'&&event().preset!=='nutrition')return;event().mode=mode;commit(true);};$('unit').onchange=()=>{event().unit=$('unit').value;commit(true);};$('dimension-unit').onchange=()=>{event().dimensionUnit=$('dimension-unit').value;commit(true);};
+$('preset').onchange=()=>{const val=$('preset').value;if(val==='custom'){event().preset='custom';event().mode='distance';commit(true,null,'change planning mode');return;}if(val.startsWith('saved:')){confirmAction('Apply saved preset?','This creates a new event with the saved template. Your current event is kept.',()=>{const e=clone(state.presets[Number(val.split(':')[1])].event);e.id=uid();addEvent(e);});render();return;}if(val===event().preset)return;confirmAction('Start with this preset?','A new event will be created with example cues. Your current event is kept.',()=>addEvent(withBike(createEvent(val))));render();};
+for(const mode of ['distance','time'])$(`mode-${mode}`).onclick=()=>{if(mode==='time'&&event().preset!=='nutrition')return;event().mode=mode;commit(true,null,'change planning mode');};$('unit').onchange=()=>{event().unit=$('unit').value;commit(true,null,'change units');};$('dimension-unit').onchange=()=>{event().dimensionUnit=$('dimension-unit').value;commit(true,null,'change dimension units');};
 for(const id of ['width','length','font','padding','gap','rotation','copies','paper'])$(id).onchange=()=>{const input=$(id);if(!input.checkValidity()||input.value==='')return input.reportValidity();const e=event(),candidate=clone(e);candidate.layout[id]=id==='paper'?input.value:Number(input.value)*(id==='width'||id==='length'?(e.dimensionUnit==='in'?25.4:1):1);try{e.layout=validateEvent(candidate).layout;commit(false,input);}catch(err){input.setCustomValidity(err.message);toast(err.message);renderPreview();}};
-$('footer-enabled').onchange=()=>{event().layout.footerEnabled=$('footer-enabled').checked;if(commit())$('footer-text').disabled=!event().layout.footerEnabled;};
+$('footer-enabled').onchange=()=>{event().layout.footerEnabled=$('footer-enabled').checked;if(commit(false,null,'toggle footer'))$('footer-text').disabled=!event().layout.footerEnabled;};
 $('footer-text').oninput=()=>{const input=$('footer-text');event().layout.footerText=input.value;commit(false,input);};
-$('header').onchange=()=>{event().layout.header=$('header').checked;commit();};$('remaining').onchange=()=>{event().remaining=$('remaining').checked;commit();};$('total').onchange=()=>{const input=$('total');input.setCustomValidity('');try{const metres=validatedTotal(input.value,event().unit);if(!input.checkValidity())throw Error('Enter a valid total distance.');event().totalM=metres;commit(false,input);}catch(err){input.setCustomValidity(err.message);renderPreview();}};$('save-bike').onclick=()=>{try{const{width,length,padding,rotation}=event().layout;state.bike={width,length,padding,rotation};if(save())toast(storageOK&&!recoveryBlocked?'Bike dimensions saved for new plans.':'Bike dimensions changed in memory — not saved.');}catch{toast('Could not save bike dimensions.');}};
-$('add-row').onclick=()=>{const e=event(),rows=e.rows[e.mode];if(rows.length>=LIMITS.rows)return toast('Maximum 200 cues per mode.');const r={id:uid(),symbol:'',cells:{}};e.columns.forEach((c,i)=>r.cells[c.id]=c.type==='number'||c.type==='distance'?i===0?(rows.at(-1)?.cells[c.id]||0):0:'');rows.push(r);commit(true);$('editor-rows').lastElementChild?.querySelector('input')?.focus();};$('sort').onclick=()=>{const e=event();sortCuesByPosition(e.rows[e.mode],e.columns[0].id);commit(true);};
+$('header').onchange=()=>{event().layout.header=$('header').checked;commit(false,null,'toggle headers');};$('remaining').onchange=()=>{event().remaining=$('remaining').checked;commit(false,null,'toggle distance remaining');};$('total').onchange=()=>{const input=$('total');input.setCustomValidity('');try{const metres=validatedTotal(input.value,event().unit);if(!input.checkValidity())throw Error('Enter a valid total distance.');event().totalM=metres;commit(false,input);}catch(err){input.setCustomValidity(err.message);renderPreview();}};$('save-bike').onclick=()=>{try{const{width,length,padding,rotation}=event().layout;state.bike={width,length,padding,rotation};if(save())toast(storageOK&&!recoveryBlocked?'Bike dimensions saved for new plans.':'Bike dimensions changed in memory — not saved.');}catch{toast('Could not save bike dimensions.');}};
+$('add-row').onclick=()=>{const e=event(),rows=e.rows[e.mode];if(rows.length>=LIMITS.rows)return toast('Maximum 200 cues per mode.');const r={id:uid(),symbol:'',cells:{}};e.columns.forEach((c,i)=>r.cells[c.id]=c.type==='number'||c.type==='distance'?i===0?(rows.at(-1)?.cells[c.id]||0):0:'');rows.push(r);commit(true,null,'insert row');$('editor-rows').lastElementChild?.querySelector('input')?.focus();};$('sort').onclick=()=>{const e=event();sortCuesByPosition(e.rows[e.mode],e.columns[0].id);commit(true,null,'sort rows');};
 $('save-preset').onclick=()=>{const d=openDialog('Save a personal preset');d.append(el('p',{},'Save columns, dimensions and both sets of cues as a reusable template on this device.'));const input=el('input',{maxlength:40,placeholder:'e.g. Long Sunday nutrition'});d.append(labelled('Preset name',input));d.append(button('Save preset',()=>{if(!input.value.trim())return input.focus();if(state.presets.length>=20)return toast('Maximum 20 presets.');state.presets.push({name:input.value.trim(),event:clone(event())});$('dialog').close();if(commit(true))toast(storageOK&&!recoveryBlocked?'Personal preset saved.':'Personal preset created in memory — not saved.');},'primary'));};
 function renderColumnSettings(){
  columnList.render();const e=event(),note=noteColumn(e);$('show-note').checked=!!note?.visible;
@@ -181,7 +255,7 @@ function renderColumnSettings(){
  $('note-help').textContent=!note&&e.columns.length>=LIMITS.columns?'Maximum 8 columns. Remove another column before enabling Note.':'Hide without deleting text. Rename and adjust widths in Column details. Adding a column may cause print overflow.';
 }
 $('show-note').onchange=()=>{
- try{if(showNoteColumn(event(),$('show-note').checked))commit(true);}catch(err){toast(err.message);renderColumnSettings();}
+ try{if(showNoteColumn(event(),$('show-note').checked))commit(true,null,'toggle Note');}catch(err){toast(err.message);renderColumnSettings();}
 };
 function columnsDialog(){
  const d=openDialog('Columns');d.append(el('p',{},'Widths are relative shares of the strip. Hidden columns stay in JSON backups. Distance/time stays first. Reorder with the list in Layout & print settings or these movement buttons.'));
@@ -192,33 +266,33 @@ function columnsDialog(){
   const type=select(['text','number','distance','symbol'].map(t=>[t,t]),c.type,v=>{
    const populated=['distance','time'].some(mode=>e.rows[mode].some(r=>r.cells[c.id]!==''&&r.cells[c.id]!==0));
    if(populated){toast('Add a new column to change type without losing values.');type.value=c.type;return;}
-   c.type=v;for(const mode of ['distance','time'])e.rows[mode].forEach(r=>r.cells[c.id]=v==='number'||v==='distance'?0:'');commit(true);
+   c.type=v;for(const mode of ['distance','time'])e.rows[mode].forEach(r=>r.cells[c.id]=v==='number'||v==='distance'?0:'');commit(true,null,'column type');
   });type.disabled=i===0||managed;
   const visibility=check(c.visible,'Show column',v=>{
    if(!v&&e.columns.filter(c=>c.visible).length===1){toast('Keep at least one visible column.');columnsDialog();return;}
-   c.visible=v;commit(true);
+   c.visible=v;commit(true,null,'column visibility');
   });visibility.querySelector('input').disabled=managed;
-  row.append(labelled('Field type',type),labelled('Width share',numberInput(c.width,5,95,1,(v,input)=>{c.width=v;commit(false,input);})),labelled('Alignment',select(['left','center','right'].map(v=>[v,v]),c.align,v=>{c.align=v;commit();})),visibility,check(c.bold,'Bold',v=>{c.bold=v;commit();}));
+  row.append(labelled('Field type',type),labelled('Width share',numberInput(c.width,5,95,1,(v,input)=>{c.width=v;commit(false,input);})),labelled('Alignment',select(['left','center','right'].map(v=>[v,v]),c.align,v=>{c.align=v;commit(false,null,'column alignment');})),visibility,check(c.bold,'Bold',v=>{c.bold=v;commit(false,null,'column emphasis');}));
   if(managed)row.append(el('p',{class:'wide'},'This is the optional Note column. Rename it here; hide or restore it with Show note column. Its text type and retained content stay protected.'));
   if(i>0){
    const actions=el('div',{class:'actions wide'});
    for(const [text,direction,delta]of [['Move left','left',-1],['Move right','right',1]]){
     const b=button(text,()=>{
-     const at=event().columns.findIndex(x=>x.id===c.id);if(!moveColumn(event(),c.id,at+delta)||!commit(true))return;
+     const at=event().columns.findIndex(x=>x.id===c.id);if(!moveColumn(event(),c.id,at+delta)||!commit(true,null,'column reorder'))return;
      columnsDialog();const updated=[...$('dialog-body').querySelectorAll('.column-config')].find(n=>n.dataset.columnId===c.id);
      const target=updated?.querySelector(`[data-column-move="${direction}"]`);(target&&!target.disabled?target:updated?.querySelector('input'))?.focus({preventScroll:true});
      const message=`${c.label} moved to position ${event().columns.findIndex(x=>x.id===c.id)+1} of ${event().columns.length}.`;
      $('column-order-status').textContent=message;$('column-dialog-status').textContent=message;
     });b.dataset.columnMove=direction;b.disabled=direction==='left'?i===1:i===e.columns.length-1;actions.append(b);
    }
-   const remove=button('Remove',()=>confirmAction('Remove column?',`“${c.label}” and its values in both modes will be removed.`,()=>{if(removeColumn(event(),c.id))commit(true);}),'danger-button');
+   const remove=button('Remove',()=>confirmAction('Remove column?',`“${c.label}” and its values in both modes will be removed.`,()=>{if(removeColumn(event(),c.id))commit(true,null,'remove column');}),'danger-button');
    remove.disabled=!canRemoveColumn(e,c.id);actions.append(remove);row.append(actions);
   }
   d.append(row);
  });
  const actions=el('div',{class:'dialog-actions'}),add=button('Add column',()=>{
   if(e.columns.length>=LIMITS.columns)return;const c=column('New column');e.columns.push(c);for(const mode of ['distance','time'])for(const r of e.rows[mode])r.cells[c.id]='';
-  if(commit(true))columnsDialog();
+  if(commit(true,null,'add column'))columnsDialog();
  },'','plus');add.disabled=e.columns.length>=LIMITS.columns;
  actions.append(add,button('Done',()=>{$('dialog').close();render();},'primary'));d.append(actions);
 }
@@ -235,14 +309,15 @@ $('import').onclick=()=>{
  paste.append(el('h3',{id:'import-paste-title'},'Spreadsheet table'),el('p',{},'Copy a range including headers from your spreadsheet, then paste it to create a new event.'),button('Paste spreadsheet table',pasteTable));
  options.append(file,paste);d.append(options);
 };
-$('file-input').onchange=async()=>{const f=$('file-input').files[0];$('file-input').value='';if(!f)return;try{if(f.size>LIMITS.bytes)throw Error('File exceeds 2,000,000 UTF-8 bytes. Keep this original file for recovery; it has not been changed.');const text=await f.text();/* Reading yields: recheck drafts created while the file was loading. */if(hasInvalidEdits())throw Error('Correct or cancel unaccepted edits before importing.');if(f.name.toLowerCase().endsWith('.csv')){const e=importCSV(text);$('dialog').close();if(addEvent(e))toast('CSV imported as a new event.');}else if(f.name.toLowerCase().endsWith('.json')){const candidate=parseState(text),d=openDialog('Restore backup?');d.append(el('p',{},`This replaces your ${state.events.length} current event(s) with ${candidate.events.length} event(s) from the backup, including preferences and presets.`));if(recoveryBlocked)offerOriginal(d);const a=el('div',{class:'dialog-actions'});a.append(button(recoveryBlocked?'Back up temporary in-memory plan':'Back up current data',()=>download(serializeState(state),'application/json','stemtape-before-restore.json')),button('Restore backup',()=>{state=candidate;allowRecoveryReplacement=true;$('dialog').close();if(commit(true))toast(recoveryBlocked?'Backup loaded in memory; original still protected.':storageOK?'Backup restored.':'Backup loaded in memory — not saved.');},'primary'));d.append(a);}else throw Error('Choose a .csv or .json file.');}catch(err){const d=openDialog('Import could not be completed');d.append(el('p',{},`${err.message} Your existing plans have not been changed.`));}};
+$('file-input').onchange=async()=>{const f=$('file-input').files[0];$('file-input').value='';if(!f)return;try{if(f.size>LIMITS.bytes)throw Error('File exceeds 2,000,000 UTF-8 bytes. Keep this original file for recovery; it has not been changed.');const text=await f.text();/* Reading yields: recheck drafts created while the file was loading. */if(hasInvalidEdits())throw Error('Correct or cancel unaccepted edits before importing.');if(f.name.toLowerCase().endsWith('.csv')){const e=importCSV(text);$('dialog').close();if(addEvent(e))toast('CSV imported as a new event.');}else if(f.name.toLowerCase().endsWith('.json')){const candidate=parseState(text),d=openDialog('Restore backup?');d.append(el('p',{},`This replaces your ${state.events.length} current event(s) with ${candidate.events.length} event(s) from the backup, including preferences and presets.`));if(recoveryBlocked)offerOriginal(d);const a=el('div',{class:'dialog-actions'});a.append(button(recoveryBlocked?'Back up temporary in-memory plan':'Back up current data',()=>download(serializeState(state),'application/json','stemtape-before-restore.json')),button('Restore backup',()=>{$('dialog').close();if(replaceLibrary(candidate))toast('Backup restored.');},'primary'));d.append(a);}else throw Error('Choose a .csv or .json file.');}catch(err){const d=openDialog('Import could not be completed');d.append(el('p',{},`${err.message} Your existing plans have not been changed.`));}};
 function offerOriginal(d){d.append(el('p',{class:'warning'},'The original saved data is protected. The visible plan is temporary fallback data, not your original. Replacement will overwrite the original; export it first.'),button('Export original recovery data',()=>download(recoveryOriginal??'','application/json','stemtape-recovery.json')));}
-function help(){const d=openDialog('Your plan. Your device.');const guidance=el('p',{},'Create your cues, choose a usable stem or top-tube width and length, then print at ');guidance.append(el('strong',{},'Scale 100% / Actual size.'),document.createTextNode(' Fit to page can change physical dimensions. Disable browser print headers and footers. Check the printed 50 mm scale with a ruler.'));d.append(guidance);for(const text of ['The preview is enlarged. If content does not fit, printing is blocked: increase the strip size, simplify text, hide columns or reduce spacing. Font size never shrinks automatically.','Nutrition entries are your own reminders. Distance and elapsed-time modes keep separate cue lists. Switching units converts distances; switching to time does not estimate ride speed.','Changing a distance or elapsed time sorts cues when you leave the field or press Enter. You can then drag cues or use the arrow buttons to keep a manual order until the next position edit. Equal positions keep their relative order.','Outline icons are bundled Lucide graphics. Pasted Unicode emojis use your device’s emoji font and can look different on another device. Test-print custom emojis before your ride.','Your ride plans stay yours. Everything you enter, including imported files, is processed and saved only on this device, in your browser. Your cue data is never uploaded to or stored on our servers. StemTape adds no accounts, analytics, tracking scripts or third-party font requests.','The hosted site at stemtape.cc uses GitHub Pages behind Cloudflare. These providers process hosting requests and connection information such as your IP address. Cloudflare Network Error Logging is disabled; other hosting logs and provider data processing may still apply. Your plan contents remain in your browser.','Browser storage is not encrypted and can be cleared by you or your browser. Each domain has its own data. Export JSON to transfer plans or keep a backup.'])d.append(el('p',{},text));if(recoveryBlocked){offerOriginal(d);d.append(el('p',{class:'warning'},startupWarning),button('Reset saved data',()=>confirmAction('Reset browser data?','The unreadable copy will be replaced. Export the recovery file first.',()=>{allowRecoveryReplacement=true;commit(true);}),'danger-button'));}d.append(button('Clear all local StemTape data',()=>confirmAction('Clear local data?','All events, presets, preferences and bike dimensions in this browser will be removed. Export JSON first.',()=>{try{localStorage.removeItem('stemtape.bike');}catch{}state=initialState();state.active=state.events[0].id;allowRecoveryReplacement=true;if(commit(true))toast(storageOK&&!recoveryBlocked?'Local StemTape data reset.':'Reset is in memory only — not saved.');}),'danger-button'));}
+function help(){const d=openDialog('Your plan. Your device.');const guidance=el('p',{},'Create your cues, choose a usable stem or top-tube width and length, then print at ');guidance.append(el('strong',{},'Scale 100% / Actual size.'),document.createTextNode(' Fit to page can change physical dimensions. Disable browser print headers and footers. Check the printed 50 mm scale with a ruler.'));d.append(guidance);for(const text of ['Undo and Redo keep up to 20 completed actions per plan in this tab, within an 8 MiB shared snapshot budget (large plans may keep fewer actions). Switching plans keeps separate histories; reloading clears them. History is never saved or exported. Plan creation/deletion, presets, library restore, theme and remembered bike dimensions are excluded. New or duplicated plans start empty; successful library replacement clears history. Correct or explicitly cancel invalid drafts before Undo/Redo. Valid restored changes stay in memory if saving fails; export a backup when Not saved is shown.',
+'The preview is enlarged. If content does not fit, printing is blocked: increase the strip size, simplify text, hide columns or reduce spacing. Font size never shrinks automatically.','Nutrition entries are your own reminders. Distance and elapsed-time modes keep separate cue lists. Switching units converts distances; switching to time does not estimate ride speed.','Changing a distance or elapsed time sorts cues when you leave the field or press Enter. You can then drag cues or use the arrow buttons to keep a manual order until the next position edit. Equal positions keep their relative order.','Outline icons are bundled Lucide graphics. Pasted Unicode emojis use your device’s emoji font and can look different on another device. Test-print custom emojis before your ride.','Your ride plans stay yours. Everything you enter, including imported files, is processed and saved only on this device, in your browser. Your cue data is never uploaded to or stored on our servers. StemTape adds no accounts, analytics, tracking scripts or third-party font requests.','The hosted site at stemtape.cc uses GitHub Pages behind Cloudflare. These providers process hosting requests and connection information such as your IP address. Cloudflare Network Error Logging is disabled; other hosting logs and provider data processing may still apply. Your plan contents remain in your browser.','Browser storage is not encrypted and can be cleared by you or your browser. Each domain has its own data. Export JSON to transfer plans or keep a backup.'])d.append(el('p',{},text));if(recoveryBlocked){offerOriginal(d);d.append(el('p',{class:'warning'},startupWarning),button('Reset saved data',()=>confirmAction('Reset browser data?','The unreadable copy will be replaced. Export the recovery file first.',()=>{if(replaceLibrary(clone(state)))toast('Saved data reset.');}),'danger-button'));}d.append(button('Clear all local StemTape data',()=>confirmAction('Clear local data?','All events, presets, preferences and bike dimensions in this browser will be removed. Export JSON first.',()=>{const candidate=initialState();candidate.active=candidate.events[0].id;if(replaceLibrary(candidate)){try{localStorage.removeItem('stemtape.bike');}catch{}toast('Local StemTape data reset.');}}),'danger-button'));}
 $('help').onclick=help;$('privacy').onclick=help;
 function preparePrint(){const e=event(),{root,warnings}=makeSheet();$('print-pages').replaceChildren();if(warnings.length)return false;const W=e.layout.paper==='A4'?190:195.9,H=e.layout.paper==='A4'?277:259.4,outerW=e.layout.width+8,outerH=e.layout.length+8;if(outerW>W||outerH+16>H){toast('Strip is too large for this paper. Reduce dimensions or choose A4.');return false;}const css=[...document.styleSheets].find(s=>s.href?.endsWith('styles.css'));if(css){for(let i=css.cssRules.length-1;i>=0;i--)if(css.cssRules[i].type===CSSRule.PAGE_RULE)css.deleteRule(i);css.insertRule(`@page { size: ${e.layout.paper}; margin: 10mm; }`,css.cssRules.length);}for(let copy=0;copy<e.layout.copies;copy++){const page=el('div',{class:'print-page'}),sheet=svg('svg',{xmlns:NS,viewBox:`0 0 ${W} ${outerH+16}`,width:`${W}mm`,height:`${outerH+16}mm`}),c=root.cloneNode(true);for(const[k,v]of Object.entries({x:4,y:4,width:e.layout.width,height:e.layout.length}))c.setAttribute(k,v);sheet.append(c);for(const x of [4,4+e.layout.width])for(const y of [4,4+e.layout.length]){const sx=x===4?-1:1,sy=y===4?-1:1;sheet.append(svg('line',{x1:x+sx,y1:y,x2:x+sx*3,y2:y,stroke:'#000','stroke-width':.2}),svg('line',{x1:x,y1:y+sy,x2:x,y2:y+sy*3,stroke:'#000','stroke-width':.2}));}const y=outerH+6;sheet.append(svg('line',{x1:4,y1:y,x2:54,y2:y,stroke:'#000','stroke-width':.3}));for(const x of [4,54])sheet.append(svg('line',{x1:x,y1:y-1,x2:x,y2:y+1,stroke:'#000','stroke-width':.3}));sheet.append(svg('text',{x:4,y:y+5,'font-family':'StemSans','font-size':2.5,fill:'#000'},'50 mm · Print at 100% / Actual size'));page.append(sheet);$('print-pages').append(page);}return true;}
 $('print').onclick=async()=>{await document.fonts.ready;if(preparePrint())window.print();};window.addEventListener('beforeprint',preparePrint);
-const columnList=columnControls({list:$('column-order-list'),status:$('column-order-status'),getEvent:event,canEdit:()=>!hasInvalidEdits(),commit:()=>commit(true),feedback:toast});
-render();refreshSaveStatus();if(startupWarning){toast(startupWarning);if(recoveryBlocked)help();}document.fonts.ready.then(renderPreview);
+const columnList=columnControls({list:$('column-order-list'),status:$('column-order-status'),getEvent:event,canEdit:()=>!hasInvalidEdits(),commit:()=>commit(true,null,'column reorder'),feedback:toast});
+render();refreshHistory();refreshSaveStatus();if(startupWarning){toast(startupWarning);if(recoveryBlocked)help();}document.fonts.ready.then(renderPreview);
 
 function pasteTable(){
  const d=openDialog('Paste a spreadsheet table');d.append(el('p',{},'Copy a range including headers. First column: km, mi or time. Optional second column: icon. Remaining columns contain your cues.'));
@@ -267,7 +342,7 @@ function attachRowDrag(handle,tr,id){
   e.preventDefault();if(hasInvalidEdits()){toast('Finish correcting the current entry before reordering.');return;}
   const rows=event().rows[event().mode],from=rows.findIndex(r=>r.id===id);
   const to=e.key==='Home'?0:e.key==='End'?rows.length-1:from+(e.key==='ArrowUp'?-1:1);
-  if(moveCue(rows,id,to)){commit(true);announceMove(id);}
+  if(moveCue(rows,id,to)){commit(true,null,'row reorder');announceMove(id);}
  });
  handle.addEventListener('pointerdown',e=>{
   if(e.button!==0||!e.isPrimary||activeDrag)return;
@@ -289,7 +364,7 @@ function attachRowDrag(handle,tr,id){
    if(activeDrag!==drag)return;activeDrag=null;cancelAnimationFrame(drag.frame);document.body.classList.remove('reordering');tr.classList.remove('dragging');
    handle.removeEventListener('pointermove',move);handle.removeEventListener('pointerup',up);handle.removeEventListener('pointercancel',cancel);handle.removeEventListener('lostpointercapture',cancel);document.removeEventListener('keydown',escape);
    if(handle.hasPointerCapture(drag.pointer))handle.releasePointerCapture(drag.pointer);
-   if(drag.started){const target=[...$('editor-rows').children].indexOf(tr);if(!cancelled&&moveCue(event().rows[event().mode],id,target)){commit(true);announceMove(id);}else{renderRows();handleRefocus(id);}}
+   if(drag.started){const target=[...$('editor-rows').children].indexOf(tr);if(!cancelled&&moveCue(event().rows[event().mode],id,target)){commit(true,null,'row reorder');announceMove(id);}else{renderRows();handleRefocus(id);}}
   };
   const up=e=>{if(e.pointerId===drag.pointer)finish();},cancel=()=>finish(true),escape=e=>{if(e.key==='Escape'){e.preventDefault();finish(true);}};
   handle.addEventListener('pointermove',move);handle.addEventListener('pointerup',up);handle.addEventListener('pointercancel',cancel);handle.addEventListener('lostpointercapture',cancel);document.addEventListener('keydown',escape);drag.frame=requestAnimationFrame(tick);

@@ -58,11 +58,11 @@ The working route inspected on 2026-10-17 is:
 | Laptop Sandbox router | `127.0.0.1:18080` → sandbox `8080` | Established forwarding from the prior working preview; laptop access and subsequent v0.6.2 manual review reported by the user. |
 | User's browser | `http://127.0.0.1:18080/` | User-confirmed preview URL, not a request executed from inside the sandbox. |
 
-The supplying release worktree is on **`review/v0.6.2`**, based on
+At that inspection the supplying release worktree was on **`review/v0.6.2`**, based on
 `9c6afe41e47563e1bd58d077d2eecfef67964484`, with release edits pending at the time
 of inspection. Locate its
 actual path with `git worktree list`; do not copy a path from another machine.
-The inspected container is `stemtape-v062-preview`, image tag `stemtape:0.6.2`.
+The then-inspected container was `stemtape-v062-preview`, image tag `stemtape:0.6.2`.
 All 28 served `dist/` assets matched that worktree byte-for-byte. The current
 read-only HTTP config mount is discoverable through `docker inspect` above.
 The stopped former `stemtape-review-http` preview is retained; its settings used
@@ -77,6 +77,27 @@ The user subsequently reported a passing final preview check on 2026-10-18,
 including the right-aligned Help button. This is user-reported laptop testing,
 not independently observed laptop access or physical printing.
 
+## Current v0.7.0 candidate preview (2026-10-18)
+
+The supplying branch is now **`review/v0.7.0`**, based on verified public main
+`bf6fb4736745f0306ead5dac64744d07fb9dcb43`. Locate the worktree with
+`git worktree list`; no machine-specific absolute path is a shared default.
+Image **`stemtape:0.7.0`** was built from that worktree using the pinned Nginx base
+below. Only the inspected v0.6.2 preview was stopped/replaced, by
+**`stemtape-v070-preview`**, reusing the existing read-only development HTTP config
+mount and **`-p 0.0.0.0:8080:8080`**. All **29** served assets matched the candidate
+worktree byte-for-byte; Nginx syntax and Docker/browser checks passed inside the
+sandbox. The v0.6.2 image and unrelated stopped previews were retained.
+
+The established laptop route remains **127.0.0.1:18080 → sandbox 8080 → container
+8080**, and the URL remains **http://127.0.0.1:18080/**. No host-side forwarding was
+changed. The user reports passing manual testing of the v0.7.0 preview on
+2026-10-18, confirming laptop access for that review. The subsequent Undo/Redo
+placement adjustment and complete v0.7.0 work were finally accepted by the user
+on 2026-10-18. Physical printing,
+screen-reader and exhaustive device coverage are not inferred. Internal HTTP
+and Chromium results remain separate evidence.
+
 ## Build and start inside the sandbox
 
 All commands in this section run **inside the sandbox**. First inspect the current
@@ -89,7 +110,7 @@ The existing `.gitignore` excludes `.env.preview` and `artifacts/`.
 ```sh
 PREVIEW_WORKTREE='<absolute path to intended worktree>'
 PREVIEW_NAME='<inspected preview container name>'
-PREVIEW_IMAGE='stemtape:0.6.2'
+PREVIEW_IMAGE='stemtape:0.7.0'
 SANDBOX_PORT=8080
 NGINX_IMAGE='nginx@sha256:<verified Alpine image digest>'
 cd "$PREVIEW_WORKTREE"
