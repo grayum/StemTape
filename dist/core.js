@@ -1,4 +1,4 @@
-import {BUILTIN_CUES} from './presets.js';
+import {BUILTIN_CUES,FLANDERS_CUES} from './presets.js';
 // Pure data model: canonical metres and elapsed minutes; no HTML or network access.
 export const VERSION = 1;
 export const KEY = 'stemtape.v1';
@@ -8,6 +8,11 @@ export const uid = () => globalThis.crypto.randomUUID();
 export const clone = value => JSON.parse(JSON.stringify(value));
 export function column(label, type='text', width=50) { return {id:uid(), label, type, width, visible:true, align:type==='distance'||type==='number'?'right':'left', bold:false}; }
 export function createEvent(preset='nutrition') {
+  if(preset==='flanders'){
+    const e=createEvent('route'),note=column('Location','text',25),fuel=e.columns[1];fuel.label='Fuel';
+    e.name='Tour of Flanders';e.preset='flanders';e.totalM=272000;e.columns.splice(1,0,note);e.noteColumnId=note.id;e.cueColumnId=fuel.id;
+    e.rows.distance=FLANDERS_CUES.map(([km,symbol,location,text])=>({id:uid(),symbol,cells:{[e.columns[0].id]:km*1000,[note.id]:location,[fuel.id]:text}}));return e;
+  }
   const first=column('km','distance',32); first.bold=true;
   // No provenance marker exists on stored labels; only new templates get the new default.
   const columns = [first, column(preset==='nutrition'?'Fuel':'Note','text',68)];
@@ -33,7 +38,7 @@ export function validateEvent(e){
   if(new Set(cols.map(c=>c.id)).size!==cols.length||cols[0].type!=='distance'||!cols.some(c=>c.visible))throw Error('Invalid column structure.');
   // Reject prototype-related keys before constructing cell maps.
   if(cols.some(c=>['__proto__','constructor','prototype'].includes(c.id)))throw Error('Invalid column ID.');
-  const out={id:str(e.id,64,'event ID'),name:str(e.name,80,'event name'),preset:choice(e.preset,['nutrition','route','custom'],'preset'),mode:choice(e.mode,['distance','time'],'mode'),unit:choice(e.unit,['km','mi'],'unit'),dimensionUnit:choice(e.dimensionUnit,['mm','in'],'dimension unit'),totalM:finite(e.totalM,0,10_000_000,'total distance'),remaining:boolean(e.remaining,'remaining distance'),columns:cols,rows:{}};
+  const out={id:str(e.id,64,'event ID'),name:str(e.name,80,'event name'),preset:choice(e.preset,['nutrition','route','custom','flanders'],'preset'),mode:choice(e.mode,['distance','time'],'mode'),unit:choice(e.unit,['km','mi'],'unit'),dimensionUnit:choice(e.dimensionUnit,['mm','in'],'dimension unit'),totalM:finite(e.totalM,0,10_000_000,'total distance'),remaining:boolean(e.remaining,'remaining distance'),columns:cols,rows:{}};
   if(e.preset!=='nutrition'&&e.mode!=='distance')throw Error('Time mode is only available in Nutrition plan.');
   // Optional references preserve identity across moves; absent fields keep legacy byte budgets unchanged.
   if(Object.hasOwn(e,'cueColumnId')){
