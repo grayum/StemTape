@@ -39,6 +39,7 @@ export function validateEvent(e){
   // Reject prototype-related keys before constructing cell maps.
   if(cols.some(c=>['__proto__','constructor','prototype'].includes(c.id)))throw Error('Invalid column ID.');
   const out={id:str(e.id,64,'event ID'),name:str(e.name,80,'event name'),preset:choice(e.preset,['nutrition','route','custom','flanders'],'preset'),mode:choice(e.mode,['distance','time'],'mode'),unit:choice(e.unit,['km','mi'],'unit'),dimensionUnit:choice(e.dimensionUnit,['mm','in'],'dimension unit'),totalM:finite(e.totalM,0,10_000_000,'total distance'),remaining:boolean(e.remaining,'remaining distance'),columns:cols,rows:{}};
+  if(Object.hasOwn(e,'presetId'))out.presetId=presetIdentity(e.presetId);
   if(e.preset!=='nutrition'&&e.mode!=='distance')throw Error('Time mode is only available in Nutrition plan.');
   // Optional references preserve identity across moves; absent fields keep legacy byte budgets unchanged.
   if(Object.hasOwn(e,'cueColumnId')){
@@ -68,12 +69,28 @@ export function validateEvent(e){
   }
   return out;
 }
+function presetIdentity(value){
+  str(value,64,'preset identity');if(!value||['__proto__','constructor','prototype'].includes(value))throw Error('Invalid preset identity.');return value;
+}
 export function validateState(s){
   if(s?.version!==VERSION)throw Error('Unsupported backup version.');
   if(!Array.isArray(s.events)||s.events.length<1||s.events.length>LIMITS.events)throw Error('Backup must contain 1–30 events.');
   const events=s.events.map(validateEvent);if(new Set(events.map(e=>e.id)).size!==events.length)throw Error('Duplicate event IDs.');
   if(!Array.isArray(s.presets)||s.presets.length>20)throw Error('Too many personal presets.');
-  const presets=s.presets.map(p=>({name:str(p.name,40,'preset name'),event:validateEvent(p.event)}));
+  const presets=s.presets.map(p=>{
+    const out={name:str(p.name,40,'preset name'),event:validateEvent(p.event)};
+    if(Object.hasOwn(out.event,'presetId'))throw Error('Preset templates cannot contain associations.');
+    if(Object.hasOwn(p,'id'))out.id=presetIdentity(p.id);
+    if(Object.hasOwn(p,'previous')){
+      if(!out.id)throw Error('Recovery requires a preset identity.');
+      out.previous={name:str(p.previous?.name,40,'previous preset name'),event:validateEvent(p.previous?.event)};
+      if(Object.hasOwn(out.previous.event,'presetId'))throw Error('Recovery templates cannot contain associations.');
+    }
+    return out;
+  });
+  const ids=presets.filter(p=>p.id).map(p=>p.id);
+  if(new Set(ids).size!==ids.length)throw Error('Duplicate preset identities.');
+  if(events.some(e=>e.presetId&&!ids.includes(e.presetId)))throw Error('Missing associated preset.');
   let bike=null;if(s.bike){const e=createEvent();e.layout={...e.layout,...s.bike};const l=validateEvent(e).layout;bike={width:l.width,length:l.length,padding:l.padding,rotation:l.rotation};}
   const out={bike,version:VERSION,theme:choice(s.theme,['light','dark','system'],'theme'),active:events.some(e=>e.id===s.active)?s.active:events[0].id,events,presets};
   // Optional v1 metadata. Legacy backups remain unchanged; malformed metadata enters recovery.

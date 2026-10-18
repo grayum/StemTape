@@ -98,6 +98,49 @@ on 2026-10-18. Physical printing,
 screen-reader and exhaustive device coverage are not inferred. Internal HTTP
 and Chromium results remain separate evidence.
 
+## Current v0.8.0 candidate preview (2026-10-18)
+
+The supplying branch is **`review/v0.8.0`**, based on verified public main
+`9203a0872465aafb3dd963ae310eddfea0111063` (merged/tagged v0.7.0). Find the actual
+worktree using `git worktree list`. Image **`stemtape:0.8.0`** was built there using
+this document's pinned Nginx base, then only the inspected v0.7.0 preview was
+replaced by **`stemtape-v080-preview`**. Existing images, unrelated containers,
+worktrees, README edits and backups were preserved.
+
+The existing read-only development HTTP configuration and **0.0.0.0:8080 →
+container 8080** publication were reused. All **30** served assets match the
+candidate worktree; Nginx syntax, native Chromium and container checks pass
+inside the sandbox. The established laptop route remains **127.0.0.1:18080 →
+sandbox 8080 → container 8080** and the URL **http://127.0.0.1:18080/**. No host-side
+command or forwarding change was made. New laptop access and v0.8.0 manual
+acceptance are not independently established; prior user-confirmed access is
+recorded separately above. See [candidate validation](VALIDATION.md).
+
+The v0.8.0 preview was refreshed again for the user-found preset-name collision
+fix on 2026-10-18 using the same container name, HTTP mount and sandbox 8080
+publication. All 30 asset bytes, container smoke and native Chromium checks pass
+inside the sandbox. The user reported an issue during manual testing; this is
+not final acceptance or a new laptop reachability claim. Forwarding is unchanged.
+
+The Event name / Preset name follow-up refreshed that same preview again on
+2026-10-18. All **31** served assets (including the new local naming module) match
+`review/v0.8.0`; Nginx syntax, container smoke and focused native browser checks
+pass inside the sandbox. The read-only HTTP mount, sandbox/container 8080 mapping
+and laptop **http://127.0.0.1:18080/** forwarding are unchanged. No new laptop
+reachability or user manual acceptance is claimed.
+
+The final button-layout follow-up on 2026-10-18 rebuilt and refreshed only
+`stemtape-v080-preview` from `review/v0.8.0`. The same HTTP mount and sandbox
+8080/container 8080 mapping remain; all 31 assets match the worktree and smoke/
+Chromium checks pass internally. Laptop URL/forwarding is unchanged and final
+manual acceptance was pending at that stage.
+
+The user subsequently reported final manual preview acceptance on **2026-10-18**,
+including the final button layout and Tour of Flanders preset. This confirms
+user-reported laptop access for that review; it does not establish physical
+printing or exhaustive device/accessibility coverage. The existing preview and
+forwarding are retained for the final branch/bundle handoff.
+
 ## Build and start inside the sandbox
 
 All commands in this section run **inside the sandbox**. First inspect the current
@@ -110,7 +153,7 @@ The existing `.gitignore` excludes `.env.preview` and `artifacts/`.
 ```sh
 PREVIEW_WORKTREE='<absolute path to intended worktree>'
 PREVIEW_NAME='<inspected preview container name>'
-PREVIEW_IMAGE='stemtape:0.7.0'
+PREVIEW_IMAGE='stemtape:0.8.0'
 SANDBOX_PORT=8080
 NGINX_IMAGE='nginx@sha256:<verified Alpine image digest>'
 cd "$PREVIEW_WORKTREE"

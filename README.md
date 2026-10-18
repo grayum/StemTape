@@ -38,6 +38,31 @@ Open **http://127.0.0.1:8080**. Use this local server rather than opening `index
 
 Custom Unicode emojis use the user's system font. The outlined symbols combine **Lucide** with original StemTape symbols, including the approved Bar, Bottle, Gel and Cobbles replacements, not Font Awesome. Lucide 1.8.0 and DejaVu font notices are bundled in `dist/assets/`. No CDN assets or analytics.
 
+## v0.8.0 changes (review candidate)
+
+- New preset names and renames must be unique after trimming and ignoring case,
+  including built-in names. Existing duplicate-name backups remain usable and
+  entries have numbered personal-preset labels.
+- Event names identify ride plans, with a separate case-insensitive namespace from
+  preset names. New/duplicated/imported plans get checked unique names; legacy
+  duplicate-name backups remain intact with numbered display labels.
+- Save as new preset associates the plan with a personal copy. Update preset
+  confirms its identity and preserves its name while capturing the event name,
+  both cue lists, columns, units and plan print settings. Rename preset is separate
+  and never renames existing events. Undo/Redo name conflicts keep history intact;
+  free the name on the other plan, then retry.
+- Recover one previous preset version from its Update dialog. Atomic failures
+  preserve both versions; preset actions remain outside plan Undo/Redo.
+- Tour of Flanders is a supplied 19-cue distance example with visible Location,
+  not a verified current official route. Default strip dimensions remain unchanged.
+- Complete JSON retains preset identities, associations and recovery. CSV does not;
+  older apps can lose new metadata. Back up before rollback.
+
+See [design, compatibility and manual review](docs/REVIEW-v0.8.0.md).
+The user reports final manual preview acceptance on **2026-10-18**, including the
+final button layout and Tour of Flanders preset. Physical printing and exhaustive
+device/accessibility testing are not inferred. Deployment remains separate.
+
 ## v0.7.0 changes (review candidate)
 
 - Undo/Redo for completed edits to the active plan, including row/column ordering,
@@ -178,7 +203,7 @@ npm run test:browser
 This creates screenshots and an actual PDF in ignored `artifacts/`. Review all screenshots and verify PDF dimensions; passing assertions alone is not visual QA.
 
 ```sh
-sh scripts/container-smoke.sh stemtape:0.7.0
+sh scripts/container-smoke.sh stemtape:0.8.0
 ```
 
 **v0.6.1 validation:** the complete native Chromium suite against the local Docker app, real-browser screenshot/200% zoom review, 69 Node tests, syntax and container checks passed. The owner also reports a passing manual Docker-preview check on 2026-10-09. Physical printing, screen-reader/device testing and production verification are not inferred; remaining gates are recorded in [current validation](docs/VALIDATION.md).

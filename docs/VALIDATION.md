@@ -1,5 +1,242 @@
 # Validation record
 
+## 2026-10-18 — final v0.8.0 manual acceptance and branch handoff
+
+The user accepts v0.8.0 after manual preview testing, including final button layout
+and the Tour of Flanders built-in preset, dated **2026-10-18**. This supersedes
+pending acceptance statements in earlier preparation entries below. It is
+user-reported testing; physical printing, screen-reader testing and exhaustive
+device/accessibility coverage are not inferred.
+
+Final review confirms consistent v0.8.0 package/UI/image metadata, changelog, help,
+separate naming namespaces, identity-based update/recovery, compatibility and
+upgrade/rollback documentation. Schema/key remain v1; older versions may lose new
+optional preset metadata and reject the Flanders key. Complete JSON originals
+must be preserved before any rollback. Tour of Flanders route data is embedded
+in local `dist/presets.js`, not fetched from the `/tmp` source CSV at runtime.
+The committed BOM-bearing CSV is test data only; fidelity checks preserve all
+19 cues, blank values, icons, order and visible Location contents.
+
+- **PASS:** final `npm test` (**89 tests**), `npm run check`, and `git diff --check`.
+  The existing Flanders fidelity test is now a separate test file for reviewable
+  commits; runtime code remains unchanged from the accepted preview. A scoped
+  `.gitattributes` rule preserves the supplied fixture BOM/CRLF bytes and treats
+  its CR line endings correctly in whitespace checks.
+- **REUSED PASS:** complete native Chromium final-layout suite at root, focused
+  preset/naming regressions at plain static `/StemTape/` and Docker root, and
+  actual 200% zoom/screenshots in both themes. These cover left/right action
+  groups, Columns then Sort, DOM/tab order, focus, disabled states, responsive
+  wrapping, existing history/save behavior and shared preview/print rendering.
+  No relevant application code changed after those checks.
+- **REUSED PASS:** final-layout Docker smoke (non-root, read-only root/app, security
+  headers, methods, gzip, security.txt); preview remains healthy on its existing
+  sandbox 8080 → container 8080 mapping. All 31 served assets rechecked against
+  this worktree. User-reported laptop preview acceptance is distinct from these
+  internal HTTP/browser checks. Forwarding remains 127.0.0.1:18080 → sandbox 8080.
+
+Handoff uses separate commits for bundled route data/model/fidelity and the
+preset/naming/UI/release integration. Only reviewed release files are included;
+original-checkout README edits, backups, worktrees, private local instructions,
+screenshots, PDFs, browser binaries and local artifacts are excluded/preserved.
+Full-history branch bundle and standalone restore verification are reported in
+the handoff. No push, merge, tag, deploy or infrastructure change is authorized.
+
+Required physical-print, production proxy/TLS and full secret/image-scanner gates
+remain unverified as previously recorded; manual acceptance does not establish
+those checks or make this a deployed release. Basic file/credential-pattern
+checks are not a substitute for full scanners.
+
+## 2026-10-18 — v0.8.0 final button-layout follow-up
+
+Final user manual acceptance remains **pending**. This follow-up changes only the
+HTML/CSS placement, associated browser layout assertions and documentation; plan,
+preset, naming, history, save, print, CSP and deployment behavior stay unchanged.
+
+- **PASS:** `npm test` (**89 tests**), `npm run check`, relevant browser-test syntax
+  and `git diff --check`.
+- **PASS:** full native Chromium root suite and focused preset/naming regressions
+  at plain static `/StemTape/`. Desktop 1440 and mobile 390/320 in light/dark themes:
+  history group aligns left, preset group aligns right, flexible gap, ordered
+  wrapping without page overflow. The history pair retains 6px spacing; wrapped
+  groups have at least 12px vertical spacing and preset buttons retain 6px spacing.
+- **PASS:** DOM order, actual Tab movement through Columns then Sort, Undo/Redo
+  then Save as new preset / Update preset when enabled; button focus, disabled
+  states, dialogs and existing functional regressions remain passing.
+- **PASS:** actual native Chromium browser zoom 2.0 (720 CSS pixels, DPR 2), both
+  themes, including the same alignment, wrap and keyboard assertions. Desktop,
+  narrow mobile and zoom screenshots inspected in both themes. Earlier unaffected
+  print/PDF evidence is reused; no physical printing or manual pass is inferred.
+- **PASS:** refreshed only `stemtape-v080-preview` from `review/v0.8.0`, with the
+  existing read-only HTTP config, sandbox **0.0.0.0:8080 → container 8080** and
+  unchanged laptop forwarding/URL **http://127.0.0.1:18080/**. All **31** served
+  assets match this worktree byte-for-byte; Nginx syntax, container smoke and
+  focused native Chromium against Docker pass. Internal success does not verify
+  new laptop reachability. No unrelated container or production setting changed.
+
+Unrelated changes/backups are preserved; no commit, push, merge, tag or deployment.
+The remaining release gates documented below are unchanged.
+
+## 2026-10-18 — v0.8.0 separate Event/Preset name follow-up
+
+Requested after the user-found duplicate-preset issue; this is automated candidate
+validation, not final user acceptance. Synthetic browser fixtures preserve all
+real user data. Separate name namespaces do not change schema v1, storage keys,
+CSV conventions, physical dimensions, strict CSP or the manual-only Pages workflow.
+
+- **PASS:** `npm test` (**89 tests**), `npm run check`, browser/zoom syntax and
+  `git diff --check`. Pure tests cover separate namespaces, self-renaming,
+  capitalization/whitespace, checked suffixes including length/Unicode limits,
+  legacy duplicate round trips, repeated personal-preset use and history peeking.
+- **PASS:** complete native Chromium root suite, including v0.7.0 grouping/save/
+  recovery regressions, v0.8.0 identity/revision/import tests, preset collision
+  validation and the new naming suite. A byte-limit history fixture now uses a
+  whitespace-free name so normalization does not change its byte-limit premise;
+  the rejected Undo still leaves both state and history unchanged.
+- **PASS:** focused preset and naming regressions at plain static `/StemTape/`
+  without rewrites and at the refreshed Docker root. The separate Pages browser
+  check passes resource/font loading, navigation, security.txt and meta-only CSP.
+- **PASS:** Event name helper and association line; same name allowed across
+  namespaces; exact/case/trim collisions within each; own-ID exclusion; unchanged
+  saved names and accessible preserved invalid drafts. Update keeps preset name,
+  identifies its target, explains captured event name/settings and has no rename
+  field. Separate Rename preserves the template and existing event names.
+- **PASS:** checked unique names for New, Duplicate, repeated personal/built-in
+  preset creation, CSV and spreadsheet import; actual complete JSON restore keeps
+  legacy duplicates byte-equivalent with numbered selector labels. No name-based
+  identity inference, merging or overwriting. Prior duplicate-preset import and
+  independent update/recovery coverage remains passing.
+- **PASS:** real Undo and Redo name conflicts leave storage, plan and history stacks
+  unchanged, announce a live status and retain focus; freeing the name allows a
+  retry. Quota failures retain valid in-memory names with Not saved, keep storage
+  unchanged, and still prevent another plan taking that name. Undo/Redo remain
+  usable after storage recovers; preset transactions retain their atomic behavior.
+- **PASS:** desktop/mobile 1440/390/320 in light/dark themes, dialog focus/Escape,
+  wrapping and no horizontal overflow. Actual Chromium browser zoom 2.0 (720 CSS
+  pixels, DPR 2), both themes, covers association, invalid naming feedback, update/
+  recovery dialogs and Help. Actual desktop, mobile and zoom screenshots inspected.
+  Shared preview/print SVG remains identical after naming and history operations;
+  existing full-suite PDF evidence is retained. No physical-print pass is claimed.
+- **PASS:** Docker build with the previously pinned Nginx base; refreshed only
+  `stemtape-v080-preview`, healthy and `nginx -t` clean. Smoke checks pass non-root,
+  read-only app, HTTP/security headers, rejected POST, gzip and exact security.txt.
+  All **31** served assets match this worktree byte-for-byte. Sandbox 8080 →
+  container 8080 and established laptop 127.0.0.1:18080 forwarding are unchanged.
+  Internal HTTP/Chromium is not independent evidence of current laptop access.
+- **PASS:** temporary-index artifact/hygiene validation (real index untouched):
+  exactly 31 dist files, security.txt included, no CNAME/unintended hidden files;
+  basic private-file/credential-pattern checks. Local Markdown targets checked.
+
+Help, README, changelog, architecture, upgrade and review docs describe the chosen
+rules and compatibility exceptions. Full secret/image scanners are unavailable;
+physical printing, screen-reader/exhaustive device testing, production proxy/TLS
+validation and user acceptance of this follow-up remain unverified. Earlier
+unaffected evidence remains applicable. No release/deployment authorization is
+inferred, and required unrun release gates remain blocking for release.
+
+## 2026-10-18 — user-found v0.8.0 preset-name collision follow-up
+
+During manual candidate testing the user found that Save as new preset accepted
+an indistinguishable duplicate name. This records a **user-found issue, not a
+completed manual pass**. Final v0.8.0 acceptance and review of this fix are pending.
+Existing user presets, including duplicates created during that testing, must
+remain untouched; browser regression fixtures use synthetic data only.
+
+- **PASS:** `npm test`, **84 tests**; `npm run check`, browser/zoom syntax and
+  `git diff --check`. New saves/renames reject exact, case-only and trimmed name
+  collisions against personal and built-in presets, preserving capitalization on
+  accepted names. Rename excludes its own ID; unchanged-name content updates and
+  recovery remain possible for existing duplicates.
+- **PASS:** complete native Chromium suite at hardened root `/`, including prior
+  v0.8.0 update/recovery/history tests and the new collision regressions. Focused
+  name regressions also pass at plain static `/StemTape/` and the refreshed Docker
+  root. Earlier unaffected full project-path/container evidence remains applicable.
+- **PASS:** rejected save/rename preserves the exact raw stored state, association,
+  recovery and dialog input; focus returns to the name field, with aria-invalid,
+  described inline role=alert and the requested exact collision message. Editing
+  the name clears the stale error; retry succeeds. No unrelated Update action is
+  offered by name. The update target remains its stable association ID.
+- **PASS:** real JSON import accepts existing duplicate names without merging or
+  renaming them. Numbered personal-preset selector and confirmation labels
+  distinguish entries without showing IDs. Each imported duplicate is independently
+  applied, updated and recovered; the other preset stays unchanged. Names remain
+  permitted in backup validation; duplicate identities are still rejected.
+- **PASS:** desktop/mobile 1440/390/320, both themes, preserved input, modal Escape/
+  focus return and no horizontal dialog overflow. Actual native Chromium 200%
+  browser zoom, both themes, includes inline collision/error screenshots and
+  unchanged storage assertions. Real mobile/zoom screenshots were visually inspected.
+- **PASS:** refreshed `stemtape-v080-preview`, container smoke, Nginx syntax and
+  all **30** served asset bytes match the release worktree. Existing read-only
+  HTTP mount and **sandbox 0.0.0.0:8080 → container 8080** publication reused;
+  laptop **http://127.0.0.1:18080/** forwarding unchanged. Internal checks do not
+  constitute a new laptop-access or user-acceptance pass.
+
+Help, review, README and changelog now explain collision validation and existing
+name duplicates. There is no schema or backup-format change in this follow-up.
+No commit, push, merge, tag, deployment or infrastructure change. Outstanding
+physical-print, broader accessibility/device, production and full scanning gates
+remain as recorded below.
+
+## 2026-10-18 — v0.8.0 preset/recovery and supplied Flanders candidate
+
+Environment: Linux aarch64 Docker Sandbox, Node 22.22.1 and native Playwright
+1.62.1 Chromium. Isolated branch `review/v0.8.0` is based on verified public main
+`9203a0872465aafb3dd963ae310eddfea0111063`; advertised/fetched main match. Annotated
+v0.7.0 tag object `50c5212281f0606b07f15271c903fd582c56acd5` points to this main,
+which contains the accepted v0.7.0 implementation. This is repository evidence,
+not independent production verification. See [design/review](REVIEW-v0.8.0.md).
+
+- **PASS:** `npm test` (81 tests), `npm run check`, new browser/zoom test syntax and
+  `git diff --check`. Focused data tests cover stable identities/same names,
+  independent plans, no-op/revision swaps, legacy loading, invalid references,
+  CSV/JSON boundaries, atomic writes/failures, UTF-8 budgets and source CSV fidelity.
+- **PASS:** complete existing native Chromium suite plus v0.8.0 regressions at
+  hardened root HTTP, plain static `/StemTape/` without rewrites, and Docker root.
+  Final focused v0.8.0 checks at Docker root and `/StemTape/` cover the final
+  confirmation/delete focus refinement and Flanders print case; earlier full-suite
+  evidence remains applicable to unchanged code.
+- **PASS:** Save new associates, same-name update uses identity, cancellation and
+  no-op preserve state/recovery, new plans use updated templates, existing plans
+  stay independent, recovery swaps versions, failed update/new/recovery preserves
+  state, invalid drafts block, blur-to-preset includes the latest field, deletion
+  unlinks all plans and old Undo cannot restore links, duplicate/switch/history,
+  rejected missing/duplicate imported references, replacement rather than merge,
+  successful JSON recovery preservation and exact-budget rejection.
+- **PASS:** Tour CSV BOM/escaping, all 19 rows/symbol keys/blanks/order, visible
+  role-marked Location and Fuel, three Kwaremont cues and Finish; repeated use and
+  reload do not inject duplicate defaults. Default dimensions are unchanged and
+  overflow blocks print. With explicitly enlarged test dimensions, preview and
+  print SVG match; generated PDF and print screenshot retain all cues/calibration.
+- **PASS:** desktop 1440, mobile 390/320 in both themes; action DOM/tab order,
+  6px Undo/Redo and 12px preset spacing, wrapping/no page overflow, accessible
+  dialog names, input focus, Escape return, keyboard cancellation and focus after
+  deletion. Actual Chromium browser zoom 2.0 (720 CSS px, DPR 2), both themes,
+  preset actions/dialogs, history and Help. Real screenshots were opened and
+  visually inspected; no CSS-transform substitute for browser zoom was used.
+- **PASS:** container smoke: nonroot/read-only, headers, method restriction,
+  security.txt exact bytes/type, hidden-path denial and gzip. Nginx syntax and
+  health pass. All **30** served dist assets match the supplying worktree exactly.
+  The existing HTTP mount and sandbox **0.0.0.0:8080 → container 8080** publication
+  are reused. Established laptop URL **http://127.0.0.1:18080/** and forwarding are
+  unchanged; internal verification does not establish new laptop reachability.
+- **PASS:** `/StemTape/` resources/fonts/home/security.txt/meta-CSP browser gate;
+  candidate artifact has exactly 30 dist files, including `.well-known/security.txt`,
+  and no CNAME/unintended hidden files. A temporary index was used to validate
+  newly added candidate files without staging the real worktree. Basic file/
+  credential-pattern hygiene and local Markdown link/diff checks pass.
+- **PASS:** tested actual v0.7.0 validator from main against candidate state:
+  it drops new optional IDs/links/recovery and rejects `flanders`. Rollback is
+  explicitly documented as potentially lossy/incompatible, despite schema v1.
+
+No v0.8.0 user manual acceptance, physical printing, screen-reader/exhaustive
+browser/device pass, production TLS/host-routing check or full secret/image
+vulnerability scan is claimed. Those release gates remain outstanding and block
+release under AGENTS.md. The pinned Nginx base was reused, not newly certified
+free of vulnerabilities. Docker's existing missing-default-build-ARG advisory
+remains; the required immutable base was explicitly supplied successfully.
+CSP, plan history limits, Pages deployment triggers/permissions/gates and
+production infrastructure are unchanged. No commit, push, merge, tag or deploy.
+
+
 ## 2026-10-18 — final v0.7.0 manual acceptance and handoff
 
 The user accepts the complete v0.7.0 work, including the final Undo/Redo placement

@@ -5,12 +5,13 @@ import {byteBudgetFixture} from './byte-budget-fixture.mjs';
 // Shared placement/focus assertions also run at actual browser zoom.
 export async function historyPlacement(page){
  const layout=await page.locator('.editor-actions').evaluate(n=>{
-  const group=n.querySelector('#history-controls'),undo=group.querySelector('#undo'),redo=group.querySelector('#redo'),save=n.querySelector('#save-preset');
-  const a=undo.getBoundingClientRect(),b=redo.getBoundingClientRect(),g=group.getBoundingClientRect(),s=save.getBoundingClientRect(),p=n.getBoundingClientRect();
-  return {order:group.nextElementSibling===save&&undo.nextElementSibling===redo,innerGap:b.left-a.right,outerGap:s.left-g.right,sameLine:Math.abs(s.top-g.top)<1,groupLine:Math.abs(a.top-b.top)<1,wrapped:s.top>=g.bottom+11,contained:g.left>=p.left-1&&g.right<=p.right+1&&s.left>=p.left-1&&s.right<=p.right+1};
+  const group=n.querySelector('#history-controls'),undo=group.querySelector('#undo'),redo=group.querySelector('#redo'),presets=n.querySelector('#preset-controls');
+  const a=undo.getBoundingClientRect(),b=redo.getBoundingClientRect(),g=group.getBoundingClientRect(),s=presets.getBoundingClientRect(),p=n.getBoundingClientRect();
+  return {order:group.nextElementSibling===presets&&undo.nextElementSibling===redo,innerGap:b.left-a.right,outerGap:s.left-g.right,sameLine:Math.abs(s.top-g.top)<1,groupLine:Math.abs(a.top-b.top)<1,wrapped:s.top>=g.bottom+11,left:Math.abs(g.left-p.left)<1,right:Math.abs(s.right-p.right)<1,contained:g.left>=p.left-1&&g.right<=p.right+1&&s.left>=p.left-1&&s.right<=p.right+1};
  });
  assert.equal(layout.order,true);assert.equal(layout.groupLine,true);assert.equal(layout.contained,true);
- assert.ok(Math.abs(layout.innerGap-6)<1);if(layout.sameLine)assert.ok(Math.abs(layout.outerGap-12)<1);else assert.equal(layout.wrapped,true);
+ assert.equal(layout.left,true);assert.equal(layout.right,true);
+ assert.ok(Math.abs(layout.innerGap-6)<1);if(layout.sameLine)assert.ok(layout.outerGap>=11);else assert.equal(layout.wrapped,true);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
  if(await page.locator('#undo').isEnabled()&&await page.locator('#redo').isEnabled()){
   await page.locator('#undo').focus();await page.keyboard.press('Tab');assert.equal(await page.locator('#redo').evaluate(n=>n===document.activeElement),true);
@@ -91,14 +92,14 @@ export async function v070Regressions(browser,base){
   await page.evaluate(()=>Storage.prototype.setItem=window.writeOriginal);await restore(backup);assert.equal(await page.locator('#undo').isDisabled(),true);assert.equal(await page.locator('#redo').isDisabled(),true);
   phase='history limits/no exports/reload';await seed();for(let i=0;i<23;i++){await page.locator('#event-name').fill(`Ride ${i}`);await blur();}for(let i=0;i<20;i++)await undo();assert.equal(await page.locator('#event-name').inputValue(),'Ride 2');assert.equal(await page.locator('#undo').isDisabled(),true);
   assert.doesNotMatch(await raw(),/"(history|undo|redo)"/);await page.reload();assert.equal(await page.locator('#redo').isDisabled(),true);
-  phase='UTF-8 rejection leaves state and stacks unchanged';const tight=byteBudgetFixture();tight.theme='dark';tight.events[0].name+='ab';await page.evaluate(raw=>localStorage.setItem('stemtape.v1',raw),serializeState(tight));await page.reload();
+  phase='UTF-8 rejection leaves state and stacks unchanged';const tight=byteBudgetFixture();tight.theme='dark';tight.events[0].name=tight.events[0].name.replaceAll(' ','_')+'ab';await page.evaluate(raw=>localStorage.setItem('stemtape.v1',raw),serializeState(tight));await page.reload();
   const shortName=tight.events[0].name.slice(0,-4);await page.locator('#event-name').fill(shortName);await blur();await page.locator('button[data-theme=system]').click();const beforeRejected=await raw(),rejectedLabel=await page.locator('#undo').getAttribute('aria-label');await undo();assert.equal(await page.locator('#event-name').inputValue(),shortName);assert.equal(await raw(),beforeRejected);assert.equal(await page.locator('#undo').getAttribute('aria-label'),rejectedLabel);assert.equal(await page.locator('#redo').isDisabled(),true);
   phase='responsive screenshots/preview/print';await seed();await cell(cue).fill('Screen to print');await undo();await redo();await page.evaluate(()=>window.print=()=>{});await page.locator('#print').click();assert.match(await page.locator('#print-pages').textContent(),/Screen to print/);assert.equal(await page.locator('#print-pages svg[aria-label="Printable cue sheet"]').innerHTML(),await page.locator('#sheet-preview > svg').innerHTML());await page.pdf({path:'artifacts/v070-print.pdf',preferCSSPageSize:true});await page.emulateMedia({media:'print'});await page.screenshot({path:'artifacts/v070-print.png',fullPage:true});await page.emulateMedia({media:'screen'});
   await page.locator('#event-name').fill('Placement');await blur();await undo();
   for(const width of [1440,390,320])for(const theme of ['light','dark']){
-   await page.setViewportSize({width,height:1000});if(width<=740)await page.locator('[data-tab=edit]').click();await page.locator(`button[data-theme=${theme}]`).click();
+   await page.setViewportSize({width,height:1000});if(width<=740)await page.locator('button[data-tab=edit]').click();await page.locator(`button[data-theme=${theme}]`).click();
    await historyPlacement(page);await page.locator('#undo').scrollIntoViewIfNeeded();await page.screenshot({path:`artifacts/v070-${width}-${theme}.png`,fullPage:true});await undo();await redo();
-   if(width<=740)await page.locator('[data-tab=preview]').click();assert.match(await page.locator('#sheet-preview').textContent(),/Screen to print/);
+   if(width<=740)await page.locator('button[data-tab=preview]').click();assert.match(await page.locator('#sheet-preview').textContent(),/Screen to print/);
   }
   assert.deepEqual(errors,[]);console.log('PASS: v0.7.0 field/sort grouping, rows, columns/Note, modes/units, isolation, boundaries, drafts, shortcuts, save failures, limits and responsive rendering');
  }catch(err){await page.screenshot({path:'artifacts/v070-failure.png',fullPage:true});throw new Error(`v0.7.0 ${phase}: ${err.message}`,{cause:err});}finally{await context.close();}

@@ -12,7 +12,7 @@ State in `stemtape.v1`: schema version, theme, active event ID, events, personal
 
 Column: ID/label/type/relative width/visibility/alignment/bold. First column is fixed distance-or-time. Text/symbol columns accept arbitrary Unicode text (160 chars); number columns accept nonnegative finite values. Typed edits are validated. Reordering/removing columns preserves stable IDs; destructive changes require confirmation. Icons are stored separately per row. Legacy state uses its second data column for printed icons; optional cueColumnId preserves that association when columns move or Note is inserted. Hidden data columns remain stored but are hidden in the editor, print and CSV; the mandatory position/icon editor and CSV fields remain available.
 
-No migration exists beyond v1 yet. Future schema versions must migrate explicitly and preserve unreadable originals. CSV creates a new event; JSON restore requires explicit confirmation and offers a pre-restore backup. A shared serializer validates and compactly encodes the complete state, enforcing a 2,000,000-byte UTF-8 budget before writes or acceptance of edits. The identical encoding is exported as JSON. Imports enforce both file bytes and the reconstructed serialized-state budget. The budget includes both modes, all events, personal presets, bike dimensions and preferences. Rejected mutations roll back in place; invalid input stays visible until corrected or explicitly cancelled. Existing oversized/unreadable storage is never automatically replaced: fallback editing remains in memory and the original raw string can be exported before explicit reset/restore. Recovery exports are originals, not necessarily valid or importable complete backups. Failed localStorage writes are reported and current in-memory data remains exportable.
+No numbered schema migration exists beyond v1; optional v0.8.0 preset metadata is assigned lazily on successful use. Future schema versions must migrate explicitly and preserve unreadable originals. CSV creates a new event; JSON restore requires explicit confirmation and offers a pre-restore backup. A shared serializer validates and compactly encodes the complete state, enforcing a 2,000,000-byte UTF-8 budget before writes or acceptance of edits. The identical encoding is exported as JSON. Imports enforce both file bytes and the reconstructed serialized-state budget. The budget includes both modes, all events, personal presets, bike dimensions and preferences. Rejected mutations roll back in place; invalid input stays visible until corrected or explicitly cancelled. Existing oversized/unreadable storage is never automatically replaced: fallback editing remains in memory and the original raw string can be exported before explicit reset/restore. Recovery exports are originals, not necessarily valid or importable complete backups. Failed localStorage writes are reported and current in-memory data remains exportable.
 
 ## Rendering
 Preview and print use the exact same DOM-built SVG. Millimetres are the SVG coordinate unit; font points are converted by 25.4/72. Text wraps using the bundled font's canvas metrics. Geometry stays in explicit SVG attributes, not dynamic inline styles. Physical page size is updated using CSSOM in the trusted stylesheet. Font size is never automatically reduced. Overflow and narrow columns block the app print action. Each requested copy prints on its own A4/Letter page with cut marks and a 50 mm line.
@@ -72,3 +72,25 @@ failures retain valid in-memory state with truthful status. Whole-library replac
 is accepted and clears history only after successful storage; failure retains the
 prior plans/history. Nothing is persisted or exported. See [history design,
 boundaries and memory accounting](REVIEW-v0.7.0.md).
+
+## Personal preset revisions (0.8)
+
+`preset-actions.js` constructs isolated, byte-validated candidates. Optional
+personal IDs, plan presetId references and one previous name/event revision are
+validated by core.js and preserved in JSON. Legacy records remain byte-stable
+until used. App acceptance requires successful atomic storage, unlike ordinary
+unsaved in-memory plan edits. Plan history restores preserve current associations.
+Duplicate/missing references reject imports, and library restore never merges.
+`names.js` applies separate event/preset naming namespaces only at explicit naming
+actions. Comparisons trim and lowercase, never infer identities. New-plan paths
+use checked numeric suffixes; compatibility validation/complete restore allows
+legacy duplicate names unchanged, distinguished by library-position display labels.
+Event collision drafts never mutate the accepted name. History peeks validate a
+changed target name before touching state or stacks; conflicting actions stay
+available for retry after the other plan is renamed. Preset content updates retain
+the preset name; explicit rename retains template contents and all event names.
+See [v0.8.0 design and rollback limits](REVIEW-v0.8.0.md).
+
+The supplied Tour of Flanders example uses fixed local FLANDERS_CUES and existing
+creation machinery, with visible role-marked Location/Fuel. Defaults are copied
+only on explicit creation and are never injected into stored libraries.
