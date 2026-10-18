@@ -102,3 +102,6 @@ button.secondary-button:focus-visible{outline:3px solid var(--lime);outline-offs
  .settings-group .checkbox-label{align-items:flex-start}
  .settings-group .checkbox-label input{margin-top:1px}
 }
+
+/* Align this action to the frame padding in normal flow; leave room for focus. */
+.preview-card>#privacy{display:block;width:fit-content;max-width:100%;margin:12px 0 0 auto}

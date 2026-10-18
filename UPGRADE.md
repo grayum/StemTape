@@ -1,3 +1,13 @@
+# Upgrade to 0.6.2 (review candidate)
+
+Focused artwork, layout and text polish from v0.6.1. No state/schema, storage-key,
+CSV/JSON, sorting, save-protection or physical sheet-dimension changes. Bidon keeps
+key `bottle`; its shared artwork rotates 45° clockwise. No data migration or reset
+is needed. Export complete JSON and preserve current backups before any separately
+authorized deployment or rollback. v0.6.1 adds no rollback data-loss concern; older
+version limitations below still apply. Validate actual-size printing physically
+before release. No deployment is part of this preparation.
+
 # Current hosting and rollback
 
 The hosted service is **https://stemtape.cc/** on **GitHub Pages behind Cloudflare**.

@@ -12,6 +12,12 @@ self-hosting support, not instructions for deploying the current hosted service.
 
 ## Local laptop / SDX
 
+For development previews, especially nested Docker inside Docker Sandbox, first
+read [local development and preview networking](LOCAL-DEVELOPMENT.md). It documents
+inspection, worktree/asset verification, the established forwarding and scoped
+replacement/cleanup. The direct-laptop Compose defaults below are a different
+network context; do not apply their loopback publish inside a sandbox blindly.
+
 Copy `docker-compose.example.yaml` to private `docker-compose.yaml`, and `.env.example` to `.env`. The defaults use `127.0.0.1:8080` only. Run:
 
 ```sh

@@ -38,7 +38,18 @@ Open **http://127.0.0.1:8080**. Use this local server rather than opening `index
 
 Custom Unicode emojis use the user's system font. The outlined symbols combine **Lucide** with original StemTape symbols, including the approved Bar, Bottle, Gel and Cobbles replacements, not Font Awesome. Lucide 1.8.0 and DejaVu font notices are bundled in `dist/assets/`. No CDN assets or analytics.
 
-## v0.6.1 changes (review candidate)
+## v0.6.2 changes (review candidate)
+
+- Rotate Bidon/Bottle artwork 45° clockwise everywhere, retaining key `bottle`.
+- Clarify **Scale 100% / Actual size.** printing guidance and ruler calibration in Help.
+- Right-align Privacy & help at the bottom of the preview frame; keep the hosted-service privacy explanation.
+- Preserve plans, imports/exports, sorting, save protections and physical sheet dimensions.
+
+The user reports the final local preview passed on 2026-10-18, including the right-aligned Help button. Physical printing and exhaustive device coverage are not inferred.
+
+See [v0.6.2 review and local Docker checklist](docs/REVIEW-v0.6.2.md) for validation and remaining release gates.
+
+## v0.6.1 changes
 
 - Responsive Import cards with equal widths and aligned actions; stack on mobile.
 - Understated secondary action buttons with visible borders, tinted backgrounds and lime keyboard focus in both themes.
@@ -90,11 +101,17 @@ time,icon,Fuel
 1:00,gel,Gel
 ```
 
+The Softdrink symbol retains CSV/JSON key `can`.
+
 Use point decimal separators in CSV numbers. A comma in text must be quoted. Supported icon keys: banana, bottle, bar, gel, smile, mountain, feed, flag, coffee, warning, cobbles, ricecake, can, neutral, litter (or empty). Unknown icons are rejected. Export includes the active mode, cumulative position values, icons and visible data columns in display order. Hidden content requires JSON backup. The position column stays in the editor and CSV even when hidden in print. If no other data column is visible, a position/icon-only CSV import creates an empty Fuel column; it does not recover omitted hidden data. Custom distance columns export explicit `stemtape:column:` JSON metadata in their CSV headers, preserving labels and distance units. v0.6.0 extends that tuple with an optional validated cue/note role to preserve identity when columns move or are renamed; marked exports require v0.6.0 for import. Older CSV files remain supported. CSV still does not preserve all custom types, exact text, precision, hidden content or layout; use JSON for complete backups. Literal labels ending in `[km]` or `[mi]` remain text unless explicitly marked; legacy CSV suffixes are not inferred. Use JSON for lossless backups.
+
+## Cue ordering
+
+Editing the primary distance or time sorts cues when you leave the field or press Enter. Manual reordering then persists until the next valid position edit (or Sort). Equal positions retain their relative order. Text and symbol edits do not sort.
 
 ## Print workflow
 
-Measure the **usable surface**, not the nominal stem length. Set width/length, adjust text and print at **100% / Actual size**; disable browser headers/footers. Save as PDF from that dialog if wanted. Measure the printed **50 mm calibration line** before fitting the strip. Each copy gets its own page. Actual printer scaling and readability still require a physical test. The app never silently shrinks fonts; default is 11 pt, minimum 8 pt.
+Measure the **usable surface**, not the nominal stem length. Set width/length, adjust text and print at **Scale 100% / Actual size.** Fit to page can change physical dimensions; disable browser headers/footers. Save as PDF from that dialog if wanted. Measure the printed **50 mm calibration line** before fitting the strip. Each copy gets its own page. Actual printer scaling and readability still require a physical test. The app never silently shrinks fonts; default is 11 pt, minimum 8 pt.
 
 ## Optional Docker development and self-hosting
 
@@ -142,7 +159,7 @@ npm run test:browser
 This creates screenshots and an actual PDF in ignored `artifacts/`. Review all screenshots and verify PDF dimensions; passing assertions alone is not visual QA.
 
 ```sh
-sh scripts/container-smoke.sh stemtape:0.6.1
+sh scripts/container-smoke.sh stemtape:0.6.2
 ```
 
 **v0.6.1 validation:** the complete native Chromium suite against the local Docker app, real-browser screenshot/200% zoom review, 69 Node tests, syntax and container checks passed. The owner also reports a passing manual Docker-preview check on 2026-10-09. Physical printing, screen-reader/device testing and production verification are not inferred; remaining gates are recorded in [current validation](docs/VALIDATION.md).
@@ -160,5 +177,3 @@ Unzip into a fresh development directory, review, then initialise Git and create
 [StemTape](https://github.com/grayum/StemTape) is developed and maintained by [Graham van der Wielen](https://grahamofthewheels.com/).
 
 Created with assistance from ChatGPT & Codex (OpenAI).
-
-Editing the primary distance or time sorts cues when you leave the field or press Enter. Manual reordering then persists until the next valid position edit (or Sort). Equal positions retain their relative order. Text and symbol edits do not sort. The Softdrink symbol retains CSV/JSON key `can`.

@@ -16,3 +16,12 @@ Read README.md, SECURITY.md and docs/ARCHITECTURE.md before making changes.
 - Use isolated development branches/checkouts and PR review. Do not change production secrets/data/config or deploy without explicit destination authorization.
 - Required checks before release: npm test, npm run check, browser suite + visual inspection (light/dark, mobile, 200% zoom), actual-size PDF and physical print, container-smoke, proxy TLS/host-routing checks, secret and image scanning. Record skipped checks accurately. Block release if required gates cannot run.
 - Website default theme System; user Light/Dark override saved locally. Printed sheet always black on white.
+
+## Local previews
+
+- Read `docs/LOCAL-DEVELOPMENT.md` before starting or replacing a preview.
+- Inspect existing containers and listeners before changing ports; reuse established Sandbox-to-laptop forwarding whenever possible.
+- Build from the intended worktree and verify every served `dist/` asset matches it.
+- Do not stop unrelated containers or change production configuration for a local preview.
+- Internal HTTP/Chromium success does not prove laptop reachability; record user-confirmed access separately.
+- Verify `sbx` syntax using installed help or current official documentation before proposing host-side commands; do not assume host controls are available inside the sandbox.

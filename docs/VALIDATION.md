@@ -1,5 +1,78 @@
 # Validation record
 
+## 2026-10-18 — v0.6.2 final user review and local handoff
+
+The user reports that the final manual preview check passed, including the
+right-aligned Privacy & help button. This supersedes the pending alignment
+acceptance recorded on 2026-10-17. It is user-reported testing of the local
+preview, not physical printing, exhaustive device/browser coverage or independent
+production verification.
+
+Final diff review confirms consistent v0.6.2 package/UI/image metadata and release
+notes. `npm test` (69/69), `npm run check`, new browser-module syntax, documentation
+links, publish-directory/basic hygiene and `git diff --check` passed again.
+Completed native Chromium evidence is reused: the full root/project-path suites,
+follow-up right-alignment/focus checks at both mounts, both themes and actual 200%
+zoom, screenshot inspection and container smoke cover the unchanged final app.
+No relevant app/browser code changed during this finalization. All 28 served
+assets still match the release worktree, and the working preview is preserved.
+
+The authorized handoff contains two separate local commits: visual/text changes
+and release documentation, then local-preview workflow instructions/documentation.
+Earlier no-commit statements below describe preparation stages. Temporary
+screenshots, browser installations, profiles and ignored local artifacts are
+excluded. Unrelated README edits and existing backups are preserved. No push,
+merge, tag, production deployment or infrastructure change is included. Physical
+printing, broader device/accessibility review and full secret/image scans remain
+unperformed gates; the user pass does not establish them.
+
+
+## 2026-10-17 — user review and Help alignment follow-up
+
+The user reports completing manual review of the v0.6.2 preview and accepting all
+reviewed changes except right-alignment of Privacy & help. That adjustment was
+pending at the time of the report. This does not establish physical printing,
+exhaustive browser/device coverage or unreviewed release gates.
+
+The follow-up right-aligns only that button within the preview frame's existing
+padding using normal flow and an automatic left margin. Its width remains bounded
+by the frame on narrow screens. User acceptance of this final adjustment is not
+yet recorded at this stage; the 2026-10-18 user report above subsequently confirms
+it. Prior automated evidence below retains its original scope.
+
+Follow-up checks passed: focused native Chromium regressions at `/` on Docker
+and `/StemTape/` on a plain static server, right-padding alignment at 1440/390/320px
+in both themes, keyboard opening/Escape focus return, actual Chromium 200% zoom
+with expanded settings in both themes, test syntax, container smoke and diff
+checks. Real desktop/mobile and 200% zoom screenshots were inspected. Existing
+Node/full-browser results are reused for unchanged application logic. No physical
+printing or exhaustive test coverage is inferred.
+
+Rebuilt and refreshed only the v0.6.2 preview container. All 28 served assets match
+the updated worktree. Established sandbox `0.0.0.0:8080` → container `8080` remains;
+the working laptop route is `127.0.0.1:18080` → sandbox `8080`. HTTP/browser checks
+were executed in the sandbox; laptop reachability is not independently claimed.
+No commit, push, merge, tag or production deployment was performed.
+
+
+## 2026-10-17 — v0.6.2 polish candidate
+
+Verified public main `9c6afe41e47563e1bd58d077d2eecfef67964484` includes the merged
+Pages migration. Isolated worktree, design, exact check scope, screenshots and
+local Docker review instructions are in [the v0.6.2 review](REVIEW-v0.6.2.md).
+
+69 Node tests, syntax, full native Chromium suites at `/` and `/StemTape/`,
+Pages-specific probes, focused icon/layout/focus regressions, actual 200% browser
+zoom in both themes and final Docker smoke passed. Real screenshots were inspected
+and PDFs generated. Documentation/link, publish-file, basic hygiene and diff checks
+passed. State/schema, identities, import/export/sorting, save protections, sheet
+geometry, CSP and the manual-only Pages workflow remain unchanged.
+
+At this earlier preparation stage no physical printing, user manual pass, screen-reader/device matrix, production
+verification, full secret/image scan or remote workflow run is inferred. No commit,
+push, merge, tag, deployment or infrastructure change is authorized in preparation.
+
+
 ## 2026-10-17 — migration finalization
 
 Reviewed the complete migration diff, including the two privacy strings and the
