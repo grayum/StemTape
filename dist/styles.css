@@ -105,3 +105,10 @@ button.secondary-button:focus-visible{outline:3px solid var(--lime);outline-offs
 
 /* Align this action to the frame padding in normal flow; leave room for focus. */
 .preview-card>#privacy{display:block;width:fit-content;max-width:100%;margin:12px 0 0 auto}
+
+/* Keep history together; wrap the preset action with the existing 12px gap. */
+.editor-bottom{flex-wrap:wrap}
+.editor-actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px;max-width:100%}
+#history-controls{display:flex;gap:6px;flex-shrink:0}
+.editor-actions>#save-preset{flex-shrink:0;white-space:nowrap}
+#history-controls:focus-visible{outline:3px solid var(--ring);outline-offset:2px}

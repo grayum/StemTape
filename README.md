@@ -38,6 +38,25 @@ Open **http://127.0.0.1:8080**. Use this local server rather than opening `index
 
 Custom Unicode emojis use the user's system font. The outlined symbols combine **Lucide** with original StemTape symbols, including the approved Bar, Bottle, Gel and Cobbles replacements, not Font Awesome. Lucide 1.8.0 and DejaVu font notices are bundled in `dist/assets/`. No CDN assets or analytics.
 
+## v0.7.0 changes (review candidate)
+
+- Undo/Redo for completed edits to the active plan, including row/column ordering,
+  Note visibility, name, units and print settings. Position edits and their
+  automatic sort are one action; continuous field edits finish on blur.
+- Separate session-only histories: up to 20 actions per plan within an 8 MiB
+  shared snapshot budget. Reload clears history; JSON/CSV and localStorage never
+  contain it. Large plans may retain fewer actions.
+- Native text undo remains available in fields. Outside fields/dialogs, use
+  Cmd/Ctrl+Z and Cmd/Ctrl+Shift+Z (also Ctrl+Y on non-Mac).
+- Invalid drafts must be corrected or explicitly cancelled first. Storage failures
+  retain valid restored changes in memory with honest Not saved status.
+
+See [scope, design and review checklist](docs/REVIEW-v0.7.0.md).
+The user confirms v0.6.2 is deployed and working and reports passing v0.7.0
+manual preview testing and final acceptance, including Undo/Redo placement, on
+2026-10-18. Physical printing, screen-reader and exhaustive device coverage are
+not inferred.
+
 ## v0.6.2 changes (review candidate)
 
 - Rotate Bidon/Bottle artwork 45° clockwise everywhere, retaining key `bottle`.
@@ -159,7 +178,7 @@ npm run test:browser
 This creates screenshots and an actual PDF in ignored `artifacts/`. Review all screenshots and verify PDF dimensions; passing assertions alone is not visual QA.
 
 ```sh
-sh scripts/container-smoke.sh stemtape:0.6.2
+sh scripts/container-smoke.sh stemtape:0.7.0
 ```
 
 **v0.6.1 validation:** the complete native Chromium suite against the local Docker app, real-browser screenshot/200% zoom review, 69 Node tests, syntax and container checks passed. The owner also reports a passing manual Docker-preview check on 2026-10-09. Physical printing, screen-reader/device testing and production verification are not inferred; remaining gates are recorded in [current validation](docs/VALIDATION.md).

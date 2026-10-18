@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.7.0 — review candidate (2026-10-18)
+
+- Add per-plan, session-only Undo/Redo for completed field edits, rows, columns,
+  Note, names, modes/units and plan print settings; preserve stable identities.
+- Group position edits with automatic sorting and continuous field changes at
+  completion. Keep native text undo in fields; add accessible buttons, feedback
+  and platform shortcuts outside fields/modal dialogs. Place Undo/Redo together
+  immediately before Save as preset, with responsive wrapping and matching tab order.
+- Bound retained history to 20 actions per plan and 8 MiB shared snapshot budget;
+  new/duplicate/imported plans start empty. Successful library replacement clears
+  history; failed restore keeps current plans and history.
+- Preserve invalid drafts, existing save/recovery protections, schema v1, export
+  formats, strict CSP and print geometry. History never enters storage or exports.
+
 ## 0.6.2 — review candidate (2026-10-18)
 
 - Rotate only Bidon/Bottle artwork 45° clockwise around its existing centre in the shared icon definition; retain `bottle` identity and all other icons.
