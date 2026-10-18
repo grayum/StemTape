@@ -106,9 +106,14 @@ button.secondary-button:focus-visible{outline:3px solid var(--lime);outline-offs
 /* Align this action to the frame padding in normal flow; leave room for focus. */
 .preview-card>#privacy{display:block;width:fit-content;max-width:100%;margin:12px 0 0 auto}
 
-/* Keep history together; wrap the preset action with the existing 12px gap. */
+/* Keep history left and preset actions right, in DOM order when they wrap. */
 .editor-bottom{flex-wrap:wrap}
-.editor-actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px;max-width:100%}
+.editor-actions{display:flex;align-items:flex-start;flex-wrap:wrap;gap:12px;width:100%;max-width:100%}
 #history-controls{display:flex;gap:6px;flex-shrink:0}
-.editor-actions>#save-preset{flex-shrink:0;white-space:nowrap}
+#preset-controls{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:6px;max-width:100%;margin-left:auto}
+#preset-controls>button{flex-shrink:0;white-space:nowrap}
 #history-controls:focus-visible{outline:3px solid var(--ring);outline-offset:2px}
+
+#event-name{margin-bottom:6px}
+.naming-help{font-size:12px;color:var(--muted);margin:6px 0;overflow-wrap:anywhere}
+#preset-association{margin-bottom:22px}

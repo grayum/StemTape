@@ -1,3 +1,36 @@
+# Upgrade to 0.8.0 (review candidate)
+
+Export complete JSON and preserve originals before updating. Schema v1 and key
+`stemtape.v1` remain; legacy personal presets load unchanged and receive stable
+identity only on successful use. New optional IDs, plan associations and one
+previous preset revision are included in complete JSON, within the existing
+2,000,000-byte UTF-8 budget. CSV cannot preserve these fields. Duplicate/dangling
+references reject imports; whole-library restore replaces rather than merges.
+
+Event names and preset names have separate trimmed, case-insensitive uniqueness
+rules for new names and renames. Existing duplicate names and complete backups
+remain valid, with numbered selector labels; restore never silently renames them.
+Creating, duplicating, applying presets and importing CSV/spreadsheet data suggests
+a checked unique event name. CSV still carries no preset association. Undo/Redo
+name conflicts preserve the plan and history; free the name on the other plan,
+then retry. Content updates keep the preset name; explicit preset renaming changes
+no saved event names or template contents.
+
+Preset update/recovery/deletion requires a successful atomic storage write;
+failure leaves both versions and plan links unchanged. Ordinary plan edits and
+Undo retain their existing valid-in-memory/Not saved behavior. See the
+[preset design and recovery instructions](docs/REVIEW-v0.8.0.md).
+
+**Rollback limitation:** v0.7.0 drops the new optional metadata when it saves and
+rejects plans whose built-in key is `flanders`. It cannot losslessly round-trip
+v0.8.0 state. Preserve the original v0.8.0 JSON and test copies in an isolated
+profile before serving older code at the same origin. Do not clear protected
+browser data to make an older app start. No automatic downgrade is implemented.
+User-reported final manual preview acceptance is dated 2026-10-18, including the
+final button layout and bundled Tour of Flanders preset. This preparation neither
+deploys nor verifies production, physical printing or exhaustive device/accessibility
+coverage. The preset is bundled local JavaScript, with no runtime CSV or /tmp dependency.
+
 # Upgrade to 0.7.0 (review candidate)
 
 The user confirms v0.6.2 is deployed and working. This candidate adds in-memory

@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.8.0 — review candidate (2026-10-18)
+
+Final user-reported manual preview acceptance: 2026-10-18, including the final
+button layout and Tour of Flanders. Physical printing and exhaustive
+device/accessibility testing are not inferred.
+
+- Align history actions left and preset actions right with flexible spacing and
+  responsive wrapping; place Columns before Sort in DOM/tab and visual order.
+
+- Fix user-found duplicate preset-name UX: reject new/renamed collisions against
+  personal/built-in names, preserving dialog input with an accessible inline alert.
+  Keep existing duplicates/imports, distinguish numbered targets and retain ID-based
+  update/recovery.
+
+- Separate event/preset naming namespaces with accessible draft-preserving collision
+  feedback, checked unique creation/import suggestions and legacy duplicate labels.
+  Block conflicting Undo/Redo names without changing state or discarding history.
+- Separate preset content updates from explicit preset renames; identify the target
+  and explain captured settings, including event name. Neither rename affects the
+  other namespace. Preserve names and data in complete backup restores.
+- Separate Save as new preset and identity-based Update preset, keeping
+  Undo/Redo in the left action group. Confirm overwrite; protect bundled defaults.
+- Retain one recoverable previous personal preset version in the atomic state
+  write. Preserve existing plans, invalid drafts and both versions on failure;
+  exclude preset actions from plan history without restoring stale associations.
+- Validate optional v1 identities, plan links and recovery in complete JSON; retain
+  legacy templates without inflating load-time byte budgets. CSV remains unchanged.
+  Older apps may discard metadata or reject the new example: back up before rollback.
+- Add the supplied Tour of Flanders distance/km example: 19 cues, visible Location
+  Note and Fuel, original symbols/blanks/order, no invented year or route claim.
+
+
 ## 0.7.0 — review candidate (2026-10-18)
 
 - Add per-plan, session-only Undo/Redo for completed field edits, rows, columns,

@@ -3,6 +3,8 @@
 import assert from 'node:assert/strict';
 import {v050Regressions} from './v050-browser.mjs';
 import {v060Regressions} from './v060-browser.mjs';
+import {namingRegressions} from './naming-browser.mjs';
+import {v080Regressions,v080NameRegressions} from './v080-browser.mjs';
 import {v070Regressions} from './v070-browser.mjs';
 import {v062Regressions} from './v062-browser.mjs';
 import {v061Regressions} from './v061-browser.mjs';
@@ -116,7 +118,7 @@ const printedSheet=page.locator('#print-pages svg[aria-label="Printable cue shee
 assert.equal(await printedSheet.count(),1,'Single-copy print contains exactly one printable sheet');
 const dim=await printedSheet.evaluate(n=>({w:n.getAttribute('width'),h:n.getAttribute('height')}));assert.deepEqual(dim,{w:'32',h:'90'});
 await page.pdf({path:'artifacts/test-print.pdf',preferCSSPageSize:true,printBackground:true});
-await page.setViewportSize({width:390,height:844});await page.screenshot({path:'artifacts/mobile-edit.png',fullPage:true});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);await page.locator('[data-tab=preview]').click();assert.equal(await page.locator('.preview-card').isVisible(),true);await page.screenshot({path:'artifacts/mobile-preview.png',fullPage:true});
+await page.setViewportSize({width:390,height:844});await page.screenshot({path:'artifacts/mobile-edit.png',fullPage:true});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);await page.locator('button[data-tab=preview]').click();assert.equal(await page.locator('.preview-card').isVisible(),true);await page.screenshot({path:'artifacts/mobile-preview.png',fullPage:true});
 assert.deepEqual(external,[]);assert.deepEqual(errors,[]);
 await reviewRegressions(browser,base);
 await saveStatusRegressions(browser,base);
@@ -126,5 +128,8 @@ await v060Regressions(browser,base);
 await v061Regressions(browser,base);
 await v062Regressions(browser,base);
 await v070Regressions(browser,base);
+await v080Regressions(browser,base);
+await v080NameRegressions(browser,base);
+await namingRegressions(browser,base);
 console.log('PASS: desktop/mobile, local persistence, theme, time/distance, XSS, imports, columns, overflow, export and PDF.');
 }finally{await context?.close();await browser.close();}

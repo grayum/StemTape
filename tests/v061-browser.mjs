@@ -47,8 +47,8 @@ export async function v061Regressions(browser,base){
    assert.equal(await dialog.evaluate(n=>n.scrollWidth>n.clientWidth+1),false,'Import dialog has no horizontal overflow');
    await page.screenshot({path:`artifacts/v061-import-${width}-${theme}.png`,fullPage:true});await page.locator('#close-dialog').click();
    if(width<=740)await page.locator('.mobile-tabs button[data-tab="edit"]').click();
-   const preset=page.getByRole('button',{name:'Save as preset',exact:true});await preset.waitFor({state:'visible',timeout:5000});
-   assert.equal(await preset.evaluate(n=>getComputedStyle(n).borderTopStyle),'solid','Save as preset shares the secondary border');
+   const preset=page.getByRole('button',{name:'Save as new preset…',exact:true});await preset.waitFor({state:'visible',timeout:5000});
+   assert.equal(await preset.evaluate(n=>getComputedStyle(n).borderTopStyle),'solid','Save as new preset shares the secondary border');
    await preset.focus();await page.keyboard.press('Tab');await page.keyboard.press('Shift+Tab');
    assert.equal(await preset.evaluate(n=>n===document.activeElement&&n.matches(':focus-visible')),true);
    await page.screenshot({path:`artifacts/v061-editor-focus-${width}-${theme}.png`,fullPage:true});
