@@ -1,6 +1,6 @@
 #!/bin/sh
 set -eu
-image=${1:-stemtape:0.8.0}
+image=${1:-stemtape:0.9.0}
 name="stemtape-smoke-$$"
 port=${STEMTAPE_TEST_PORT:-18080}
 repo=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)

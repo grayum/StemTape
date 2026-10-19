@@ -23,7 +23,8 @@ Pasted emoji rendering depends on installed OS fonts. Bundled Lucide icons remai
 Project-owner templates: edit `BUILTIN_CUES` in `dist/presets.js`; each cue is `[kilometres, iconKey, text]`. Templates are copied at event creation; changing them never rewrites an existing saved plan. Personal templates include both cue modes and layout and travel in JSON backup. Nutrition example entries are illustrations, not recommendations.
 
 ## Branding
-Lime #C5F82A; charcoal #202426; off-white #F6F7F1. SVG wordmarks are outlined from bundled DejaVu Sans for portable rendering; this is a vector interpretation of the selected generated concept, not an extracted proprietary font. Transparent light/dark logos, standalone symbols, banners, SVG/ICO favicons are in assets. Keep accents out of print content. The working name StemTape is not domain/trademark-cleared.
+Lime #C5F82A; charcoal #202426; off-white #F6F7F1. SVG wordmarks are outlined from bundled DejaVu Sans for portable rendering; this is a vector interpretation of the selected generated concept, not an extracted proprietary font. Transparent light/dark logos, standalone symbols, banners, SVG/ICO favicons are in assets. Keep UI accents out of print content; only explicit per-cue palette selections
+add artwork colour. The working name StemTape is not domain/trademark-cleared.
 
 ## Row reordering (0.2)
 
@@ -94,3 +95,33 @@ See [v0.8.0 design and rollback limits](REVIEW-v0.8.0.md).
 The supplied Tour of Flanders example uses fixed local FLANDERS_CUES and existing
 creation machinery, with visible role-marked Location/Fuel. Defaults are copied
 only on explicit creation and are never injected into stored libraries.
+
+## Cue colours and grids (0.9)
+
+`icon-colours.js` holds fixed named IDs/sRGB values. Optional row.iconColour is
+validated in both modes; primary icon SVGs inherit the palette colour through
+currentColor. `icon-fills.js` adds audited interior layers beneath dark original
+outline/detail strokes for selected colours; Feed zone remains stroke-only.
+Default Banana no longer has a yellow surface/colour exception. Text,
+custom symbol columns, icon shapes and IDs are unchanged. Default omits styling
+and keeps the theme-aware editor and black-on-white print conventions.
+
+`grid.js` owns the grid allowlist, legacy mapping and pure boundary geometry.
+Optional layout.grid defaults to row lines (or a validated legacy lines boolean).
+Full grid is one path: visible column edges and each row boundary once, with a
+0.15 mm stroke. Outer sides/top are inset half a stroke; content starts 0.15 mm
+lower and bottom ink reserves another 0.075 mm before fit/footer allocation.
+A shared 0.8 mm per-side cell inset replaces the former uneven offsets in every
+grid mode; wrapping budgets it inside column widths, including icon space.
+Column width shares/fonts/sheet dimensions are unchanged. Row-line mode retains
+its existing separator style; None removes separators, including the header rule. Preview
+and print clone the same SVG. No grid boundaries extend into the footer.
+
+Both fields pass through existing validation/serialization, byte budgets, preset
+candidate transactions and bounded plan history. Defaults do not inflate old
+records. Coloured CSV uses a reserved versioned metadata tuple after icon; old
+strict metadata parsers reject it. See [v0.9.0 review](REVIEW-v0.9.0.md).
+
+The final v0.9.0 orientation follow-up sets Bar, Gel and Bottle upright at 0°,
+removing rotations from original outline paths and audited fill layers together.
+Path data, bounds, IDs, colour data and shared 0.8 mm padding remain unchanged.

@@ -1,3 +1,4 @@
+import {validateIconColour} from './icon-colours.js';
 import {validateGrid} from './grid.js';
 import {BUILTIN_CUES,FLANDERS_CUES} from './presets.js';
 // Pure data model: canonical metres and elapsed minutes; no HTML or network access.
@@ -55,6 +56,7 @@ export function validateEvent(e){
     if(!Array.isArray(e.rows?.[mode])||e.rows[mode].length>LIMITS.rows)throw Error('Too many rows (maximum 200 per mode).');
     out.rows[mode]=e.rows[mode].map(r=>{
       const row={id:str(r.id,64,'row ID'),symbol:choice(r.symbol,SYMBOLS,'symbol'),cells:{}};
+      if(Object.hasOwn(r,'iconColour'))row.iconColour=validateIconColour(r.iconColour);
       for(const [i,c] of cols.entries()){const value=r.cells?.[c.id];row.cells[c.id]=c.type==='distance'||c.type==='number'?finite(value,0,i===0&&mode==='time'?59999:10_000_000,'cell value'):str(value,LIMITS.text,'cell text');if(i===0&&mode==='time'&&!Number.isInteger(value))throw Error('Elapsed time must use whole minutes.');}
       return row;
     });
@@ -118,14 +120,15 @@ export function parseCSV(text){
 // Spreadsheet-safe CSV is not a lossless backup; JSON preserves exact strings.
 export function safeCSVCell(v){let s=String(v??'');if(/^[\s]*[=+\-@\t\r\n]/.test(s))s="'"+s;return '"'+s.replaceAll('"','""')+'"';}
 export function exportCSV(e){
-  const cols=e.columns.slice(1).filter(c=>c.visible),head=[e.mode==='time'?'time':`distance_${e.unit}`,'icon',...cols.map(c=>csvHeader(c,e.unit,e))];
-  return '\uFEFF'+[head,...e.rows[e.mode].map(r=>[e.mode==='time'?formatTime(r.cells[e.columns[0].id]):displayDistance(r.cells[e.columns[0].id],e.unit),r.symbol,...cols.map(c=>c.type==='distance'?displayDistance(r.cells[c.id],e.unit):r.cells[c.id])])].map(r=>r.map(safeCSVCell).join(',')).join('\r\n');
+  const cols=e.columns.slice(1).filter(c=>c.visible),coloured=e.rows[e.mode].some(r=>r.iconColour&&r.iconColour!=='default'),head=[e.mode==='time'?'time':`distance_${e.unit}`,'icon',...(coloured?[CSV_COLOUR_HEADER]:[]),...cols.map(c=>csvHeader(c,e.unit,e))];
+  return '\uFEFF'+[head,...e.rows[e.mode].map(r=>[e.mode==='time'?formatTime(r.cells[e.columns[0].id]):displayDistance(r.cells[e.columns[0].id],e.unit),r.symbol,...(coloured?[r.iconColour??'default']:[]),...cols.map(c=>c.type==='distance'?displayDistance(r.cells[c.id],e.unit):r.cells[c.id])])].map(r=>r.map(safeCSVCell).join(',')).join('\r\n');
 }
 export function importCSV(text){
   const data=parseCSV(text);if(data.length<2)throw Error('CSV needs a header and at least one row.');
   const h=data.shift().map(v=>v.trim()),first=h[0]?.toLowerCase(),mode=['time','h:mm'].includes(first)?'time':'distance';
   if(!['time','h:mm','distance_km','km','distance_mi','mi'].includes(first))throw Error('First CSV column must be distance_km, distance_mi or time (h:mm).');
-  const iconIndex=h[1]?.toLowerCase()==='icon'?1:-1,start=iconIndex===1?2:1;
+  const iconIndex=h[1]?.toLowerCase()==='icon'?1:-1,colourIndex=iconIndex===1&&h[2]===CSV_COLOUR_HEADER?2:-1,start=colourIndex===2?3:iconIndex===1?2:1;
+  if(h.some((v,i)=>v.startsWith('stemtape:column:["icon-colour"')&&i!==colourIndex))throw Error('Unsupported or misplaced CSV cue-colour metadata. Use v0.9.0 or later and preserve its header.');
   if((h.length-start<1&&iconIndex!==1)||h.length-start>7)throw Error('CSV needs 1–7 cue columns, or position and icon only.');
   const meta=h.slice(start).map(parseCSVHeader);
   if(['cue','note'].some(role=>meta.filter(c=>c.role===role).length>1))throw Error('Duplicate CSV column role.');
@@ -140,6 +143,7 @@ export function importCSV(text){
     const raw=values[0].trim();if(!raw)throw Error('Every row needs a distance or time.');
     const n=mode==='time'?parseTime(raw):toMetres(raw,e.unit);if(!Number.isFinite(n)||n<0)throw Error('Distances must be positive numbers.');
     const r={id:uid(),symbol:iconIndex===1?values[1]:'',cells:{[e.columns[0].id]:n}};
+    if(colourIndex===2){const colour=validateIconColour(values[colourIndex]);if(colour!=='default')r.iconColour=colour;}
     e.columns.slice(1).forEach((c,i)=>{
       if(!meta[i]){r.cells[c.id]='';return;}
       const value=values[start+i];if(c.type==='distance'&&!value.trim())throw Error('Every distance cell needs a number.');
@@ -193,6 +197,7 @@ export function restoreObject(target,source) {
 
 // Explicit metadata avoids confusing literal labels such as "Water [km]" with units.
 const CSV_COLUMN_PREFIX='stemtape:column:';
+const CSV_COLOUR_HEADER='stemtape:column:["icon-colour",1]';
 function csvHeader(c,unit,e) {
   const role=c.id===e.noteColumnId?'note':c.id===e.cueColumnId?'cue':null;
   const meta=[c.type==='distance'?'distance':'text',c.label,c.type==='distance'?unit:null];

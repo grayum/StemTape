@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.9.0 — review candidate (2026-10-19)
+
+- Add independent per-cue primary-icon colours from a fixed named palette,
+  with labelled picker choices, selected state and focus restoration. Keep
+  transparent areas, existing solid details and cue identities.
+  Fill audited interiors beneath dark detail outlines; Feed zone keeps coloured
+  strokes. Remove Banana's special yellow default.
+- Set Bar, Bottle/Bidon and Gel upright at 0°, removing their artwork rotations
+  from filled interiors and detail outlines together. Retain bounds and padding.
+- Add None / Row lines / Full grid through the shared preview/print renderer;
+  draw boundaries once, reserve outer stroke space and keep the footer outside.
+  Use a shared 0.8 mm horizontal inset per cell side across grid modes.
+- Preserve colours/grid across history, duplicates, JSON and preset revisions.
+  Validate optional v1 styling without inflating legacy load-time byte budgets.
+- Extend coloured CSVs with a versioned icon-colour metadata column that older
+  importers reject. Preserve monochrome CSV and all role/value alignment.
+- Add data, native-browser, geometry and PDF checks. Final user-reported manual
+  acceptance dated **2026-10-19** includes Bar, Bottle/Bidon and Gel at 0°.
+  Physical printing remains unverified and is not a release gate at the user's
+  request. No deployment or infrastructure changes.
+
 ## 0.8.0 — review candidate (2026-10-18)
 
 Final user-reported manual preview acceptance: 2026-10-18, including the final

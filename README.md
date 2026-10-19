@@ -38,6 +38,28 @@ Open **http://127.0.0.1:8080**. Use this local server rather than opening `index
 
 Custom Unicode emojis use the user's system font. The outlined symbols combine **Lucide** with original StemTape symbols, including the approved Bar, Bottle, Gel and Cobbles replacements, not Font Awesome. Lucide 1.8.0 and DejaVu font notices are bundled in `dist/assets/`. No CDN assets or analytics.
 
+## v0.9.0 changes (review candidate)
+
+- Open a cue's icon picker to choose Default / monochrome, Blue, Orange, Green,
+  Red or Purple. Colour belongs to the row, survives icon changes/None, and affects
+  primary icon artwork only. Both Bidon rows can have different colours.
+- Layout & print settings → Appearance → Grid: None, Row lines (existing default),
+  or Full grid. Visible Note/custom columns participate; footer stays outside.
+- Colours and grid are undoable and retained in complete JSON, duplicates, personal
+  presets and their recovery revisions. Old plans remain monochrome with row lines.
+- Coloured CSVs add versioned metadata requiring v0.9.0; monochrome CSVs stay in the
+  previous format. CSV omits grid settings. Older apps lose new styling on JSON save.
+- Same selected icon colour on screen, preview and print; audited interior fills
+  and dark outlines retain gaps/details. Feed zone keeps coloured utensil strokes.
+  Default Banana is monochrome like every cue. Shared 0.8 mm cell insets keep
+  artwork/text away from grid borders within configured widths. Browser/printer
+  settings and greyscale printers can affect colour. Verify an actual-size physical print before use.
+
+See [design, compatibility and review checklist](docs/REVIEW-v0.9.0.md).
+Final user-reported manual preview acceptance: **2026-10-19**, including upright
+Bar, Gel and Bottle/Bidon at 0°. Physical printing remains unverified and is not a
+release gate at the user's request; production verification is not claimed.
+
 ## v0.8.0 changes (review candidate)
 
 - New preset names and renames must be unique after trimming and ignoring case,
@@ -203,7 +225,7 @@ npm run test:browser
 This creates screenshots and an actual PDF in ignored `artifacts/`. Review all screenshots and verify PDF dimensions; passing assertions alone is not visual QA.
 
 ```sh
-sh scripts/container-smoke.sh stemtape:0.8.0
+sh scripts/container-smoke.sh stemtape:0.9.0
 ```
 
 **v0.6.1 validation:** the complete native Chromium suite against the local Docker app, real-browser screenshot/200% zoom review, 69 Node tests, syntax and container checks passed. The owner also reports a passing manual Docker-preview check on 2026-10-09. Physical printing, screen-reader/device testing and production verification are not inferred; remaining gates are recorded in [current validation](docs/VALIDATION.md).

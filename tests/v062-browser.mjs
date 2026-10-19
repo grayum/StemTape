@@ -13,14 +13,14 @@ export async function v062Regressions(browser,base){
   const editor=page.locator('#editor-rows .symbol-button').first();
   await editor.click();const bottle=page.getByRole('button',{name:'Bottle',exact:true});
   const paths=await bottle.locator('svg').innerHTML();
-  // Sample actual curves after rotation, including the existing 1.8-unit stroke.
+  // Sample actual curves with optional artwork rotation, including the existing 1.8-unit stroke.
   const bounds=await bottle.locator('path').evaluateAll(nodes=>{
    const points=[];
-   for(const path of nodes){const matrix=path.transform.baseVal.consolidate().matrix,length=path.getTotalLength();
+   for(const path of nodes){const matrix=(path.transform.baseVal.consolidate()?.matrix??path.ownerSVGElement.createSVGMatrix()),length=path.getTotalLength();
     for(let i=0;i<=1000;i++){const p=path.getPointAtLength(length*i/1000).matrixTransform(matrix);points.push(p);}}
    return {minX:Math.min(...points.map(p=>p.x))-.9,maxX:Math.max(...points.map(p=>p.x))+.9,minY:Math.min(...points.map(p=>p.y))-.9,maxY:Math.max(...points.map(p=>p.y))+.9};
   });
-  assert.ok(bounds.minX>0&&bounds.minY>0&&bounds.maxX<24&&bounds.maxY<24,'Rotated artwork and stroke stay within the existing viewBox');
+  assert.ok(bounds.minX>0&&bounds.minY>0&&bounds.maxX<24&&bounds.maxY<24,'Artwork and stroke stay within the existing viewBox');
   await page.screenshot({path:'artifacts/v062-picker.png',fullPage:true});await bottle.click();
   assert.equal(await editor.locator('svg').innerHTML(),paths);
   assert.equal(await page.locator('#sheet-preview svg svg').first().innerHTML(),paths);
