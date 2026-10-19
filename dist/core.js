@@ -1,3 +1,4 @@
+import {validateGrid} from './grid.js';
 import {BUILTIN_CUES,FLANDERS_CUES} from './presets.js';
 // Pure data model: canonical metres and elapsed minutes; no HTML or network access.
 export const VERSION = 1;
@@ -60,6 +61,8 @@ export function validateEvent(e){
     if(new Set(out.rows[mode].map(r=>r.id)).size!==out.rows[mode].length)throw Error('Duplicate row IDs.');
   }
   const l=e.layout||{};out.layout={width:finite(l.width,20,180,'width (20–180 mm)'),length:finite(l.length,30,260,'length (30–260 mm)'),font:finite(l.font,8,24,'font size (8–24 pt)'),padding:finite(l.padding,1,8,'padding'),gap:finite(l.gap,0.5,6,'row spacing'),rotation:choice(l.rotation,[0,90,180,270],'rotation'),header:boolean(l.header,'header'),paper:choice(l.paper,['A4','Letter'],'paper'),copies:finite(l.copies,1,4,'copies')};
+  if(Object.hasOwn(l,'grid'))out.layout.grid=validateGrid(l.grid);
+  if(Object.hasOwn(l,'lines'))out.layout.lines=boolean(l.lines,'legacy row lines');
   if(!Number.isInteger(l.copies))throw Error('Copies must be a whole number.');
   // Absent footer fields mean disabled/empty. Do not inflate old exact-budget plans on load.
   if(Object.hasOwn(l,'footerEnabled'))out.layout.footerEnabled=boolean(l.footerEnabled,'footer visibility');
