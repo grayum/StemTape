@@ -141,6 +141,40 @@ user-reported laptop access for that review; it does not establish physical
 printing or exhaustive device/accessibility coverage. The existing preview and
 forwarding are retained for the final branch/bundle handoff.
 
+## Current v0.9.0 candidate preview (2026-10-18)
+
+The supplying branch is **`review/v0.9.0`**, based on verified public main
+`76ccab4be602743c492c92330fac9151da1ee2ca` (merged/tagged v0.8.0). Find its actual
+path using `git worktree list`. Build/start/update commands below apply; the
+current image is **`stemtape:0.9.0`**, container **`stemtape-v090-preview`**.
+Only the inspected v0.8.0 preview was replaced, after building this worktree
+using the pinned Nginx base below. Prior images, worktrees and backups remain.
+
+The existing read-only development HTTP config mount was reused, with container
+**0.0.0.0:8080**, nested Docker **0.0.0.0:8080 → container 8080**, and established
+laptop forwarding **127.0.0.1:18080 → sandbox 8080** unchanged. The user opens
+**http://127.0.0.1:18080/**. No host-side command was needed or executed.
+All **34** served assets match the v0.9.0 worktree; Nginx syntax, container smoke,
+complete native Chromium and actual 200% zoom checks pass inside the sandbox.
+These do not prove new laptop access or user manual acceptance for v0.9.0.
+The earlier user-reported v0.8.0 acceptance remains a separate historical record.
+
+The fill/Banana/cell-padding follow-up rebuilds the same image and replaces only
+this preview, using the same read-only HTTP mount and port mapping. User feedback
+on the earlier preview was positive overall; final acceptance remains pending.
+
+The 2026-10-19 final orientation follow-up rebuilds/replaces only that same
+v0.9.0 preview, with the same HTTP mount and forwarding. All 34 assets match;
+focused native icon checks and container smoke pass internally. The user reports
+acceptance of the preceding preview apart from this final orientation change,
+which still awaits visual acceptance. Physical printing is unverified and is
+non-blocking for this candidate at the user's request.
+
+Final user-reported manual acceptance dated **2026-10-19** includes the corrected
+upright Bar/Gel/Bottle orientations. This supersedes the pending visual-check
+notes above. The working preview and established forwarding remain available;
+physical printing remains unverified and non-blocking at the user's request.
+
 ## Build and start inside the sandbox
 
 All commands in this section run **inside the sandbox**. First inspect the current
@@ -153,7 +187,7 @@ The existing `.gitignore` excludes `.env.preview` and `artifacts/`.
 ```sh
 PREVIEW_WORKTREE='<absolute path to intended worktree>'
 PREVIEW_NAME='<inspected preview container name>'
-PREVIEW_IMAGE='stemtape:0.8.0'
+PREVIEW_IMAGE='stemtape:0.9.0'
 SANDBOX_PORT=8080
 NGINX_IMAGE='nginx@sha256:<verified Alpine image digest>'
 cd "$PREVIEW_WORKTREE"

@@ -1,3 +1,45 @@
+# Upgrade to 0.9.0 (review candidate)
+
+Preserve complete JSON originals before upgrading. Schema version/key remain v1
+and `stemtape.v1`. Optional row `iconColour` accepts only default/blue/orange/green/
+red/purple; absent means monochrome. Optional layout `grid` accepts only none/rows/
+full. Absent grid uses the old row-line appearance; a legacy boolean `lines` maps
+true to rows and false to none. This base had unconditional row separators and no
+saved line control. Load does not add styling bytes to legacy exact-budget data.
+Unknown styling values reject import/storage validation with useful errors, keeping
+original data protected; there is no silent normalization to another colour.
+
+Colours/grid are included in complete JSON, duplicates, personal templates and the
+one previous revision, and the unchanged atomic save/UTF-8 budget path. They are
+plan Undo/Redo actions; preset recovery itself stays outside history. Remembered
+bike dimensions do not acquire styling preferences.
+
+Coloured CSVs add the reserved header `stemtape:column:["icon-colour",1]` immediately
+after icon, with a stable palette ID per row. All visible user-column data stays
+aligned after it. Old CSVs import as monochrome; entirely monochrome exports omit
+the new column. Grid remains JSON/preset layout metadata, absent from CSV.
+
+**Tested rollback limitation:** the actual v0.8.0 validator drops new colour/grid
+fields when re-saving JSON, and its CSV importer rejects the new metadata tuple.
+Older applications must not be used to edit the only copy of styled plans.
+Export complete JSON and retain originals; test older code only on copies in an
+isolated profile. No automatic downgrade or lossless older-version round trip is
+claimed. Earlier preset/association rollback limitations still apply.
+
+The visual follow-up adds audited fill layers for selected colours, keeps Feed
+zone as coloured strokes and removes the default Banana yellow treatment.
+Shared 0.8 mm cell insets replace uneven offsets across grid modes; unusually
+tight existing columns may wrap differently or need explicit adjustment.
+Dimensions/fonts are never silently changed and overflow still blocks printing.
+No additional persisted fields or format changes are needed for these refinements.
+
+Printing remains client-side, with exact-colour CSS hints already present in the
+print stylesheet. Browser/printer options, ink and greyscale output can alter
+colours. Shapes/text remain independent identifiers; check physical dimensions
+and the printed 50 mm scale. Final user-reported manual preview acceptance on
+**2026-10-19** includes Bar/Gel/Bottle upright at 0°. Physical printing remains
+unverified and is not a release gate at the user's request.
+
 # Upgrade to 0.8.0 (review candidate)
 
 Export complete JSON and preserve originals before updating. Schema v1 and key

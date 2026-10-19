@@ -1,5 +1,228 @@
 # Validation record
 
+## 2026-10-19 — final v0.9.0 manual acceptance and branch handoff
+
+The user accepts the final v0.9.0 preview, including Bar, Bottle/Bidon and Gel
+upright at **0°**, dated **2026-10-19**. This final user-reported manual acceptance
+supersedes pending acceptance statements in the preparation history below.
+Physical printing remains **unverified**, explicitly **not a release gate at the
+user's request**. It is not recorded as passed. No physical-print, screen-reader,
+exhaustive device/accessibility or independent production pass is inferred.
+
+Final review confirms v0.9.0 package/UI/image metadata, changelog, help, palette,
+fill/monochrome treatment, grid and shared 0.8 mm cell padding, CSV metadata,
+optional v1 JSON fields and tested rollback limitations are consistent. Bar,
+Bottle and Gel use no artwork rotation, including their fill/detail layers.
+Strict CSP and the manual-only/main-only Pages workflow remain unchanged.
+
+- **PASS:** final `npm test` (**100 tests**), `npm run check`, `git diff --check`.
+  The existing artwork audit is now a separate test file for reviewable commits;
+  runtime code is unchanged from the accepted preview.
+- **REUSED PASS:** complete native Chromium suites at root and plain static
+  `/StemTape/`, both themes, desktop/mobile, actual 200% zoom, grid geometry,
+  state/history/preset/import/storage regressions and actual PDF inspection.
+  Focused final upright-orientation checks pass at root and Docker, covering all
+  three icons in monochrome/blue, both themes, picker/editor/preview/print
+  equality, bounds, focus and unchanged state/history. These final captures/PDFs
+  were visually inspected. The earlier −7° attempt is superseded.
+- **REUSED PASS:** container smoke, Nginx syntax and byte comparison of all 34
+  served assets with this worktree. The existing preview stays available at
+  http://127.0.0.1:18080/ using unchanged forwarding. The accepted laptop preview
+  is user-reported evidence, separate from sandbox HTTP/Chromium checks.
+
+Handoff uses separate palette/artwork and grid-model commits, then shared app/CSV
+integration, tests and release documentation. Screenshots, PDFs, browser binaries,
+local artifacts and private local instructions are excluded. Unrelated README
+edits, backups and prior worktrees are preserved. Bundle and standalone restore
+verification are reported in the handoff. No push, merge, tag, deployment or
+infrastructure change. Production proxy/TLS and full secret/image-scanner gates
+remain unverified; this branch handoff does not claim deployment readiness on
+those unrun gates. Physical printing is separately waived as described above.
+
+
+## 2026-10-19 — final correction: Bar and Gel at 0°
+
+The user corrected Bar and Gel to **0°**, superseding the −7° orientation in the
+preceding entry. All three icons (Bar, Gel and Bottle) are now upright with no
+artwork rotation, including filled interiors and detail outlines. No other icons,
+colour data, history behavior or 0.8 mm grid padding changed. Final visual
+acceptance remains pending; the previously reported preview acceptance and
+non-blocking, unverified physical-print status remain as recorded below.
+
+**PASS:** 100 Node tests, syntax/diff checks and focused native Chromium icon
+checks at root and refreshed Docker, in monochrome/blue and both themes. Picker,
+editor, preview and print match; stroke bounds stay unclipped and inspection
+preserves state/history/focus. Updated print PDF visually inspected. Preview
+reuses the same sandbox/container 8080 publication and laptop URL/forwarding
+http://127.0.0.1:18080/. All 34 served assets match the worktree. Unaffected
+validation is reused. No commit, push, merge, tag or deployment.
+
+## 2026-10-19 — preview acceptance; final icon orientation awaits visual check
+
+The user reports the v0.9.0 preview looks good and is accepted **apart from the
+final Bar/Bottle/Gel orientation adjustment**. That adjustment remains pending
+user visual acceptance. This is user-reported preview testing, not independent
+production, physical-print, screen-reader or exhaustive device coverage.
+**Physical printing remains unverified and is not a release gate for v0.9.0,
+at the user's explicit request.** This overrides the earlier physical-print gate
+statements below for this candidate only; it does not claim a physical-print pass.
+
+Inspected existing transforms: Bottle +45°, Bar/Gel +38° clockwise. Final artwork
+is 45° counter-clockwise relative to that preview: remove Bottle's rotation;
+change Bar/Gel to −7°. Both original detail paths and added fill silhouettes use
+the same final transform, without compensating groups. Stable IDs, colours,
+state/schema, dimensions and shared 0.8 mm cell padding are unchanged.
+
+- **PASS:** `npm test` (**100 tests**), `npm run check`, standalone browser-test
+  syntax checks and `git diff --check`. Updated transform assertions and the
+  earlier Bottle-bounds helper to support an absent transform/identity matrix.
+- **PASS:** focused `tests/v090-orientation.mjs` in native Chromium at hardened
+  root, plain static `/StemTape/`, and refreshed Docker root. Covers all three
+  icons in monochrome/blue, both themes, picker/editor/preview/print equality,
+  complete stroke/curve bounds within the existing 24×24 icon viewBox, restored
+  focus/cancellation without state mutation, and no history entries on inspection.
+  The existing v0.6.2 bounds/help/focus regression also passes with unrotated Bottle.
+- **INSPECTED:** real native-browser captures of all three icons in default/blue
+  in both themes, plus rasterized actual print PDFs from both themes. Interiors,
+  dark detail outlines and transparent gaps stay aligned; no clipping observed.
+  Both PDFs have one A4 page and the unchanged 50 mm calibration vector. This is
+  PDF/browser evidence only; no physical-print result is inferred.
+- **PASS:** semantic comparison with base `dist/icons.js`: only the transforms
+  of Bar/Bottle/Gel changed; all path/shape attributes and all other icons remain
+  unchanged. Reuse the previous full root/project-path browser suites, mobile/
+  200% zoom, history/storage/import/preset/grid tests for unaffected behavior.
+- **PASS:** Docker rebuild/replacement of only `stemtape-v090-preview`, Nginx
+  syntax and container smoke. All **34** served assets match the release worktree.
+  The existing HTTP config and sandbox 0.0.0.0:8080 → container 8080 mapping remain;
+  laptop forwarding remains 127.0.0.1:18080 → sandbox 8080. Internal checks do not
+  establish a new laptop-access result for this final orientation.
+
+Run the focused check from the intended worktree with local Playwright available:
+`BASE_URL=http://127.0.0.1:8080/ node tests/v090-orientation.mjs` (or set
+`PLAYWRIGHT_MODULE` to its installed local module path). Outputs stay in ignored
+`artifacts/`. No commit, push, merge, tag, deployment or infrastructure change.
+Unrelated README edits, backups and worktrees are preserved.
+
+
+## 2026-10-18 — v0.9.0 fill, monochrome Banana and cell-padding refinements
+
+User feedback on the earlier preview was positive overall, with these visual
+refinements requested. **Final manual acceptance remains pending.** This record
+supersedes the initial outline-only treatment described in the earlier candidate
+entry below; it is automated/browser/PDF evidence, not a user or physical-print pass.
+
+- **PASS:** `npm test` (**100 tests**), `npm run check`, `git diff --check`.
+  New coverage audits all 15 cue geometries, original-path/rotation preservation,
+  explicit fill layers, and the Feed zone stroke-only exception. Palette IDs,
+  persistence, CSV, history and transaction behavior are unchanged.
+- **PASS:** complete native Chromium suites at hardened `/` and plain static
+  `/StemTape/`, plus final focused v0.9.0 and refinement suites at Docker root.
+  Filled icons are checked in screen/preview/print, all six palette choices and
+  both themes. Banana button surfaces/text match other cues in default and selected
+  states. Keyboard focus/cancellation and responsive 1440/390/320 px views pass.
+  Existing history/draft/save/storage/preset/import regressions still pass.
+- **PASS:** actual native Chromium 200% browser zoom in both themes, including
+  palette keyboard/selected state/focus, responsive actions and grid controls.
+  Real desktop/mobile and zoom screenshots were inspected. No screen-reader or
+  exhaustive device/accessibility coverage is inferred.
+- **PASS:** shared **0.8 mm** horizontal cell inset per side, replacing old uneven
+  icon/left/right offsets and the separate wrapping allowance. Browser measurements
+  check padded icon/text positions, existing left/right/center alignment, headers,
+  visible/reordered Note and custom columns, and absent hidden-column dividers.
+  All grid modes use the same inset inside existing widths. A 1 mm prototype made
+  the default 32 mm sheet's km header wrap; 0.8 mm keeps that header intact and the
+  existing narrow/footer regressions pass. The older column-identity test now
+  expects the deliberate icon inset while continuing to verify its host column.
+- **PASS:** 36 updated native Chromium PDFs checked for one A4 page, absence of
+  application chrome and a 50 mm calibration vector; fixed palette fill values and
+  visible Note/custom contents checked. Fixtures cover all 15 icons in all palette
+  choices/both themes, narrow/wide sheets, four rotations, headers on/off and footer
+  combinations. Actual PDF rasters were inspected for every icon's fill geometry,
+  all palette colours on representative icons, narrow/rotated grids and Note/custom
+  padding. Coffee handle, open peel/steam, cobble gaps and other transparent details
+  remain visible. Feed zone intentionally stays coloured open utensil strokes.
+- **PASS:** rebuilt/replaced only `stemtape-v090-preview` using the established
+  read-only HTTP mount and **0.0.0.0:8080 → container 8080** publication; Nginx
+  syntax and container smoke pass. All **34** served assets match this worktree.
+  Laptop forwarding/URL remain **http://127.0.0.1:18080/**. Internal HTTP/Chromium
+  success is distinct from a new user-confirmed laptop test of these refinements.
+
+Repository hygiene, temporary-index artifact inspection (exactly 34 dist files,
+including security.txt) and all 53 local links in changed docs also pass. The real
+Git index remains unstaged. These are not full secret/image scans.
+
+Audited fill layers are isolated in `dist/icon-fills.js`, with original outline
+geometry unchanged in `dist/icons.js`. No palette/data/schema/history changes,
+extra runtime dependencies, CSP relaxation, Pages trigger or production settings
+changes. See [per-icon treatment and review checklist](REVIEW-v0.9.0.md).
+Screenshots, PDFs and development tools remain ignored/temporary artifacts.
+Unrelated work, README edits, backups and worktrees are preserved. No commit,
+push, merge, tag or deployment performed. Physical printing and the outstanding
+release gates recorded below remain unverified.
+
+
+## 2026-10-18 — initial v0.9.0 candidate: icon colours and full grids
+
+Prepared on `review/v0.9.0` from public HTTPS main
+`76ccab4be602743c492c92330fac9151da1ee2ca`, verified against the annotated v0.8.0
+tag target and merged v0.8.0 release. Environment: Linux ARM64 Docker Sandbox,
+Node 22.22.1, native Chromium through Playwright 1.62.1. Repository verification
+is not independent production verification. No user manual acceptance is claimed.
+
+- **PASS:** `npm test` (**99 tests**), `npm run check`, `git diff --check`.
+  Coverage includes optional/legacy fields, strict palette/grid validation,
+  no-op/history behavior, row identity, None/icon changes, JSON/preset previous
+  revisions, CSV metadata/value alignment (including time/custom distance columns),
+  hidden columns and unchanged byte limits. One test fixture initially exceeded
+  the existing 32-character column-label limit; it was corrected without relaxing
+  application validation.
+- **PASS:** complete native Chromium suites at hardened root `/`, plain static
+  `/StemTape/` (no Nginx rewrites), and final Docker root. New regressions cover
+  independent row colours, picker keyboard/focus/cancellation, sorting/reordering/
+  deletion/Undo/Redo, grid changes/no-ops, reload/duplication/preset update/recovery,
+  JSON/CSV import, invalid drafts, storage failures and exact-budget rejections.
+  Existing naming, protected recovery, history and save tests also pass.
+- **PASS:** actual Chromium 200% browser zoom in both themes, including final
+  Docker preview; responsive action order, palette names/selected state/focus and
+  grid controls. Real screenshots inspected for desktop/mobile (including 320 px),
+  light/dark and 200% zoom, representative icons across all palette colours,
+  all grid modes, headers on/off, hidden/reordered Note/custom columns and
+  narrow/wide sheets. Condition-based waits and visible mobile controls are used.
+- **PASS:** shared SVG preview/print comparisons, rotations 0/90/180/270,
+  footer/overflow checks, and native Chromium print PDFs. PDF inspection confirms
+  one A4 page per fixture, no application chrome, 50 mm calibration vectors and
+  all five fixed colour strokes in light/dark palette PDFs. Rasterized actual
+  PDFs were visually inspected for artwork, borders, rotated sheet placement,
+  footer and cut marks. This does not establish physical dimensions on a printer
+  or exact colour reproduction.
+- **PASS:** container smoke using the pinned Nginx base documented in
+  LOCAL-DEVELOPMENT: non-root/read-only application, security headers, methods,
+  gzip, security.txt and hidden-path denial; `nginx -t`. The refreshed preview
+  uses the existing sandbox 8080 → container 8080 mapping. All 33 served `dist/`
+  assets match this worktree byte-for-byte. Laptop forwarding remains
+  127.0.0.1:18080 → sandbox 8080; internal success is not a new laptop-access claim.
+- **PASS:** temporary-index repository hygiene checks, all 52 local links in
+  changed documentation, and a tar artifact containing exactly the 33 intended
+  dist files, including security.txt and no unintended hidden files or CNAME.
+  The real Git index remains unstaged.
+- **CHECKED:** actual v0.8.0 CSV parser rejects the new versioned colour metadata
+  rather than shifting it into cue text. Its JSON validator drops optional colour/
+  grid settings; rollback is not lossless. Keep original v0.9.0 JSON backups.
+
+Palette/grid modules and focused tests are separate; shared integration hunks are
+identified in [REVIEW-v0.9.0.md](REVIEW-v0.9.0.md). No icon artwork, CSP, schema/key,
+Pages deployment triggers or production configuration changes. No commit, push,
+merge, tag or deployment performed. Unrelated README edits, backups and worktrees
+are preserved; screenshots/PDFs and development tooling are excluded artifacts.
+
+**Outstanding release gates:** user review and physical printing (including a
+ruler check and colour/greyscale output), production proxy TLS/host-routing checks,
+and full secret/image scanning. `gitleaks` and `trivy` are unavailable here.
+Repository private-file/artifact checks are narrower than those scanners. No
+screen-reader or exhaustive device/accessibility coverage is claimed. Required
+unrun gates still block release under the development contract.
+
+
 ## 2026-10-18 — final v0.8.0 manual acceptance and branch handoff
 
 The user accepts v0.8.0 after manual preview testing, including final button layout
