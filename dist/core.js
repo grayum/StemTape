@@ -1,3 +1,4 @@
+import {validateAlignment} from './alignment.js';
 import {validateIconColour} from './icon-colours.js';
 import {validateGrid} from './grid.js';
 import {BUILTIN_CUES,FLANDERS_CUES} from './presets.js';
@@ -8,7 +9,7 @@ export const LIMITS = {events: 30, rows: 200, columns: 8, text: 160, footer: 80,
 export const SYMBOLS = ['','banana','bottle','bar','gel','smile','mountain','feed','flag','coffee','warning','cobbles','ricecake','can','neutral','litter'];
 export const uid = () => globalThis.crypto.randomUUID();
 export const clone = value => JSON.parse(JSON.stringify(value));
-export function column(label, type='text', width=50) { return {id:uid(), label, type, width, visible:true, align:type==='distance'||type==='number'?'right':'left', bold:false}; }
+export function column(label, type='text', width=50) { return {id:uid(), label, type, width, visible:true, align:'auto', bold:false}; }
 export function createEvent(preset='nutrition') {
   if(preset==='flanders'){
     const e=createEvent('route'),note=column('Location','text',25),fuel=e.columns[1];fuel.label='Fuel';
@@ -36,7 +37,7 @@ function boolean(v,label){if(typeof v!=='boolean')throw Error(`Invalid ${label}.
 export function validateEvent(e){
   if(!e||typeof e!=='object')throw Error('Invalid event.');
   if(!Array.isArray(e.columns)||e.columns.length<2||e.columns.length>LIMITS.columns)throw Error('Use 2–8 columns.');
-  const cols=e.columns.map(c=>({id:str(c.id,64,'column ID'),label:str(c.label,32,'column name'),type:choice(c.type,['text','number','distance','symbol'],'column type'),width:finite(c.width,5,95,'column width'),visible:boolean(c.visible,'visibility'),align:choice(c.align,['left','center','right'],'alignment'),bold:boolean(c.bold,'bold')}));
+  const cols=e.columns.map(c=>({id:str(c.id,64,'column ID'),label:str(c.label,32,'column name'),type:choice(c.type,['text','number','distance','symbol'],'column type'),width:finite(c.width,5,95,'column width'),visible:boolean(c.visible,'visibility'),align:validateAlignment(Object.hasOwn(c,'align')?c.align:'auto'),bold:boolean(c.bold,'bold')}));
   if(new Set(cols.map(c=>c.id)).size!==cols.length||cols[0].type!=='distance'||!cols.some(c=>c.visible))throw Error('Invalid column structure.');
   // Reject prototype-related keys before constructing cell maps.
   if(cols.some(c=>['__proto__','constructor','prototype'].includes(c.id)))throw Error('Invalid column ID.');
