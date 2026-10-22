@@ -125,3 +125,57 @@ strict metadata parsers reject it. See [v0.9.0 review](REVIEW-v0.9.0.md).
 The final v0.9.0 orientation follow-up sets Bar, Gel and Bottle upright at 0°,
 removing rotations from original outline paths and audited fill layers together.
 Path data, bounds, IDs, colour data and shared 0.8 mm padding remain unchanged.
+
+## Column alignment and row duplication (0.10)
+
+`alignment.js` owns the fixed allowlist, type-aware Auto defaults and measured
+icon/text block positions. Columns retain align by existing stable identity;
+legacy explicit values are byte-stable. The existing wrapping width/padding and
+line height are unchanged. Shared makeSheet emits a cell group with auditable
+row/column references; print clones exactly the same SVG. Headers use the same
+alignment without an icon reserve. No editor input CSS or sheet geometry changes.
+
+`row-actions.js` copies only the stored source row, replaces its ID and inserts it
+after the source in the active mode, never sorting. The DOM handler finishes field
+history after blur/sort, resolves stable identity and commits once. Existing
+capture guards preserve invalid drafts. Full-state budget validation precedes
+history capture; quota failures follow existing unsaved-in-memory conventions.
+Keyboard history restores focus by stable row identity or its preceding row if
+removed; toolbar activation retains toolbar focus. Presets/CSV need no new row
+representation. See [review](REVIEW-v0.10.0.md) for compatibility and evidence.
+
+### Cue presentation and plan-wide content fit (0.10 follow-up)
+
+`cue-display.js` validates icon-text/icon-only and selects natural widths or
+existing relative-share allocation. Only the stable primary cue role hides text;
+editor/CSV still use stored cells. None produces a blank cue cell in icon-only mode.
+Optional boolean `layout.fitWidth` defaults off without inflating old records.
+Validation discards obsolete preview `column.widthMode` recursively, never enabling
+fit or changing shares. JSON/presets/revisions/history retain display and fit;
+CSV carries neither. Schema/key stay v1.
+
+`makeSheet` measures the same formatted values, complete explicit lines, font
+weights and icon reservations it draws, after bundled fonts are ready. Audited
+SVG ink bounds include conservative stroke allowance; icon viewports remain the
+selected font size. Cell insets remain 0.8 mm per side (icon-only full grid also
+allows half the 0.15 mm stroke per side), with a 0.05 mm measurement tolerance.
+Grid borders are drawn once within column bounds, not added twice to width.
+Only visible columns and displayed text reserve width; headers reserve full
+natural lines only when enabled. Natural column widths are used unchanged if
+their sum fits the available maximum; otherwise the unchanged shares allocate
+that maximum and the existing grapheme-aware wrapping/overflow rules apply.
+A centered, unwrapped footer can require extra sheet width but never expands the
+compact columns. Its advance and actual ink overhang are measured separately.
+No font reduction or spare-space redistribution occurs.
+
+At 0°/180°, combined column width plus sheet padding (or wider footer) determines
+physical width. At 90°/270°, the table uses configured length as its horizontal
+maximum and required vertical table/footer extent determines physical width.
+Configured length remains fixed in every orientation, so a rotated compact table
+can leave blank space along the length. Effective width is capped at configured
+width; genuine overflow still blocks printing. A local effective layout centres
+the footer; stored dimensions/shares never change. The same SVG and effective
+dimensions drive preview, print nesting, white outline and cut marks. The 50 mm
+scale stays outside the sheet, unchanged. A fitted sheet may be narrower than
+20 mm; 20 mm remains the configured maximum-width input's minimum, not a content-fit
+floor. Effective dimensions appear above the preview.

@@ -1,5 +1,207 @@
 # Validation record
 
+## 2026-10-22 — final v0.10.0 acceptance and branch handoff
+
+The user explicitly accepts the final v0.10.0 implementation, **including Fit width
+to content**, and reports passing manual review and physical print testing dated
+2026-10-22. This is a separate report from the earlier measured physical-print
+test below. No new measurement values, exhaustive browser/device coverage or
+screen-reader results are inferred. This final report supersedes the pending
+acceptance/physical-validation statements for fitting in the preparation record.
+
+Finalization reruns `npm test` (115 passing tests), `npm run check` and
+`git diff --check`. Application code is unchanged since the completed final
+content-fit Chromium/Firefox, actual 200% zoom, PDF/layout and container checks
+below; that evidence is reused. Four PDFs cover every rotation, fitted dimensions,
+cut marks and the unchanged 50 mm scale. Those automated measurements remain
+separate from both user-reported physical-print tests.
+
+The existing preview remains available with the same forwarding. Only reviewed
+release changes enter the branch commits and complete-history bundle; unrelated
+README work, backups, browser tooling and ignored artifacts remain outside them.
+No push, merge, tag, deployment or infrastructure change is authorized or performed.
+Production proxy/TLS/host-routing checks and new full image/secret scans were not
+run during this local finalization; manual acceptance does not supply those checks.
+
+## 2026-10-22 — plan-wide content-fit follow-up
+
+**User-reported evidence:** on 2026-10-22 the user accepted the preceding v0.10.0
+implementation and tested an actual physical print, manually checking measurements.
+This supersedes earlier pending statements for that implementation only. It does
+not imply broader device/accessibility coverage. **The new Fit width to content
+behaviour still awaits user validation and final acceptance**, including its own
+physical measurement; the preceding print is not evidence for fitted geometry.
+
+- **PASS:** `npm test` — 115 tests; `npm run check`; `git diff --check`.
+  Model coverage includes optional strict fit boolean/default-off, retained shares,
+  natural-width versus maximum/share allocation, JSON/duplicate/preset/recovery/
+  history round trips, unchanged byte limit and CSV omission. Obsolete preview
+  widthMode is stripped from plans, presets and previous revisions without opt-in.
+- **PASS:** complete native Chromium suite at `/`, including all existing release,
+  recovery, byte-budget, draft, storage, alignment/duplicate, icon and grid suites.
+  Focused new fit/cue suite also passes against a plain static `/StemTape/` mount
+  and the refreshed Docker preview. Native Chromium 151.0.7922.34, existing pinned
+  Playwright 1.62.1; development tooling is outside the production image.
+- **PASS:** focused native Firefox fit/cue suite at both `/` and `/StemTape/`.
+  Both engines exercise the
+  48-case light/dark × grid × rotation × header matrix with reordered columns,
+  all alignment choices, Note/custom values, footer variants and icon-only cues.
+  Additional checks cover natural long headings, explicit newlines, formatted
+  elapsed time, hidden contents, None, font/icon sizes, full-width restoration,
+  no spare-width redistribution (including a wider footer), maximum-width wrapping,
+  genuine footer overflow, Undo/Redo/reload, accessible mobile focus, no document
+  overflow, invalid drafts, exact byte-budget rejection and quota failures with
+  retained in-memory layout and honest Not saved status. Seed fixtures are validated.
+- **PASS:** actual Chromium 200% browser zoom (extension reports 2.0; 720 CSS px,
+  DPR 2), both themes: fit control, duplicate focus, column keyboard controls and
+  action wrapping. Representative desktop/mobile/light/dark/zoom screenshots were
+  opened and visually inspected; this is not exhaustive device/accessibility testing.
+- **PASS:** four updated Chromium PDFs, all rotations, one A4 page each, visually
+  inspected after rasterization. PyMuPDF independently measured physical white
+  sheet bounds against the generated SVG (within 0.03 mm): 53.749 × 179.998 mm
+  at 0°/180° (SVG 53.750 × 180), 40.329 × 179.998 mm at 90°/270° (SVG 40.329 × 180).
+  All eight cut marks track actual sheet edges; all calibration lines measure
+  49.9995 mm (within 0.01 mm of 50). Browser assertions also compare the exact
+  preview/print SVG contents and effective dimensions. PDFs are browser output,
+  not physical printing or exact printer-colour evidence.
+- **PASS:** actual v0.9.0 rollback probe rechecked: Auto in any event/template/
+  recovery rejects the complete state at parse/startup/JSON import, retaining the
+  original/current library. With every alignment explicit, cueDisplay/fitWidth
+  are accepted but dropped by old validation/save; cue text remains. See UPGRADE.
+- **PASS:** Docker build with the existing pinned Nginx base, smoke (non-root,
+  read-only application, headers, GET/rejected POST, security.txt, hidden-path
+  denial, gzip), Nginx syntax and healthy preview. Docker emits the existing
+  missing-default build-argument lint warning; the supplied digest builds successfully.
+  All 37 served assets match this worktree byte-for-byte. Only the inspected
+  preview was replaced; sandbox 8080 → container 8080 and established laptop
+  127.0.0.1:18080 → sandbox 8080 forwarding are unchanged. Sandbox browser/HTTP
+  checks do not prove fresh laptop access; the user's earlier access is separate.
+
+No commit, push, merge, tag, deployment or infrastructure change. The unrelated
+checkout's README hash is unchanged; backups and worktrees remain. Artifacts,
+PDF tools and browsers stay outside release files. Existing production TLS/routing,
+image/secret scanning evidence is not expanded by these local checks.
+
+## 2026-10-19 — v0.10.0 icon-only display follow-up
+
+The user reports that the alignment and duplicate-row changes look good in manual
+review. This is **positive feedback, not final acceptance**; the additional icon-only
+option and final v0.10.0 acceptance remain pending. No physical printing,
+screen-reader or exhaustive device pass is inferred.
+
+- **PASS:** `npm test` (**114 tests**), `npm run check`, `git diff --check`;
+  new model tests cover default byte stability, allowlists, relative-share
+  preservation/distribution, identity/reordering, hidden text/colour, history,
+  preset update/recovery, JSON round trips, CSV retained text/omitted settings,
+  and existing UTF-8 limits.
+- **PASS:** complete native Chromium suite on root hosting with the new focused
+  suite integrated, plus focused `/StemTape/` checks and Pages static asset/
+  navigation/CSP coverage. Earlier complete two-mount evidence is reused for
+  unaffected code. Chromium uses the project's unchanged Playwright 1.62.1.
+- **PASS:** native cue-display checks cover toggling without text loss, unchanged
+  editor fields, None/text-only blank cells, renamed/reordered stable cue role,
+  similarly named unrelated Note, explicit shares restored after Automatic,
+  header wrapping and compact width, no-op history, Undo/Redo/reload, all-None
+  and only-visible-cue cases, byte rejection, invalid drafts and quota failures.
+- **PASS:** 48 compact layout combinations: light/dark × None/Row lines/Full grid
+  × 0°/90°/180°/270° × headers off/on, with reordered cue/Note and footer off/on.
+  Shared print/preview SVG equality and physical SVG dimensions asserted.
+  Mobile keyboard/tab order and no dialog/document overflow pass. Actual Chromium
+  200% zoom (720 CSS px, DPR2) includes the new display/width controls in both themes.
+- **PASS:** four representative Chromium icon-only PDFs, one A4 page each, all
+  rotations. Full heading retained (text extraction ignoring wrapping), calibration
+  label present; rasterized 0°/90° PDFs and screen shots inspected for ink alignment,
+  borders, Note, blank None cell, footer and long-header wrapping. The long heading
+  intentionally grows vertically; insufficient sheet length still blocks printing.
+  Physical printing remains unverified and non-blocking at the user's request.
+- **PASS:** existing focused native Firefox 153 alignment/duplication regressions
+  rerun against `/StemTape/` with this renderer. The new icon-only matrix also
+  passes in native Firefox (PDF generation skipped). PDFs above use Chromium;
+  no new user Firefox manual pass is claimed.
+- **PASS:** rollback exercised against the actual local v0.9.0 app:
+  Auto alignment in active/inactive plans, preset templates or recovery revisions
+  rejects the complete record via parseState. Startup retains the raw original in
+  protected recovery; JSON import rejects before confirmation without changing
+  the current library. With only explicit old alignment values, display/width
+  metadata is accepted then dropped; startup shows retained text, save drops the
+  metadata, and JSON import reaches its restore confirmation. This is not a
+  browser/hosting incompatibility. See [upgrade details](../UPGRADE.md).
+- **PASS:** Docker smoke/Nginx syntax and focused native Chromium against the
+  refreshed image. All **37** served assets match the release worktree. Reused
+  read-only development HTTP config and nested port8080 publication; established
+  laptop **http://127.0.0.1:18080/** forwarding unchanged. No host-side command,
+  production configuration change or independent laptop reachability claim.
+
+Earlier evidence remains historical; this follow-up supersedes the earlier
+36-asset count and 109-test count for the current candidate. No commits, push,
+merge, tags or deployments made. Full secret/image scans remain unperformed;
+basic file hygiene and documentation links are checked separately.
+
+
+## 2026-10-19 — v0.10.0 alignment and duplicate-row candidate
+
+Base: public main and tag v0.9.0 both
+`0a0dc8c73cf74a270610f3c7644413f6c998d5f2`, containing the released v0.9.0 work.
+The user confirms deployed v0.9.0 works and manually reviews in Firefox; this is
+user-reported production status, not an independent production test. Work is on
+isolated `review/v0.10.0` in Linux ARM64. No commits or deployment made.
+
+- **PASS:** `npm test` (**109 tests**), `npm run check`, `git diff --check`.
+  New pure tests cover Auto/explicit allowlists and types, complete icon/text
+  group geometry, column identity/Note visibility/history, JSON/preset revisions,
+  CSV omission, duplicated hidden values/blanks/colour, stable ties, time mode,
+  fresh IDs/Undo/Redo and row/UTF-8 limits.
+- **PASS:** complete existing native Chromium suite on hardened root hosting and
+  plain static `/StemTape/` hosting; integrated v0.10.0 checks and dedicated Pages
+  assets/fonts/navigation/security.txt/meta-CSP checks. Historical SVG tests now
+  find text inside the shared cell groups; their content/geometry assertions remain.
+  Focused checks rerun for the final icon-only alignment and budget rollback UI.
+- **PASS:** pinned Playwright **1.62.1**, native Chromium **151.0.7922.34** and
+  matching native Firefox **153.0** (build **1538**). `playwright install firefox`
+  downloaded the matching ARM64 browser; `playwright install-deps firefox` supplied
+  missing development libraries successfully, without changing project dependency
+  versions. Focused Firefox checks pass at root and `/StemTape/`; no installation
+  or runtime blocker remains. No Firefox PDF generation is claimed.
+- **PASS:** native focused browser tests cover valid blur-sort before duplication,
+  invalid draft preservation, new-row keyboard focus/live feedback, Undo/Redo exact
+  identity/focus, row count and byte-limit atomic rejection, storage failure with
+  unsaved in-memory state/history, Auto/no-op and selected alignment persistence,
+  complete group/blank icon geometry, dropdown rollback on budget rejection,
+  mobile visible controls, keyboard navigation and disabled history states.
+- **PASS:** screenshots inspected for desktop/mobile (1440/390/320 CSS px), both
+  themes, alignment dialog, compact row actions and preview. Actual Chromium
+  **200% browser zoom**, checked at **720 CSS px / DPR 2**, passes in both themes;
+  temporary local-only extension, not CSS transform or device scale emulation.
+- **PASS:** shared preview/print SVG equality and configured millimetre dimensions;
+  PDFs generated for all four rotations, headers on/off, visible Note/custom
+  numeric columns, full grid and footer combinations. Narrow 32 mm sheet fits
+  without font or dimension changes. Representative PDFs rasterized and visually
+  inspected (0°, 90°, 270°): coloured grouped artwork, borders, wrapping, footer,
+  cut marks and calibration remain visible. Eight PDFs each have one A4 page;
+  all contain the 50 mm label. This is Chromium PDF evidence, not physical output.
+- **PASS:** container smoke checks for non-root/read-only execution, headers,
+  GET/rejected POST, exact security.txt, hidden-path rejection and gzip; focused
+  native Chromium checks against the Docker preview. Nginx syntax passes. The
+  immutable Nginx base is unchanged. Basic private-file hygiene and local
+  documentation-link checks pass; these are not full secret/image scans.
+- **PASS:** all **36** served `dist/` assets match the release worktree byte for
+  byte. Only the inspected previous preview was replaced; existing development
+  HTTP mount and sandbox/container port8080 reused. Established laptop URL remains
+  **http://127.0.0.1:18080/** with unchanged forwarding. Sandbox HTTP/browser
+  success does not prove fresh laptop reachability.
+- **TESTED compatibility:** v0.9.0 validator rejects Auto with “Invalid alignment.”
+  Explicit left/right values validate on that older version, but old icon/text
+  rendering differs. Complete JSON/presets preserve alignment; CSV omits it and
+  duplicated rows retain existing colour metadata. Keep compatible originals;
+  see [upgrade/rollback](../UPGRADE.md) and [review](REVIEW-v0.10.0.md).
+
+**Outstanding:** v0.10.0 user Firefox manual acceptance; physical printing
+unverified and non-blocking at the user's request; broader device/screen-reader
+coverage and full secret/image scanning not claimed. No production proxy/TLS
+changes or new independent production checks. Existing CSP, Pages manual-only/
+main-only deployment, schema/key, palette/artwork, grid padding and print sizes
+remain intact. Browser binaries/screenshots/PDFs stay outside tracked release data.
+
 ## 2026-10-19 — final v0.9.0 manual acceptance and branch handoff
 
 The user accepts the final v0.9.0 preview, including Bar, Bottle/Bidon and Gel

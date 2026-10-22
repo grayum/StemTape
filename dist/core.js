@@ -1,3 +1,4 @@
+import {validateCueDisplay} from './cue-display.js';
 import {validateAlignment} from './alignment.js';
 import {validateIconColour} from './icon-colours.js';
 import {validateGrid} from './grid.js';
@@ -37,7 +38,7 @@ function boolean(v,label){if(typeof v!=='boolean')throw Error(`Invalid ${label}.
 export function validateEvent(e){
   if(!e||typeof e!=='object')throw Error('Invalid event.');
   if(!Array.isArray(e.columns)||e.columns.length<2||e.columns.length>LIMITS.columns)throw Error('Use 2–8 columns.');
-  const cols=e.columns.map(c=>({id:str(c.id,64,'column ID'),label:str(c.label,32,'column name'),type:choice(c.type,['text','number','distance','symbol'],'column type'),width:finite(c.width,5,95,'column width'),visible:boolean(c.visible,'visibility'),align:validateAlignment(Object.hasOwn(c,'align')?c.align:'auto'),bold:boolean(c.bold,'bold')}));
+  const cols=e.columns.map(c=>({id:str(c.id,64,'column ID'),label:str(c.label,32,'column name'),type:choice(c.type,['text','number','distance','symbol'],'column type'),width:finite(c.width,5,95,'column width'),visible:boolean(c.visible,'visibility'),align:validateAlignment(Object.hasOwn(c,'align')?c.align:'auto'),bold:boolean(c.bold,'bold'),...(Object.hasOwn(c,'cueDisplay')?{cueDisplay:validateCueDisplay(c.cueDisplay)}:{})}));
   if(new Set(cols.map(c=>c.id)).size!==cols.length||cols[0].type!=='distance'||!cols.some(c=>c.visible))throw Error('Invalid column structure.');
   // Reject prototype-related keys before constructing cell maps.
   if(cols.some(c=>['__proto__','constructor','prototype'].includes(c.id)))throw Error('Invalid column ID.');
@@ -64,6 +65,7 @@ export function validateEvent(e){
     if(new Set(out.rows[mode].map(r=>r.id)).size!==out.rows[mode].length)throw Error('Duplicate row IDs.');
   }
   const l=e.layout||{};out.layout={width:finite(l.width,20,180,'width (20–180 mm)'),length:finite(l.length,30,260,'length (30–260 mm)'),font:finite(l.font,8,24,'font size (8–24 pt)'),padding:finite(l.padding,1,8,'padding'),gap:finite(l.gap,0.5,6,'row spacing'),rotation:choice(l.rotation,[0,90,180,270],'rotation'),header:boolean(l.header,'header'),paper:choice(l.paper,['A4','Letter'],'paper'),copies:finite(l.copies,1,4,'copies')};
+  if(Object.hasOwn(l,'fitWidth'))out.layout.fitWidth=boolean(l.fitWidth,'content-fit width');
   if(Object.hasOwn(l,'grid'))out.layout.grid=validateGrid(l.grid);
   if(Object.hasOwn(l,'lines'))out.layout.lines=boolean(l.lines,'legacy row lines');
   if(!Number.isInteger(l.copies))throw Error('Copies must be a whole number.');

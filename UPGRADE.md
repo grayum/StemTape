@@ -1,3 +1,65 @@
+# Upgrade to 0.10.0 (accepted review)
+
+Export and retain the original complete JSON before upgrading. Schema/key remain
+v1 / `stemtape.v1`; no new numbered migration. Column `align` accepts only `auto`,
+`left`, `center`, `right`. New columns use Auto (numeric/distance/time right,
+text/symbol left). Absent alignment defaults to Auto; saved explicit values are
+retained without inferring whether the user chose them. Unknown values, including
+null, reject the complete import/stored record, preserving original data through
+the existing recovery path; styling is never interpreted as CSS.
+
+JSON, duplicates, preset templates/previous revisions and plan Undo/Redo preserve
+alignment by stable column ID. CSV omits alignment/layout and still carries ordinary
+independent rows with v0.9.0 colour metadata. No format change to CSV.
+
+**Rollback limitation:** the v0.9.0 validator rejects `auto`; do not serve an older
+app against current browser state or assume it can restore a v0.10.0 backup.
+Preserve current JSON and use a separate browser profile/origin to verify older
+software with a compatible pre-upgrade backup before switching. Explicit
+left/center/right values already existed, but older rendering does not align the
+complete icon/text group in the same way. No promise of lossless older-version
+layout support. Duplicated rows themselves are ordinary existing-format rows.
+
+The exact v0.9.0 failure paths were exercised against its actual local app:
+Auto alignment in any active/inactive event, preset template or previous revision
+makes `parseState` reject the **entire** record. Startup protects the original raw
+localStorage and opens fallback/recovery; JSON import rejects before a restore
+confirmation, leaving the current library untouched. JSON export itself on
+v0.10.0 works normally. v0.9.0-generated CSVs and its new-plan defaults do not
+introduce Auto; CSV never carries alignment. This is an older-validator constraint,
+not a server or browser-specific error.
+
+Optional column `cueDisplay` accepts `icon-text` / `icon-only` (absent = icon/text).
+Only the stable primary cue-column role uses it. Optional layout `fitWidth` is a
+strict boolean (absent = off). Invalid recognized settings reject the whole record
+through protected recovery. Existing records acquire no extra fields on load.
+JSON, duplicates, presets/recovery and Undo/Redo retain these settings. CSV keeps
+visible cue-cell text even when Icon only hides it in print, but omits display,
+alignment and content-fit settings. Hidden-column CSV rules remain unchanged.
+
+Earlier **development-preview** `column.widthMode` is obsolete: validation discards
+it from every plan, preset and previous revision, like other unknown metadata.
+It cannot affect layout or automatically opt into plan-wide fitting. Stored column
+shares, text and dimensions remain intact. Retain an original JSON if that earlier
+preview setting matters; normalized saves/exports omit it. There is no per-column
+automatic-width control. Fitting never writes effective dimensions into the plan.
+
+With **all** alignment values left/center/right, v0.9.0 accepts JSON containing
+`cueDisplay` / `layout.fitWidth`, but validation drops them. Its startup shows cue
+text and full configured width / old relative shares; its next save/export loses the settings while
+retaining cue text. This was checked through startup, JSON restore confirmation
+and save, not inferred from a schema number. Auto alignment takes precedence and
+rejects the whole record as above. Use complete originals and a separate test
+profile before rollback; never overwrite the only backup.
+
+Duplication validates the whole-library UTF-8 budget and 200-row mode limit.
+Invalid drafts block it; accepted field edits finish before the copy is made.
+Budget/validation rejection rolls back the copy; localStorage failures retain
+valid in-memory changes/history with truthful Not saved status and JSON export.
+No preset association or history boundary changes.
+
+---
+
 # Upgrade to 0.9.0 (review candidate)
 
 Preserve complete JSON originals before upgrading. Schema version/key remain v1
