@@ -18,6 +18,7 @@
 <details class="more-settings"><summary><svg class="settings-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 2 12 8 5 14Z"/></svg>Layout &amp; print settings</summary>
 <section class="settings-group" aria-labelledby="sheet-size-title"><h3 id="sheet-size-title">Sheet size</h3>
 <div class="settings-grid layout-controls"><label>Width<input id="width" type="number" min="20" max="180" step="0.1"></label><label>Length<input id="length" type="number" min="30" max="260" step="0.1"></label><label>Measure<select id="dimension-unit"><option value="mm">mm</option><option value="in">inches</option></select></label><label>Orientation<select id="rotation"><option value="0">0°</option><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select></label></div>
+<label class="checkbox-label"><input id="fit-width" type="checkbox" aria-describedby="fit-width-help">Fit width to content</label><p id="fit-width-help" class="settings-help">Make the sheet as narrow as possible, up to the configured width.</p>
 <button id="save-bike" class="secondary-button">Remember these bike dimensions</button></section>
 <section class="settings-group" aria-labelledby="appearance-title"><h3 id="appearance-title">Appearance</h3>
 <div class="settings-grid"><label>Font (pt)<input id="font" type="number" min="8" max="24" step="0.5"></label><label>Padding (mm)<input id="padding" type="number" min="1" max="8" step="0.5"></label><label>Row space (mm)<input id="gap" type="number" min="0.5" max="6" step="0.5"></label><label>Grid<select id="grid"><option value="none">None</option><option value="rows">Row lines</option><option value="full">Full grid</option></select></label><label>Total distance<input id="total" type="number" min="0" max="10000" step="0.1"></label><label class="checkbox-label"><input id="header" type="checkbox">Column headers</label><label class="checkbox-label"><input id="remaining" type="checkbox">Show distance remaining</label></div></section>
@@ -30,7 +31,7 @@
 </details>
 <p class="print-hint">Print at <strong>Scale 100% / Actual size.</strong> Cut marks and a 50 mm scale are added to the page.</p><button id="privacy" class="secondary-button">Privacy &amp; help</button></section>
 </div><footer>
-<div class="footer-top"><span>StemTape <span class="version">v0.9.0</span></span></div>
+<div class="footer-top"><span>StemTape <span class="version">v0.10.0</span></span></div>
 <p class="privacy-promise"><strong>Your ride plans stay yours.</strong></p>
 <p class="backup-note">Export a backup to keep your plans safe or move them to another device.</p>
 <div class="credits"><p><a href="https://github.com/grayum/StemTape">StemTape</a> is developed and maintained by <a href="https://grahamofthewheels.com/" target="_blank" rel="noopener noreferrer">Graham van der Wielen</a>.</p><p>Created with assistance from ChatGPT &amp; Codex (OpenAI).</p></div>

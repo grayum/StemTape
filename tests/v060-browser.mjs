@@ -22,14 +22,14 @@ export async function v060Regressions(browser,base){
   assert.match(await item(first).textContent(),/Fixed first/);assert.equal(await item(first).locator('button').count(),0,'Primary column has no movement controls');
   phase='Note creation and identity';await page.locator('#show-note').check();const note=(await plan()).noteColumnId;
   assert.deepEqual((await plan()).columns.map(c=>c.id),[first,note,cue]);assert.equal((await plan()).cueColumnId,cue);
-  assert.deepEqual(await page.locator('#sheet-preview svg > g > text').evaluateAll(nodes=>nodes.slice(0,3).map(n=>n.textContent)),['km','Note','Fuel'],'Preview headers follow the selected column order');
+  assert.deepEqual(await page.locator('#sheet-preview [data-sheet-row="header"] > text').evaluateAll(nodes=>nodes.slice(0,3).map(n=>n.textContent)),['km','Note','Fuel'],'Preview headers follow the selected column order');
   assert.ok(Math.abs(await page.locator('#sheet-preview svg svg').evaluate(n=>Number(n.getAttribute('x')))-(2+76*57/125+CELL_PADDING))<1e-8,'Icon stays with Fuel when Note is inserted');
   await cell(note).fill('Bridge 🍌');assert.equal((await plan()).rows.distance[0].cells[note],'Bridge 🍌');
   assert.equal(await item(note).getByRole('button',{name:'Move left',exact:true}).isDisabled(),true);
   assert.equal(await item(cue).getByRole('button',{name:'Move right',exact:true}).isDisabled(),true);
   phase='Movement and keyboard focus';await item(note).getByRole('button',{name:'Move right',exact:true}).click();
   assert.deepEqual((await plan()).columns.map(c=>c.id),[first,cue,note]);
-  assert.deepEqual(await page.locator('#sheet-preview svg > g > text').evaluateAll(nodes=>nodes.slice(0,3).map(n=>n.textContent)),['km','Fuel','Note'],'Preview moves the complete header with its column');
+  assert.deepEqual(await page.locator('#sheet-preview [data-sheet-row="header"] > text').evaluateAll(nodes=>nodes.slice(0,3).map(n=>n.textContent)),['km','Fuel','Note'],'Preview moves the complete header with its column');
   assert.ok(Math.abs(await page.locator('#sheet-preview svg svg').evaluate(n=>Number(n.getAttribute('x')))-(2+76*32/125+CELL_PADDING))<1e-8,'Icon follows the same Fuel column after movement');
   assert.equal(await item(note).locator('.column-drag-handle').evaluate(n=>n===document.activeElement),true,'Boundary movement restores focus to the same column handle');
   assert.match(await page.locator('#column-order-status').textContent(),/position 3/);

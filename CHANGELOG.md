@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.10.0 — accepted review (2026-10-22)
+
+- Add Auto/Left/Centre/Right column alignment for shared preview/print, including
+  primary position and complete icon/text groups inside unchanged cell padding.
+  Retain existing explicit saved alignment; new columns default to Auto.
+- Add Icon only cue display, retaining editor/export text, and plan-wide Fit width
+  to content (off by default). Measure displayed contents/headings/icons and footer;
+  compact the physical width up to its configured maximum, without redistributing
+  spare space or changing fonts, length or stored shares. Fall back to existing
+  shares/wrapping above the maximum; remove development-only cue autosizing.
+- Duplicate a row immediately after its source without sorting or changing its
+  distance/time; retain colour, hidden values and blanks with a fresh stable ID.
+  One Undo/Redo action, new-row position focus and accessible feedback.
+- Preserve alignment in JSON/presets/history; validate imported values strictly.
+  CSV stays unchanged and omits alignment. Schema/key stay v1; older apps reject
+  Auto, so preserve pre-upgrade JSON originals before rollback.
+- Add focused native Chromium/Firefox and model regressions. The user accepted
+  the preceding implementation and reports a measured physical print on 2026-10-22.
+  Separately, final manual review and physical print testing, including fitting,
+  passed according to the user on 2026-10-22; no new measurements or exhaustive
+  device/browser coverage are inferred.
+
 ## 0.9.0 — review candidate (2026-10-19)
 
 - Add independent per-cue primary-icon colours from a fixed named palette,

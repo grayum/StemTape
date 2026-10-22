@@ -38,6 +38,32 @@ Open **http://127.0.0.1:8080**. Use this local server rather than opening `index
 
 Custom Unicode emojis use the user's system font. The outlined symbols combine **Lucide** with original StemTape symbols, including the approved Bar, Bottle, Gel and Cobbles replacements, not Font Awesome. Lucide 1.8.0 and DejaVu font notices are bundled in `dist/assets/`. No CDN assets or analytics.
 
+## v0.10.0 changes (accepted review)
+
+- Columns → Alignment: Auto, Left, Centre or Right, including primary position,
+  headings and icon/text groups. Preview and print use the same layout; editor
+  inputs retain their editing behaviour. Auto preserves numeric/text defaults;
+  existing saved explicit choices are retained.
+- Cue column settings offer Icon + text or Icon only in preview/print. Text stays
+  editable and exported. Enable Fit width to content in Sheet size to use natural
+  displayed content widths,
+  up to the configured maximum. Long headings remain visible. Above that maximum,
+  existing width shares and wrapping apply. Fonts and stored shares stay intact;
+  switching off restores full configured width. JSON/presets retain fitting; CSV does not.
+- Duplicate row copies a cue immediately after its source, including colour and
+  hidden values, with a fresh identity and unchanged distance/time. It does not
+  sort. Undo/Redo treats the copy as one action.
+- JSON and personal presets/recovery preserve alignment; CSV omits it. Keep an
+  original JSON backup before upgrading: v0.9.0 rejects the new Auto value.
+
+See [design, compatibility and Firefox review](docs/REVIEW-v0.10.0.md).
+The user confirms v0.9.0 is deployed and working and manually tests in Firefox.
+On 2026-10-22 the user accepted the preceding implementation and reports an
+actual physical print with manually checked measurements. Separately, the user
+accepted the final implementation, including fitting, and reports passing manual
+review and physical print testing on 2026-10-22. No new measurement values or
+exhaustive device/browser coverage are inferred.
+
 ## v0.9.0 changes (review candidate)
 
 - Open a cue's icon picker to choose Default / monochrome, Blue, Orange, Green,
@@ -225,7 +251,7 @@ npm run test:browser
 This creates screenshots and an actual PDF in ignored `artifacts/`. Review all screenshots and verify PDF dimensions; passing assertions alone is not visual QA.
 
 ```sh
-sh scripts/container-smoke.sh stemtape:0.9.0
+sh scripts/container-smoke.sh stemtape:0.10.0
 ```
 
 **v0.6.1 validation:** the complete native Chromium suite against the local Docker app, real-browser screenshot/200% zoom review, 69 Node tests, syntax and container checks passed. The owner also reports a passing manual Docker-preview check on 2026-10-09. Physical printing, screen-reader/device testing and production verification are not inferred; remaining gates are recorded in [current validation](docs/VALIDATION.md).

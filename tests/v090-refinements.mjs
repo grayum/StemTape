@@ -32,7 +32,7 @@ export async function v090Refinements(browser,base){
    const positions=await page.locator('#sheet-preview text:not([data-footer])').evaluateAll(nodes=>nodes.map(n=>({text:n.textContent,x:Number(n.getAttribute('x')),anchor:n.getAttribute('text-anchor')})));
    assert.equal(positions.some(p=>p.text==='Hidden content'),false);let x=e.layout.padding;
    for(const [i,c]of visible.entries()){
-    const body=positions.find(p=>p.text===String(c.id===note.id?'Village':c.id===extra.id?'Cafe':c.id===e.columns[0].id?'0':'banana'));assert.ok(body,`${mode} ${c.label}`);let expected=x+CELL_PADDING;if(c.align==='right')expected=x+widths[i]-CELL_PADDING;else if(c.align==='center')expected=x+widths[i]/2;else if(c.id===e.cueColumnId||c.id===initial.events[0].columns[1].id)expected+=e.layout.font*25.4/72+1;
+    const body=positions.find(p=>p.text===String(c.id===note.id?'Village':c.id===extra.id?'Cafe':c.id===e.columns[0].id?'0':'banana'));assert.ok(body,`${mode} ${c.label}`);let expected=x+CELL_PADDING;if(c.align==='right'||(c.align==='auto'&&['distance','number'].includes(c.type)))expected=x+widths[i]-CELL_PADDING;else if(c.align==='center')expected=x+widths[i]/2;else if(c.id===e.cueColumnId||c.id===initial.events[0].columns[1].id)expected+=e.layout.font*25.4/72+1;
     assert.ok(Math.abs(body.x-expected)<.001,`${c.label}: ${body.x} != ${expected}`);x+=widths[i];
    }
    const iconX=Number(await page.locator('#sheet-preview [data-cue-icon]').first().getAttribute('x'));const cueIndex=visible.findIndex(c=>c.id===initial.events[0].columns[1].id);assert.ok(Math.abs(iconX-(e.layout.padding+widths.slice(0,cueIndex).reduce((a,b)=>a+b,0)+CELL_PADDING))<.001);

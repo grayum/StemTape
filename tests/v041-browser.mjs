@@ -21,7 +21,7 @@ export async function v041Regressions(browser,base){
    // The first horizontal rule ends the header; x coordinates identify columns
    // independently of their text. This fixture has three columns, no rotation.
    const headerBottom=Number(children.find(n=>n.tagName==='line').getAttribute('y1'));
-   const text=children.filter(n=>n.tagName==='text').map(n=>({x:Number(n.getAttribute('x')),y:Number(n.getAttribute('y')),text:n.textContent}));
+   const text=[...group.querySelectorAll('[data-sheet-column] > text')].map(n=>({x:Number(n.getAttribute('x')),y:Number(n.getAttribute('y')),text:n.textContent}));
    const headers=text.filter(n=>n.y<headerBottom),columns=[...new Set(headers.map(n=>n.x))].sort((a,b)=>a-b);
    const targetX=columns[2],inOrder=nodes=>nodes.sort((a,b)=>a.y-b.y).map(n=>n.text);
    return {columnCount:columns.length,headerLines:inOrder(headers.filter(n=>n.x===targetX)),cueLines:inOrder(text.filter(n=>n.x===targetX&&n.y>headerBottom))};

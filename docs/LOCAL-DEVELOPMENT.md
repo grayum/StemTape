@@ -175,6 +175,49 @@ upright Bar/Gel/Bottle orientations. This supersedes the pending visual-check
 notes above. The working preview and established forwarding remain available;
 physical printing remains unverified and non-blocking at the user's request.
 
+## Current v0.10.0 candidate preview (2026-10-19)
+
+The supplying branch is **`review/v0.10.0`**, based on public main/tag v0.9.0
+`0a0dc8c73cf74a270610f3c7644413f6c998d5f2`. Find its actual worktree using
+`git worktree list`. Image **`stemtape:0.10.0`**, container
+**`stemtape-v0100-preview`**, uses the build/start procedure below. Only the
+inspected v0.9.0 preview is replaced; previous images and unrelated work remain.
+The read-only development HTTP configuration is reused without production edits.
+
+Mapping remains container **0.0.0.0:8080**, nested Docker **0.0.0.0:8080 →
+container 8080**, established laptop **127.0.0.1:18080 → sandbox 8080**. Open
+**http://127.0.0.1:18080/**. No host-side forwarding command or change is needed.
+All **36** served assets match this worktree byte-for-byte after replacement. Native
+Chromium/Firefox and Docker HTTP checks are sandbox evidence; new laptop access
+and v0.10.0 manual acceptance remain for the user to confirm. The user separately
+confirms deployed v0.9.0 works and uses Firefox for manual testing.
+
+The icon-only follow-up reuses this same image/container, HTTP mount and port
+mapping. The refreshed worktree now supplies **37** matching assets. The user
+reports positive manual feedback on alignment/duplicate row, while final
+acceptance remains pending this addition. New sandbox Chromium/Docker evidence is
+recorded in [validation](VALIDATION.md); it does not establish fresh laptop access
+or physical printing. Forwarding remains unchanged.
+
+### Plan-wide fit follow-up (2026-10-22)
+
+The user accepted the preceding implementation and reports a measured physical
+print on 2026-10-22; that does not validate the new content-fit behaviour. Only
+`stemtape-v0100-preview` was replaced after building from `review/v0.10.0`, using
+the same pinned base, read-only HTTP config and sandbox 8080/container 8080 mapping.
+All 37 assets match; Nginx syntax, healthy container, smoke and focused Chromium
+checks pass internally. Established laptop **http://127.0.0.1:18080/** forwarding
+is unchanged. No new laptop access or final acceptance of fitting is claimed.
+See the dated [validation record](VALIDATION.md).
+
+### Final v0.10.0 user acceptance (2026-10-22)
+
+Separately from the earlier measured print, the user reports passing final manual
+review and physical print testing, accepting the final implementation including
+content fitting. No new measurements or exhaustive device/browser coverage are
+inferred. Finalization changes documentation only; the existing healthy preview,
+37 matching assets and forwarding remain unchanged. No rebuild/restart is required.
+
 ## Build and start inside the sandbox
 
 All commands in this section run **inside the sandbox**. First inspect the current
@@ -187,7 +230,7 @@ The existing `.gitignore` excludes `.env.preview` and `artifacts/`.
 ```sh
 PREVIEW_WORKTREE='<absolute path to intended worktree>'
 PREVIEW_NAME='<inspected preview container name>'
-PREVIEW_IMAGE='stemtape:0.9.0'
+PREVIEW_IMAGE='stemtape:0.10.0'
 SANDBOX_PORT=8080
 NGINX_IMAGE='nginx@sha256:<verified Alpine image digest>'
 cd "$PREVIEW_WORKTREE"

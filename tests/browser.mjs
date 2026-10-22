@@ -1,3 +1,5 @@
+import {cueDisplayRegressions} from './cue-display-browser.mjs';
+import {v010Regressions} from './v010-browser.mjs';
 import {v090Refinements} from './v090-refinements.mjs';
 // npm install --no-save playwright@1.62.1 && npx playwright install chromium
 // Run against the local development server or Docker: BASE_URL=http://127.0.0.1:8080 npm run test:browser
@@ -134,6 +136,8 @@ await v080Regressions(browser,base);
 await v080NameRegressions(browser,base);
 await namingRegressions(browser,base);
 await v090Regressions(browser,base);
+await v010Regressions(browser,base);
+await cueDisplayRegressions(browser,base);
 await v090Refinements(browser,base);
 console.log('PASS: desktop/mobile, local persistence, theme, time/distance, XSS, imports, columns, overflow, export and PDF.');
 }finally{await context?.close();await browser.close();}
