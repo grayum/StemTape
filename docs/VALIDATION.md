@@ -1,5 +1,103 @@
 # Validation record
 
+## 2026-11-06 — v0.10.1 manual Firefox review and finalization
+
+**User-reported PASS, Firefox, 2026-11-06:**
+
+- The introduction stays compact on desktop and in a narrow window.
+- The browser tab title is correct.
+- Print preview excludes the introduction and otherwise looks unchanged.
+
+These specific manual checks passed. **No new physical print was done.** This
+report does not establish production verification, Googlebot access, indexing or
+ranking, or exhaustive device/accessibility coverage. Live Cloudflare 403/error
+1010, managed robots differences and Search Console live URL inspection remain
+unresolved external checks, as documented below and in [search guidance](SEARCH-VISIBILITY.md).
+
+Final diff review confirms consistent v0.10.1 package, visible version and public
+image-example metadata, changelog and documentation. Finalization reruns passed:
+`npm test` (115 tests), `npm run check` and `git diff --check`.
+
+Finalization changes documentation only. Completed browser, mobile/theme, 200%
+zoom, PDF, container and 39-file artifact evidence below is reused for unchanged
+application code. The existing healthy preview and established forwarding remain
+in place. Only reviewed v0.10.1 changes are included in the branch handoff;
+unrelated README edits, backups, screenshots, PDFs and local artifacts remain
+outside it. No push, merge, tag, deployment or DNS/Cloudflare change is part of
+this finalization. Physical printing, production checks and full secret/image
+scans remain outstanding release gates.
+
+## 2026-11-06 — v0.10.1 basic search visibility review
+
+**Base and scope:** verified the owner-supplied `/tmp/stemtape-main.bundle` with
+`git bundle verify`; its advertised `refs/remotes/origin/main` exactly matched
+supplied SHA `60bcc8b2551eca5711b320a7bb136116eca1ce13`. Imported only that local
+bundle and confirmed merged v0.10.0 commit `e93531d` is an ancestor and package
+version is 0.10.0 before creating isolated `review/v0.10.1`. No SSH/HTTPS Git fetch.
+Original README work, other worktrees, retained containers/images and backups were
+preserved. Local handoff instructions are not included in application changes.
+
+**Inspection before edits:** repository HTML had one generic title/description,
+no canonical or social-card tags, no robots/sitemap, and no equivalent visible
+introductory paragraph. Existing 1200 × 400 local `banner-light.png` was visually
+inspected and reused. The patch adds static descriptive metadata, a compact
+introduction, allow-all public crawl rules and a one-URL sitemap without lastmod.
+Application JS, data/schema, print rendering, CSP and hosting workflows are unchanged.
+
+**Live evidence, separate from repository/local results:** requests made without
+bypassing restrictions returned the following on 2026-11-06 (latest response Date
+headers 20:37:31–32 UTC):
+
+| URL | Observed response |
+| --- | --- |
+| `https://stemtape.cc/` | Cloudflare 403, text/plain body `error code: 1010`; no redirect observed. HTML and canonical/indexing metadata unavailable. |
+| `https://stemtape.cc/robots.txt` | 200 text/plain; Cloudflare Managed Content, general `Allow: /`, `search=yes` plus named crawler disallows; no Sitemap directive. |
+| `https://stemtape.cc/sitemap.xml` | Cloudflare 403, text/plain body `error code: 1010`; no redirect observed. Existence/content cannot be determined from this response. |
+
+No X-Robots-Tag was present on these responses. CSP, nosniff, DENY, no-referrer,
+Permissions-Policy and HSTS max-age=31536000 were observed, including on the blocked
+responses; they do not verify successfully served app HTML or canonical-host
+redirects. The blocked requests do **not** establish that Googlebot is blocked.
+No alternate identity, direct-origin request or security-setting change was used.
+Live robots differs from both the old repository and the new local artifact.
+Cloudflare may supply/modify it: a source file does not establish public control.
+After an authorized deployment, the operator must compare public robots, ensure
+its sitemap reference survives, and check Googlebot access with Search Console's
+live URL inspection. [Setup and self-hosting guidance](SEARCH-VISIBILITY.md)
+contains manual DNS TXT verification steps without an invented token.
+
+**Local validation** (Node 22.22.1, Playwright 1.62.1, Linux ARM64):
+
+| Check | Result |
+| --- | --- |
+| `npm test`, `npm run check` | All 115 Node tests and application syntax checks passed. |
+| `PLAYWRIGHT_MODULE=… sh scripts/browser-checks.sh` | Complete native Chromium suite passed at `/` and plain static `/StemTape/`, including PDFs and Pages meta-CSP/asset/navigation probes. Canonical metadata is excluded from the resource-load probe; relative application assets remain checked. |
+| Focused raw HTTP validation | On the development server and final Docker preview: 200 without redirects; exactly one title/description/canonical, expected OG/social values, local banner/resource bytes, valid namespaced one-page sitemap, text/plain robots and XML content types, crawl access for app/assets and no accidental HTML/header noindex. |
+| Focused Chromium 151.0.7922.34 / Firefox 153.0 smoke | Desktop 1440 px and mobile 390/320 px in both themes: intro visible, wraps without clipping, no document overflow, app/print ready and no external loads or page/console errors. Intro absent from prepared print content and hidden under print media. Screenshots visually inspected. |
+| Actual Chromium 200% zoom | Local extension confirms zoom 2.0, 720 CSS px/DPR2. Intro fits and is visible in both themes; existing alignment/duplicate/focus/settings/action wrapping checks pass. Screenshots visually inspected. |
+| Actual-size PDF | Generated one-page A4 PDF: MediaBox 594.95996 × 841.91998 pt; preview remains 32 × 90 mm, 50 mm scale retained, intro absent. PDF page rendered and visually inspected. This is not physical printing. |
+| Docker | Built `stemtape:0.10.1` using existing pinned `nginx@sha256:970364228b1e4f932abc22d321932816782cca8a20b85a77552a7cfe9acfb3b5`; existing empty-default build-arg lint warning remains. Container smoke on sandbox 18081 passed UID/read-only/security headers/POST/security.txt/hidden-path/gzip checks; Nginx syntax passed. |
+| Deployment artifact | Dist-only GNU tar and existing artifact validator passed: exactly 39 matching files including robots, sitemap, banner and security.txt. New required-file assertions protect the Pages artifact. At preparation, a temporary Git index included the new files for validation; the real index stayed unstaged. No remote upload/deployment was run. |
+| Hygiene | Python validator syntax, basic tracked-file/private-pattern check, documentation link existence and `git diff --check` passed. Basic patterns are not full secret/image scans. |
+
+Diagnostics, screenshots, PDF, temporary probes and archive stay in ignored
+`artifacts/`; execution logs and live response captures remain local, outside the
+release artifact. The subsequent user Firefox report above supplies the three
+listed manual checks only. Remaining review: fresh physical print, production
+TLS/canonical routing and successfully served HTML/
+sitemap/image checks, Googlebot live inspection and full secret/image scanning.
+These release gates remain outstanding; do not release based only on local checks.
+No indexing/ranking success is claimed. At this preparation stage no commit,
+push, merge, tag, deployment, DNS or Cloudflare change was performed.
+
+**Preview:** no v0.10.0 preview container was running/present on inspection. The
+historical stopped previews were left intact. Started `stemtape-v0101-preview`
+from the reviewed image using the existing read-only development HTTP config and
+sandbox `0.0.0.0:8080` → container `8080`. All 39 served files match this worktree;
+health and Nginx syntax pass. Established laptop URL **http://127.0.0.1:18080/** and
+forwarding are unchanged. Sandbox requests do not independently establish laptop
+reachability or user acceptance.
+
 ## 2026-10-22 — final v0.10.0 acceptance and branch handoff
 
 The user explicitly accepts the final v0.10.0 implementation, **including Fit width

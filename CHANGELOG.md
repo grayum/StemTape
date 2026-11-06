@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.10.1 — review candidate (2026-11-06)
+
+- Describe the app in static title/description, production canonical and basic
+  Open Graph/social cards using the existing local banner.
+- Add one compact introduction outside print output, crawl permissions and a
+  sitemap containing only the public app URL, without invented modification dates.
+- Document self-hosting URL edits/omission, manual Search Console DNS TXT setup
+  and the difference between repository robots and Cloudflare-managed responses.
+- Preserve client-only plans, strict CSP, print rendering and manual Pages deployment.
+- User-reported Firefox checks passed on 2026-11-06: compact desktop/narrow-window
+  introduction, correct tab title and introduction-free, otherwise unchanged print
+  preview. No new physical print or production/indexing verification is claimed.
+
 ## 0.10.0 — accepted review (2026-10-22)
 
 - Add Auto/Left/Centre/Right column alignment for shared preview/print, including

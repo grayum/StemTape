@@ -10,7 +10,7 @@ dist = root / 'dist'
 expected = set(subprocess.check_output(
     ['git', 'ls-files', '-z', 'dist/'], cwd=root).decode().strip('\0').split('\0'))
 expected = {p.removeprefix('dist/') for p in expected if p}
-assert 'index.html' in expected and '.well-known/security.txt' in expected
+assert {'index.html', '.well-known/security.txt', 'robots.txt', 'sitemap.xml'} <= expected
 actual = set()
 for path in dist.rglob('*'):
     name = path.relative_to(dist).as_posix()
@@ -35,6 +35,6 @@ if len(sys.argv) > 1:
             seen.add(name)
             assert archive.extractfile(member).read() == (dist / name).read_bytes(), name
     assert seen == expected, f'Archive omissions: {expected - seen}'
-    print(f'PASS: artifact.tar contains exactly {len(seen)} verified dist files, including security.txt.')
+    print(f'PASS: artifact.tar contains exactly {len(seen)} verified dist files, including security.txt, robots.txt and sitemap.xml.')
 else:
     print(f'PASS: {len(actual)} tracked dist files; no CNAME, links or unintended hidden files.')

@@ -218,6 +218,30 @@ content fitting. No new measurements or exhaustive device/browser coverage are
 inferred. Finalization changes documentation only; the existing healthy preview,
 37 matching assets and forwarding remain unchanged. No rebuild/restart is required.
 
+## Current v0.10.1 candidate preview (2026-11-06)
+
+The supplying worktree is on **`review/v0.10.1`**, based on verified bundle main
+`60bcc8b2551eca5711b320a7bb136116eca1ce13` (merged v0.10.0). Locate it with
+`git worktree list`. Image **`stemtape:0.10.1`**, container
+**`stemtape-v0101-preview`**, uses the same pinned base and existing read-only
+development HTTP configuration. No v0.10.0 preview container was present/running
+on inspection; historical stopped previews, existing images and backups remain.
+
+All **39** served files, including robots/sitemap, match this review worktree.
+Nginx syntax, container smoke and raw metadata/crawl-file checks pass internally.
+Container **0.0.0.0:8080**, nested Docker **0.0.0.0:8080 → container 8080**, and
+established laptop **127.0.0.1:18080 → sandbox 8080** are unchanged. Open
+**http://127.0.0.1:18080/** for review. No host forwarding change was made;
+internal checks do not establish new laptop reachability or manual acceptance.
+See [candidate validation and live-access limits](VALIDATION.md).
+
+The user subsequently reports passing Firefox manual checks on 2026-11-06:
+compact introduction on desktop and a narrow window, correct tab title, and print
+preview excluding the introduction while otherwise looking unchanged. No new
+physical print was done. This specific user-reported evidence supplements the
+internal checks; it does not establish production verification or Googlebot access.
+Finalization changes documentation only and preserves the working preview.
+
 ## Build and start inside the sandbox
 
 All commands in this section run **inside the sandbox**. First inspect the current

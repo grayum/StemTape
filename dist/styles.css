@@ -39,7 +39,9 @@ footer a:hover{color:var(--ring)}
  footer .privacy-promise{font-size:12px}
 }
 
-.intro{justify-content:flex-end;margin-bottom:16px}
+.intro{justify-content:space-between;flex-wrap:wrap;gap:8px 24px;margin-bottom:16px}
+.intro-copy{flex:1 1 32rem;max-width:70ch;margin:0;color:var(--muted);font-size:13px}
+.intro #save-status{margin-left:auto}
 
 /* Overlay details never take space from the editor; the trigger remains visible on mobile. */
 #save-status{position:relative;max-width:100%;color:var(--text)}
