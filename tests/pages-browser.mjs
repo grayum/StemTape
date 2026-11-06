@@ -33,7 +33,8 @@ try{
  }),true,'CSP precedes resource loads');
  assert.equal(await page.evaluate(()=>document.fonts.check('400 12px StemSans')&&document.fonts.check('700 12px StemSans')),true);
  // Check all document-linked assets, including alternate/touch icons not fetched by Chromium.
- const assets=await page.locator('link[href],script[src]').evaluateAll(nodes=>nodes.map(n=>n.href||n.src));
+ // The production canonical identifies the page; it is not a resource to load here.
+ const assets=await page.locator('link[href]:not([rel=canonical]),script[src]').evaluateAll(nodes=>nodes.map(n=>n.href||n.src));
  for(const asset of assets){
   assert.ok(asset.startsWith(base.href),asset);
   const r=await page.request.get(asset);assert.equal(r.status(),200,asset);

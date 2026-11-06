@@ -1,3 +1,11 @@
+# Upgrade to 0.10.1 (review candidate)
+
+This patch changes static page metadata, introductory copy and crawl/share files.
+Storage/schema, import/export formats and print rendering are unchanged from 0.10.0.
+Keep existing browser data, JSON backups and private self-hosting configuration.
+Self-hosters should [replace or omit production-specific URLs](docs/SEARCH-VISIBILITY.md)
+before serving their copy. Deployment remains separately authorized and gated.
+
 # Upgrade to 0.10.0 (accepted review)
 
 Export and retain the original complete JSON before upgrading. Schema/key remain
